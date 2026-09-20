@@ -1,0 +1,16 @@
+{
+  "nombre": "Bodega Ramón Ramos",
+  "categoria_negocio": "Bodega",
+  "descripcion": "Bodega sdjslfjslfjasñdfasfjalsfjalsfj´ dsljasfljaslf asflasjflasjfaljaljf ",
+  "logo_url": "/media/imagenes/logo.jpeg",
+  "direccion": "Camino de la Centinela, parcela 181, 49153 Venialbo, Zamora",
+  "telefono": "(+34) 980 57 30 80",
+  "email": "info@bodegaramonramos.com",
+  "web_url": "https://www.bodegaramonramos.com/es",
+  "redes_sociales": {
+    "facebook": "https://www.facebook.com/bodegasramonramos/",
+    "instagram": "https://www.instagram.com/bodegasramonramos/"
+  },
+  "horario": "De 9h a 14h  de 16h a 19h",
+  "activo": true
+}
