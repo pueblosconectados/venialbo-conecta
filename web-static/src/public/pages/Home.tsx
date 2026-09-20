@@ -58,6 +58,8 @@ export function Home() {
         <img
           src={`${import.meta.env.BASE_URL}venialbo-conecta.webp`}
           alt="VenialboConecta"
+          width={1177}
+          height={1134}
         />
         <div style={{ maxWidth: 460 }}>
           <Typography.Title
@@ -146,6 +148,10 @@ export function Home() {
             <img
               src={`${import.meta.env.BASE_URL}pueblos-conectados-icono.webp`}
               alt=""
+              width={300}
+              height={300}
+              loading="lazy"
+              decoding="async"
             />
             <div>
               <Typography.Title

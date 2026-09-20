@@ -51,6 +51,7 @@ export function NoticiasShow() {
         <img
           src={imgUrl(n.imagen_url)}
           alt={n.titulo}
+          decoding="async"
           style={{
             width: "100%",
             maxHeight: 400,

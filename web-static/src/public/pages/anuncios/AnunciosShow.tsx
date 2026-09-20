@@ -65,6 +65,7 @@ export function AnunciosShow() {
         <img
           src={imgUrl(a.imagen_url)}
           alt={a.titulo}
+          decoding="async"
           style={{
             width: "100%",
             maxHeight: 360,

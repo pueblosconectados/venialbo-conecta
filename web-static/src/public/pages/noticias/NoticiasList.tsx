@@ -56,6 +56,8 @@ export function NoticiasList() {
                     <img
                       src={imgUrl(n.imagen_url)}
                       alt={n.titulo}
+                      loading="lazy"
+                      decoding="async"
                       style={{
                         height: 180,
                         objectFit: "cover",

@@ -75,7 +75,8 @@ export function NegociosShow() {
           <img
             src={imgUrl(n.logo_url)}
             alt={n.nombre}
-            style={{ maxHeight: 120, display: "block" }}
+            decoding="async"
+            style={{ maxHeight: 160, display: "block" }}
           />
         </div>
       )}

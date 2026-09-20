@@ -60,8 +60,10 @@ export function NegociosList() {
                     <img
                       src={imgUrl(n.logo_url)}
                       alt={n.nombre}
+                      loading="lazy"
+                      decoding="async"
                       style={{
-                        height: 140,
+                        height: 180,
                         objectFit: "contain",
                         padding: 16,
                         background: colors.crema,
@@ -71,7 +73,7 @@ export function NegociosList() {
                   ) : (
                     <div
                       style={{
-                        height: 100,
+                        height: 180,
                         display: "flex",
                         alignItems: "center",
                         justifyContent: "center",

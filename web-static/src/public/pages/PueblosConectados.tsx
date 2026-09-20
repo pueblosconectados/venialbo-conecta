@@ -33,6 +33,8 @@ export function PueblosConectados() {
         <img
           src={`${import.meta.env.BASE_URL}pueblos-conectados.webp`}
           alt="Pueblos Conectados — conectando personas, impulsando pueblos"
+          width={794}
+          height={954}
           style={{ width: "100%", maxWidth: 280, height: "auto" }}
         />
       </div>
