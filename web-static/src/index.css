@@ -116,6 +116,13 @@ a:hover {
   height: auto;
   border-radius: 14px;
   margin: 0.6em 0;
+  /* Al pulsarlas se ven completas (ContenidoRico) */
+  cursor: zoom-in;
+}
+
+/* Si la imagen es ademas un enlace, manda el enlace */
+.vc-md a img {
+  cursor: pointer;
 }
 
 .vc-md table {

@@ -10,7 +10,8 @@ import {
 } from "antd";
 import { StarFilled } from "@ant-design/icons";
 import { formatFecha, imgUrl } from "../../../config";
-import { renderMarkdown } from "../../../markdown";
+import { ContenidoRico } from "../../components/ContenidoRico";
+import { ImagenAmpliable } from "../../components/ImagenAmpliable";
 import { colors, softTagStyle, softTagStyleFromHex } from "../../../theme";
 
 type NoticiaDetail = {
@@ -48,16 +49,15 @@ export function NoticiasShow() {
         ]}
       />
       {n.imagen_url && (
-        <img
+        <ImagenAmpliable
           src={imgUrl(n.imagen_url)}
           alt={n.titulo}
-          decoding="async"
+          wrapperStyle={{ display: "block", width: "100%", marginBottom: 24 }}
           style={{
             width: "100%",
             maxHeight: 400,
             objectFit: "cover",
             borderRadius: 14,
-            marginBottom: 24,
             border: `1px solid ${colors.borde}`,
           }}
         />
@@ -75,15 +75,7 @@ export function NoticiasShow() {
         {formatFecha(n.fecha_publicacion)}
       </Typography.Text>
       <Divider style={{ borderColor: colors.borde }} />
-      {/*
-        El contenido viene en Markdown desde Pages CMS. renderMarkdown escapa
-        el HTML en crudo, asi que la cadena resultante no puede traer etiquetas
-        del contenido.
-      */}
-      <div
-        className="vc-md"
-        dangerouslySetInnerHTML={{ __html: renderMarkdown(n.contenido) }}
-      />
+      <ContenidoRico texto={n.contenido} />
       <Link to="/noticias" style={{ color: colors.musgo, fontWeight: 500 }}>← Volver a Noticias</Link>
     </div>
   );

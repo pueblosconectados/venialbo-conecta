@@ -10,7 +10,8 @@ import {
 } from "antd";
 import { formatFecha, imgUrl } from "../../../config";
 import { colors, softTagStyle, type TagTone } from "../../../theme";
-import { renderMarkdown } from "../../../markdown";
+import { ContenidoRico } from "../../components/ContenidoRico";
+import { ImagenAmpliable } from "../../components/ImagenAmpliable";
 
 type Anuncio = {
   id: string;
@@ -62,16 +63,15 @@ export function AnunciosShow() {
         ]}
       />
       {a.imagen_url && (
-        <img
+        <ImagenAmpliable
           src={imgUrl(a.imagen_url)}
           alt={a.titulo}
-          decoding="async"
+          wrapperStyle={{ display: "block", width: "100%", marginBottom: 24 }}
           style={{
             width: "100%",
             maxHeight: 360,
             objectFit: "cover",
             borderRadius: 14,
-            marginBottom: 24,
             border: `1px solid ${colors.borde}`,
           }}
         />
@@ -87,13 +87,7 @@ export function AnunciosShow() {
         Publicado el {formatFecha(a.fecha_publicacion)}
       </Typography.Text>
       <Divider style={{ borderColor: colors.borde }} />
-      {a.descripcion && (
-        <div
-          className="vc-md"
-          style={{ lineHeight: 1.7, marginBottom: 16 }}
-          dangerouslySetInnerHTML={{ __html: renderMarkdown(a.descripcion) }}
-        />
-      )}
+      <ContenidoRico texto={a.descripcion} style={{ lineHeight: 1.7, marginBottom: 16 }} />
       {a.contacto && (
         <div
           style={{

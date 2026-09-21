@@ -20,7 +20,8 @@ import {
 } from "@ant-design/icons";
 import { imgUrl } from "../../../config";
 import { colors, softTagStyle } from "../../../theme";
-import { renderMarkdown } from "../../../markdown";
+import { ContenidoRico } from "../../components/ContenidoRico";
+import { ImagenAmpliable } from "../../components/ImagenAmpliable";
 
 type Negocio = {
   id: string;
@@ -72,10 +73,9 @@ export function NegociosShow() {
             display: "inline-block",
           }}
         >
-          <img
+          <ImagenAmpliable
             src={imgUrl(n.logo_url)}
             alt={n.nombre}
-            decoding="async"
             style={{ maxHeight: 160, display: "block" }}
           />
         </div>
@@ -87,13 +87,7 @@ export function NegociosShow() {
         {!n.activo && <Tag style={softTagStyle("rojo")}>Cerrado</Tag>}
       </div>
       <Typography.Title level={2} style={{ marginTop: 4 }}>{n.nombre}</Typography.Title>
-      {n.descripcion && (
-        <div
-          className="vc-md"
-          style={{ fontSize: 15 }}
-          dangerouslySetInnerHTML={{ __html: renderMarkdown(n.descripcion) }}
-        />
-      )}
+      <ContenidoRico texto={n.descripcion} style={{ fontSize: 15 }} />
       <Divider style={{ borderColor: colors.borde }} />
       <Descriptions column={1} size="small">
         {n.direccion && (
