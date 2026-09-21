@@ -22,6 +22,11 @@ concurrency:
 jobs:
   build:
     runs-on: ubuntu-latest
+    # contents: write para poder devolver al repo las imágenes ya reducidas
+    permissions:
+      contents: write
+      pages: write
+      id-token: write
     defaults:
       run:
         working-directory: web-static
@@ -35,6 +40,28 @@ jobs:
           cache-dependency-path: web-static/package-lock.json
 
       - run: npm ci
+
+      # Pages CMS sube la foto tal cual sale del móvil (2500 px, 1,6 MB). Se reduce
+      # antes de construir, así que la web sirve ya la versión ligera aunque el
+      # commit de vuelta falle.
+      - name: Reducir las imágenes que entran demasiado grandes
+        run: npm run normaliza-imagenes -- --escribir
+
+      - name: Devolver las imágenes reducidas al repo
+        # Si falla (porque el CMS haya commiteado entre medias) no se corta el
+        # despliegue: se reintenta solo en la siguiente publicación.
+        continue-on-error: true
+        run: |
+          if git diff --quiet -- public/media/imagenes; then
+            echo "Ninguna imagen ha cambiado"
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add public/media/imagenes
+          git commit -m "chore(web-static): reducir imagenes subidas desde el CMS"
+          git pull --rebase origin main
+          git push origin HEAD:main
 
       - run: npm run build
 

@@ -9,7 +9,8 @@
     "build": "node scripts/build-content.mjs && tsc -b && vite build && node -e \"require('fs').copyFileSync('dist/index.html','dist/404.html')\"",
     "lint": "eslint .",
     "preview": "vite preview",
-    "imagenes-huerfanas": "node scripts/imagenes-huerfanas.mjs"
+    "imagenes-huerfanas": "node scripts/imagenes-huerfanas.mjs",
+    "normaliza-imagenes": "node scripts/normaliza-imagenes.mjs"
   },
   "dependencies": {
     "@ant-design/icons": "^6.2.2",
@@ -34,6 +35,7 @@
     "eslint-plugin-react-hooks": "^7.1.1",
     "eslint-plugin-react-refresh": "^0.5.2",
     "globals": "^17.5.0",
+    "sharp": "^0.35.4",
     "typescript": "~6.0.2",
     "typescript-eslint": "^8.58.2",
     "vite": "^8.0.10"
