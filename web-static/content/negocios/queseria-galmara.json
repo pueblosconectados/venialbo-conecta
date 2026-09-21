@@ -1,0 +1,14 @@
+{
+  "nombre": "Quesería Galmara",
+  "categoria_negocio": "Quesería",
+  "descripcion": "**En el 2019 nace Galmara, una quesería con alma venezolana y gallega. Nos especializamos en la elaboración de quesos frescos venezolanos y latinos, quesos de pasta hilada y semicurados de vaca.**",
+  "logo_url": "/media/imagenes/garmara-queseria.png",
+  "telefono": "6040442204",
+  "email": "info@queseriagalmara.com",
+  "web_url": "https://queseriagalmara.com/",
+  "redes_sociales": {
+    "facebook": "https://www.facebook.com/QueseriaGalmara",
+    "instagram": "https://www.instagram.com/queseriagalmara/"
+  },
+  "activo": true
+}
