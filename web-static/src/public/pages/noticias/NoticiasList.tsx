@@ -7,6 +7,8 @@ import {
   Col,
   Pagination,
   Row,
+  Select,
+  Space,
   Spin,
   Tag,
   Typography,
@@ -25,27 +27,84 @@ type NoticiaList = {
   activa: boolean;
 };
 
-const PAGE_SIZE = 12;
+const POR_PAGINA_POR_DEFECTO = 12;
+const TODAS = "todas";
+
+const OPCIONES = [
+  { value: 12, label: "12 por página" },
+  { value: 24, label: "24 por página" },
+  { value: 48, label: "48 por página" },
+  { value: TODAS, label: "Todas" },
+];
 
 export function NoticiasList() {
   const [page, setPage] = useState(1);
+  const [porPagina, setPorPagina] = useState<number | typeof TODAS>(
+    POR_PAGINA_POR_DEFECTO,
+  );
 
   const { result, query } = useList<NoticiaList>({
     resource: "noticias",
-    pagination: { currentPage: page, pageSize: PAGE_SIZE, mode: "server" },
+    // "off" hace que el data provider devuelva la lista entera sin trocear
+    pagination:
+      porPagina === TODAS
+        ? { mode: "off" }
+        : { currentPage: page, pageSize: porPagina, mode: "server" },
   });
 
-  if (query.isLoading)
-    return <Spin style={{ display: "block", margin: "60px auto" }} />;
-  if (query.isError)
-    return <Alert type="error" message="No se pudieron cargar las noticias" />;
+  const items = result?.data ?? [];
+  const total = result?.total ?? 0;
 
-  const items = result.data ?? [];
-  const total = result.total ?? 0;
+  // La cabecera se pinta siempre, tambien mientras carga: si desapareciera al
+  // cambiar de opcion, el desplegable daria un salto justo al usarlo.
+  const cabecera = (
+    <div
+      style={{
+        display: "flex",
+        flexWrap: "wrap",
+        gap: 12,
+        alignItems: "center",
+        justifyContent: "space-between",
+        marginBottom: 24,
+      }}
+    >
+      <Typography.Title level={2} style={{ margin: 0 }}>Noticias</Typography.Title>
+      <Space size={8}>
+        <Typography.Text type="secondary">Mostrar</Typography.Text>
+        <Select
+          value={porPagina}
+          onChange={(valor) => {
+            setPorPagina(valor);
+            // Si estabas en la pagina 4 y pasas a 48 por pagina, esa pagina ya no
+            // existe: se vuelve al principio.
+            setPage(1);
+          }}
+          options={OPCIONES}
+          style={{ width: 150 }}
+          aria-label="Noticias por página"
+        />
+      </Space>
+    </div>
+  );
+
+  if (query.isLoading)
+    return (
+      <div>
+        {cabecera}
+        <Spin style={{ display: "block", margin: "60px auto" }} />
+      </div>
+    );
+  if (query.isError)
+    return (
+      <div>
+        {cabecera}
+        <Alert type="error" message="No se pudieron cargar las noticias" />
+      </div>
+    );
 
   return (
     <div>
-      <Typography.Title level={2} style={{ marginBottom: 24 }}>Noticias</Typography.Title>
+      {cabecera}
       <Row gutter={[16, 16]}>
         {items.map((n) => (
           <Col key={n.id} xs={24} sm={12} lg={8}>
@@ -99,11 +158,11 @@ export function NoticiasList() {
           </Col>
         ))}
       </Row>
-      {total > PAGE_SIZE && (
+      {porPagina !== TODAS && total > porPagina && (
         <div style={{ textAlign: "center", marginTop: 24 }}>
           <Pagination
             current={page}
-            pageSize={PAGE_SIZE}
+            pageSize={porPagina}
             total={total}
             onChange={setPage}
             showSizeChanger={false}
