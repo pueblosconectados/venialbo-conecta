@@ -46,6 +46,9 @@ const applyFilters = (rows: Row[], filters?: CrudFilter[]): Row[] =>
     }),
   );
 
+// Recursos cuyas fichas desaparecen solas al pasar su fecha de caducidad.
+const CADUCAN = new Set(["anuncios", "avisos"]);
+
 // La web se publica de tarde en tarde, así que la caducidad se comprueba al visitarla.
 // Pages CMS guarda la fecha sin hora ("2026-09-30"): el anuncio se ve hasta el final de ese día.
 const noCaducado = (row: Row): boolean => {
@@ -64,7 +67,7 @@ export const staticDataProvider = (baseUrl: string): DataProvider => ({
 
   getList: async ({ resource, pagination, filters }) => {
     let rows = await loadJson<Row[]>(baseUrl, resource);
-    if (resource === "anuncios") rows = rows.filter(noCaducado);
+    if (CADUCAN.has(resource)) rows = rows.filter(noCaducado);
     rows = applyFilters(rows, filters);
 
     const { currentPage = 1, pageSize = 20, mode = "server" } = pagination ?? {};

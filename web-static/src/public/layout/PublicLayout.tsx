@@ -3,6 +3,7 @@ import { Outlet, Link, useLocation } from "react-router";
 import { Layout, Menu, Button, Drawer, Grid, Typography } from "antd";
 import { MenuOutlined, EnvironmentFilled } from "@ant-design/icons";
 import { colors, fonts } from "../../theme";
+import { BannerAvisos } from "../components/BannerAvisos";
 
 const { Header, Content, Footer } = Layout;
 const { useBreakpoint } = Grid;
@@ -104,6 +105,8 @@ export function PublicLayout() {
           style={{ border: "none" }}
         />
       </Drawer>
+
+      <BannerAvisos />
 
       <Content
         style={{

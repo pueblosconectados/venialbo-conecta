@@ -92,6 +92,17 @@ const servicios = (await leerColeccion("servicios"))
   .sort((a, b) => porTexto("tipo")(a, b) || porTexto("nombre")(a, b));
 await escribir("servicios", servicios, servicios);
 
+// Avisos de portada — la banda de arriba. Caducan solos igual que los anuncios.
+// El orden importa porque se apilan: primero el mas grave, y a igual nivel el mas
+// reciente (el id empieza por la fecha, asi que basta con ordenar por id).
+const ORDEN_NIVEL = { urgente: 0, aviso: 1, informacion: 2 };
+const nivelDe = (a) => ORDEN_NIVEL[a.nivel] ?? 9;
+const avisos = (await leerColeccion("avisos"))
+  .filter((a) => a.activo !== false)
+  .map((a) => ({ ...a, noticia: a.noticia ? idDe(a.noticia) : null }))
+  .sort((a, b) => nivelDe(a) - nivelDe(b) || (b.id ?? "").localeCompare(a.id ?? ""));
+await escribir("avisos", avisos, avisos);
+
 // Anuncios — los caducados se ocultan en el navegador (staticDataProvider)
 const anuncios = (await leerColeccion("anuncios"))
   .filter((a) => a.activo !== false)

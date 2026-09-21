@@ -274,6 +274,65 @@ content:
         type: boolean
         default: true
 
+  - name: avisos
+    label: Avisos de portada
+    description: >-
+      La banda que sale arriba en todas las páginas. Para cosas que caducan: un corte
+      de agua, una carretera cortada, un cambio de fecha. NO es el Tablón de anuncios.
+    type: collection
+    path: web-static/content/avisos
+    subfolders: false
+    format: json
+    filename: "{year}-{month}-{day}-{primary}.json"
+    view:
+      primary: titulo
+      fields: [titulo, nivel, fecha_caducidad, activo]
+      sort: [fecha_caducidad, titulo]
+      default:
+        sort: fecha_caducidad
+        order: desc
+    fields:
+      - name: titulo
+        label: Texto del aviso
+        description: Una línea. Lo que se lee en la banda.
+        type: string
+        required: true
+      - name: nivel
+        label: Nivel
+        description: Cambia el color de la banda.
+        type: select
+        required: true
+        default: aviso
+        options:
+          values:
+            - name: urgente
+              label: Urgente (rojo)
+            - name: aviso
+              label: Aviso (ámbar)
+            - name: informacion
+              label: Información (verde)
+      - name: noticia
+        label: Noticia relacionada
+        description: Opcional. Si la pones, el aviso lleva un enlace para leer más.
+        type: reference
+        options:
+          collection: noticias
+          value: "{path}"
+          label: "{titulo}"
+          search: titulo
+      - name: fecha_caducidad
+        label: Visible hasta (incluido)
+        description: Pasado este día el aviso desaparece solo. Es obligatorio a propósito.
+        type: date
+        required: true
+        options:
+          format: yyyy-MM-dd
+      - name: activo
+        label: Visible en la web
+        description: Desmárcalo para bajarlo antes de tiempo.
+        type: boolean
+        default: true
+
   - name: categorias
     label: Categorías de noticias
     type: collection
