@@ -4,5 +4,6 @@
   "descripcion": "Médico de cabecera. ",
   "direccion": "Carretera del Piñero 1, 49153 Venialbo - Zamora",
   "horario": "Lunes, miércoles y viernes a las 9:30",
+  "informacion_adicional": "Para solicitar consulta médica, es necesario pedir cita previa a través del Portal de Salud de Castilla y León, o de la aplicación SACYL CONECTA.",
   "activo": true
 }
