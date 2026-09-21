@@ -1,9 +1,0 @@
-{
-  "titulo": "¡Tenemos la Web ya publicada!",
-  "fecha_publicacion": "2026-09-17T17:19",
-  "categoria": "web-static/content/categorias/curiosidades.json",
-  "destacada": true,
-  "activa": true,
-  "imagen_url": "/media/imagenes/venialbo-hero.jpg",
-  "contenido": "Acabamos de publicar **nuestra** web [aquí](https://pueblosconectados.github.io/venialbo-conecta/)."
-}
