@@ -1,0 +1,58 @@
+name: Buscar imagenes sin usar
+
+# Se lanza a mano: desde el boton "Buscar imágenes sin usar" de Pages CMS
+# (ver actions: en .pages.yml) o desde la pestaña Actions de GitHub.
+# Solo informa: no borra ni commitea nada. Para borrarlas, en local:
+#   cd web-static && npm run imagenes-huerfanas -- --borrar
+on:
+  workflow_dispatch:
+    inputs:
+      payload:
+        description: Payload de Pages CMS (JSON). Vacio si se lanza a mano.
+        required: false
+        type: string
+
+permissions:
+  contents: read
+
+# Varias pulsaciones seguidas del boton: basta con el ultimo informe
+concurrency:
+  group: imagenes-huerfanas
+  cancel-in-progress: true
+
+jobs:
+  informe:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: web-static
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+
+      # El script solo usa modulos de Node, asi que no hace falta npm ci
+      - name: Buscar imagenes huerfanas
+        run: |
+          set -o pipefail
+          node scripts/imagenes-huerfanas.mjs | tee informe.txt
+
+      - name: Publicar el informe en el resumen
+        if: always()
+        run: |
+          {
+            echo "## Imágenes sin usar"
+            echo
+            echo '```'
+            cat informe.txt 2>/dev/null || echo "(el script no llego a dar salida)"
+            echo '```'
+            echo
+            echo "Para borrarlas, en local desde \`web-static/\`:"
+            echo
+            echo '```bash'
+            echo "git pull"
+            echo "npm run imagenes-huerfanas -- --borrar"
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"

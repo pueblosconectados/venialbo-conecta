@@ -1,6 +1,15 @@
 # Configuración de Pages CMS (https://pagescms.org) para web-static/
 # Cada guardado hace un commit en main y la GitHub Action republica la web.
 
+# Botones que lanzan workflows de GitHub. En la raiz salen en la barra lateral;
+# dentro de media: obligaria a convertirlo al formato de lista con nombre.
+actions:
+  - name: imagenes-huerfanas
+    label: Buscar imágenes sin usar
+    workflow: imagenes-huerfanas.yml
+    # La rama que se este editando en el CMS (main)
+    ref: current
+
 media:
   input: web-static/public/media/imagenes
   output: /media/imagenes
