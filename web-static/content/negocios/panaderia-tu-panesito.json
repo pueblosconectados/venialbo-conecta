@@ -1,16 +1,10 @@
 {
-  "nombre": "Panadería Tu Panesito",
+  "nombre": "Panadería Hernando",
   "categoria_negocio": "Panadería",
   "descripcion": "Panadería del pueblo",
-  "logo_url": "/media/imagenes/8928f66aaf9a44d6bdce5c7cd065408e.jpg",
-  "direccion": "Calle del Pan",
-  "telefono": "123456789",
-  "email": "",
-  "web_url": "",
-  "redes_sociales": {
-    "facebook": "",
-    "instagram": ""
-  },
-  "horario": "L-S 09:00-14:00",
+  "logo_url": "/media/imagenes/panaderiahernando.jpg",
+  "direccion": "Calle Tajada 19, 49153 Venialbo - Zamora",
+  "telefono": "980573107",
+  "horario": "De lunes a sábados de 9:00 a 14:00",
   "activo": true
 }
