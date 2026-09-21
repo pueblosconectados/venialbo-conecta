@@ -24,7 +24,9 @@ solos pasada su fecha de caducidad.
 ```bash
 npm install
 npm run dev                    # regenera public/data y arranca Vite
-npm run build && npm run preview   # http://localhost:4173/venialbo-conecta/
+npm run build && npm run preview   # http://localhost:4173/
 ```
 
-La ruta base es `/venialbo-conecta/`. Con dominio propio: `BASE_PATH=/ npm run build`.
+La ruta base es `/`, porque la web se publica en el dominio propio https://venialboconecta.es
+(el fichero `public/CNAME` mantiene el dominio en cada despliegue).
+Para publicar en la subruta de GitHub Pages: `BASE_PATH=/venialbo-conecta/ npm run build`.
