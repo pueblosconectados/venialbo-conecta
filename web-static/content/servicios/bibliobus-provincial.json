@@ -1,10 +1,8 @@
 {
   "nombre": "Bibliobús provincial",
   "tipo": "bibliobus",
-  "descripcion": "Visita el primer miércoles de cada mes.",
-  "direccion": "",
-  "telefono": "",
-  "horario": "1er miércoles del mes, 10:00-13:00",
-  "informacion_adicional": "Parada en la Plaza Mayor",
+  "descripcion": "Ruta 21. Parada en Venialbo: Colegio y Plaza\n\nPeriodicidad: Cinco paradas al año (febrero, abril, junio, septiembre y noviembre)\n\nHora de llegada: 10:45\n\nHora de salida: 12:15\n\nParadas: \n\nColegio (10:45-11:40)\n\nPlaza de la Iglesia (11:45-12:15)\n\n",
+  "horario": "febrero, abril, junio, septiembre y noviembre de 10:45 a 12:15",
+  "informacion_adicional": "Paradas: Colegio (10:45-11:40) y Plaza de la Iglesia (11:45-12:15)",
   "activo": true
 }
