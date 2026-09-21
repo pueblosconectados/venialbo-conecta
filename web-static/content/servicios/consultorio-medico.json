@@ -1,10 +1,8 @@
 {
   "nombre": "Consultorio médico",
   "tipo": "medico",
-  "descripcion": "Médico de cabecera. Consultas los martes y jueves.",
-  "direccion": "C/ Mayor 12",
-  "telefono": "923 000 001",
-  "horario": "Martes y jueves 10:00-14:00",
-  "informacion_adicional": "",
+  "descripcion": "Médico de cabecera. ",
+  "direccion": "Carretera del Piñero 1, 49153 Venialbo - Zamora",
+  "horario": "Lunes, miércoles y viernes a las 9:30",
   "activo": true
 }
