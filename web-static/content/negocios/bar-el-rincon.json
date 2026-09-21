@@ -1,16 +1,14 @@
 {
-  "nombre": "Bar El Rincón",
-  "categoria_negocio": "Bar",
-  "descripcion": "Bar de toda la vida en el centro del pueblo",
-  "logo_url": "",
-  "direccion": "Calle Mayor, 3",
-  "telefono": "921000001",
-  "email": "",
-  "web_url": "",
+  "nombre": "Bar restaurante El Trasgu - todo Asturias ",
+  "categoria_negocio": "Bar Restaurante",
+  "descripcion": "No dejes de probar nuestros cachopos de 1,5 kg",
+  "logo_url": "/media/imagenes/bar-trasgu.jpg",
+  "direccion": "Travesía El Caño, 49153 Venialbo - Zamora",
+  "telefono": "980567805",
+  "email": "crisgp722@gmail.com",
   "redes_sociales": {
-    "facebook": "https://facebook.com/elrincon",
-    "instagram": ""
+    "facebook": "https://www.facebook.com/profile.php?id=61573887563693",
+    "instagram": "https://www.instagram.com/eltrasgutodoasturias?fbclid=IwY2xjawUd03twZG9mBWV4dG4DYWVtAjEwAHNydGMGYXBwX2lkEDIyMjAzOTE3ODgyMDA4OTIAAR5DGLHuSmlehnGCOtJ0W21KbZNbtRl2g67Bg5FD0f9waoZBylgEbJfI430dOg_aem_fJ2I78-PsjHyU-O66M069g"
   },
-  "horario": "Lun-Dom 8:00-23:00",
   "activo": true
 }
