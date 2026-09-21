@@ -10,6 +10,17 @@ actions:
     # La rama que se este editando en el CMS (main)
     ref: current
 
+  - name: imagenes-huerfanas-pr
+    label: Proponer borrar las imágenes sin usar
+    workflow: imagenes-huerfanas-pr.yml
+    ref: current
+    confirm:
+      title: ¿Proponer el borrado?
+      message: >-
+        No se borra nada todavía: se prepara una propuesta en GitHub con la lista
+        de imágenes que nadie usa, para revisarla y aceptarla o descartarla.
+      button: Preparar la propuesta
+
 media:
   input: web-static/public/media/imagenes
   output: /media/imagenes

@@ -1,0 +1,90 @@
+name: Proponer borrado de imagenes sin usar
+
+# Se lanza a mano: desde el boton "Proponer borrar las imágenes sin usar" de
+# Pages CMS (ver actions: en .pages.yml) o desde la pestaña Actions de GitHub.
+#
+# No borra nada en main: deja el borrado propuesto en una Pull Request para poder
+# revisar la lista antes de aceptarla. La deteccion es una heuristica (busca el
+# nombre del fichero en content/, src/ e index.html), asi que conviene mirarla:
+# una imagen recien subida cuya noticia aun no se ha guardado parece huerfana.
+on:
+  workflow_dispatch:
+    inputs:
+      payload:
+        description: Payload de Pages CMS (JSON). Vacio si se lanza a mano.
+        required: false
+        type: string
+
+permissions:
+  contents: write
+  pull-requests: write
+
+# Se reutiliza siempre la misma rama, asi que dos ejecuciones a la vez se pisarian
+concurrency:
+  group: imagenes-huerfanas-pr
+  cancel-in-progress: false
+
+env:
+  RAMA: limpieza/imagenes-huerfanas
+
+jobs:
+  proponer:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: web-static
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          ref: main
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+
+      # El script solo usa modulos de Node, asi que no hace falta npm ci
+      - name: Borrar las huerfanas en una rama aparte
+        run: |
+          set -o pipefail
+          node scripts/imagenes-huerfanas.mjs --borrar | tee informe.txt
+
+      - name: Abrir o actualizar la Pull Request
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          if git diff --quiet -- public/media/imagenes; then
+            echo "Ninguna imagen huerfana: no hay nada que proponer." >> "$GITHUB_STEP_SUMMARY"
+            exit 0
+          fi
+
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git checkout -B "$RAMA"
+          git add public/media/imagenes
+          git commit -m "chore(web-static): borrar imagenes sin usar"
+          # La rama es de usar y tirar: si quedo una propuesta anterior sin aceptar,
+          # esta la sustituye en vez de acumularse
+          git push --force origin "$RAMA"
+
+          cuerpo=$(printf '%s\n\n```\n%s\n```\n\n%s\n' \
+            "Imágenes de \`public/media/imagenes/\` que no referencia nadie en \`content/\`, \`src/\` ni \`index.html\`." \
+            "$(cat informe.txt)" \
+            "Revisa la lista antes de aceptar: una imagen recién subida cuya noticia todavía no se ha guardado también aparece aquí. Si algo no cuadra, cierra la PR y no pasa nada.")
+
+          if gh pr view "$RAMA" --json number --jq .number >/dev/null 2>&1; then
+            gh pr edit "$RAMA" --body "$cuerpo"
+            echo "Actualizada la PR existente" >> "$GITHUB_STEP_SUMMARY"
+          else
+            gh pr create \
+              --base main \
+              --head "$RAMA" \
+              --title "Borrar imágenes sin usar" \
+              --body "$cuerpo"
+          fi
+
+          url=$(gh pr view "$RAMA" --json url --jq .url)
+          {
+            echo "## Propuesta lista para revisar"
+            echo
+            echo "$url"
+          } >> "$GITHUB_STEP_SUMMARY"
