@@ -5,10 +5,10 @@ import {
   Alert,
   Card,
   Col,
+  Empty,
   Pagination,
   Row,
   Select,
-  Space,
   Spin,
   Tag,
   Typography,
@@ -16,6 +16,12 @@ import {
 import { StarFilled } from "@ant-design/icons";
 import { formatFecha, imgUrl } from "../../../config";
 import { colors, softTagStyle, softTagStyleFromHex } from "../../../theme";
+
+type Categoria = {
+  id: string;
+  nombre: string;
+  icono?: string;
+};
 
 type NoticiaList = {
   id: string;
@@ -30,10 +36,10 @@ type NoticiaList = {
 const POR_PAGINA_POR_DEFECTO = 12;
 const TODAS = "todas";
 
+const OPCIONES_NUMERICAS = [12, 24, 48];
+
 const OPCIONES = [
-  { value: 12, label: "12 por página" },
-  { value: 24, label: "24 por página" },
-  { value: 48, label: "48 por página" },
+  ...OPCIONES_NUMERICAS.map((n) => ({ value: n, label: `${n} por página` })),
   { value: TODAS, label: "Todas" },
 ];
 
@@ -42,6 +48,7 @@ export function NoticiasList() {
   const [porPagina, setPorPagina] = useState<number | typeof TODAS>(
     POR_PAGINA_POR_DEFECTO,
   );
+  const [categoria, setCategoria] = useState<string>("");
 
   const { result, query } = useList<NoticiaList>({
     resource: "noticias",
@@ -50,6 +57,15 @@ export function NoticiasList() {
       porPagina === TODAS
         ? { mode: "off" }
         : { currentPage: page, pageSize: porPagina, mode: "server" },
+    // La noticia trae la categoria entera dentro, de ahi el campo anidado
+    filters: categoria
+      ? [{ field: "categoria.id", operator: "eq", value: categoria }]
+      : [],
+  });
+
+  const { result: categorias } = useList<Categoria>({
+    resource: "categorias",
+    pagination: { mode: "off" },
   });
 
   const items = result?.data ?? [];
@@ -58,32 +74,24 @@ export function NoticiasList() {
   // La cabecera se pinta siempre, tambien mientras carga: si desapareciera al
   // cambiar de opcion, el desplegable daria un salto justo al usarlo.
   const cabecera = (
-    <div
-      style={{
-        display: "flex",
-        flexWrap: "wrap",
-        gap: 12,
-        alignItems: "center",
-        justifyContent: "space-between",
-        marginBottom: 24,
-      }}
-    >
+    <div className="vc-cabecera-lista">
       <Typography.Title level={2} style={{ margin: 0 }}>Noticias</Typography.Title>
-      <Space size={8}>
-        <Typography.Text type="secondary">Mostrar</Typography.Text>
-        <Select
-          value={porPagina}
-          onChange={(valor) => {
-            setPorPagina(valor);
-            // Si estabas en la pagina 4 y pasas a 48 por pagina, esa pagina ya no
-            // existe: se vuelve al principio.
-            setPage(1);
-          }}
-          options={OPCIONES}
-          style={{ width: 150 }}
-          aria-label="Noticias por página"
-        />
-      </Space>
+      <Select
+        value={categoria}
+        onChange={(valor) => {
+          setCategoria(valor);
+          setPage(1);
+        }}
+        options={[
+          { value: "", label: "Todas las categorías" },
+          ...(categorias?.data ?? []).map((c) => ({
+            value: c.id,
+            label: c.icono ? `${c.icono}  ${c.nombre}` : c.nombre,
+          })),
+        ]}
+        // El ancho lo pone .vc-cabecera-lista: 280 px, o la fila entera en movil
+        aria-label="Filtrar noticias por categoría"
+      />
     </div>
   );
 
@@ -105,6 +113,12 @@ export function NoticiasList() {
   return (
     <div>
       {cabecera}
+      {items.length === 0 ? (
+        <Empty
+          description="No hay noticias en esta categoría"
+          style={{ margin: "48px 0" }}
+        />
+      ) : null}
       <Row gutter={[16, 16]}>
         {items.map((n) => (
           <Col key={n.id} xs={24} sm={12} lg={8}>
@@ -158,14 +172,42 @@ export function NoticiasList() {
           </Col>
         ))}
       </Row>
-      {porPagina !== TODAS && total > porPagina && (
-        <div style={{ textAlign: "center", marginTop: 24 }}>
-          <Pagination
-            current={page}
-            pageSize={porPagina}
-            total={total}
-            onChange={setPage}
-            showSizeChanger={false}
+      {/*
+        Los dos controles del pie van juntos porque los dos deciden cuanto se ve.
+        El desplegable se pinta aunque la paginacion no haga falta: con "Todas"
+        elegido no hay paginacion, y si desapareciera con ella no habria forma de
+        volver a 12.
+      */}
+      {total > OPCIONES_NUMERICAS[0] && (
+        <div
+          style={{
+            marginTop: 24,
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            gap: 12,
+          }}
+        >
+          {porPagina !== TODAS && total > porPagina && (
+            <Pagination
+              current={page}
+              pageSize={porPagina}
+              total={total}
+              onChange={setPage}
+              showSizeChanger={false}
+            />
+          )}
+          <Select
+            value={porPagina}
+            onChange={(valor) => {
+              setPorPagina(valor);
+              // Si estabas en la pagina 4 y pasas a 48 por pagina, esa pagina ya
+              // no existe: se vuelve al principio.
+              setPage(1);
+            }}
+            options={OPCIONES}
+            style={{ width: 150 }}
+            aria-label="Noticias por página"
           />
         </div>
       )}

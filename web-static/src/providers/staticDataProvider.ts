@@ -24,12 +24,25 @@ const loadJson = <T>(baseUrl: string, path: string): Promise<T> => {
 
 type Row = Record<string, unknown>;
 
+// El campo puede venir anidado ("categoria.id"): las noticias traen la categoria
+// entera dentro del propio registro, no solo su id.
+const valorDe = (row: Row, campo: string): unknown =>
+  campo
+    .split(".")
+    .reduce<unknown>(
+      (valor, parte) =>
+        valor && typeof valor === "object"
+          ? (valor as Row)[parte]
+          : undefined,
+      row,
+    );
+
 const applyFilters = (rows: Row[], filters?: CrudFilter[]): Row[] =>
   rows.filter((row) =>
     (filters ?? []).every((f) => {
       if (!("field" in f) || f.operator !== "eq") return true;
       if (f.value === undefined || f.value === null || f.value === "") return true;
-      return String(row[f.field]) === String(f.value);
+      return String(valorDe(row, f.field)) === String(f.value);
     }),
   );
 

@@ -60,6 +60,28 @@ a:hover {
 
 /* Contenido de noticias, renderizado desde Markdown (ver src/markdown.ts).
    Los encabezados ya cogen la serif de la regla global de arriba. */
+/* Cabecera de un listado: titulo a la izquierda y su control a la derecha. En
+   pantalla estrecha el control baja a su propia linea y ocupa el ancho entero; sin
+   la media query no baja, porque el texto de dentro impide que encoja y se sale. */
+.vc-cabecera-lista {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 24px;
+}
+
+.vc-cabecera-lista > .ant-select {
+  width: 280px;
+}
+
+@media (max-width: 560px) {
+  .vc-cabecera-lista > .ant-select {
+    width: 100%;
+  }
+}
+
 .vc-md {
   font-size: 16px;
   line-height: 1.8;
