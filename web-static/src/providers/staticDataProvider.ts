@@ -51,12 +51,16 @@ const CADUCAN = new Set(["anuncios", "avisos"]);
 
 // La web se publica de tarde en tarde, así que la caducidad se comprueba al visitarla.
 // Pages CMS guarda la fecha sin hora ("2026-09-30"): el anuncio se ve hasta el final de ese día.
-const noCaducado = (row: Row): boolean => {
-  const fecha = row.fecha_caducidad;
-  if (typeof fecha !== "string") return true;
+// Se exporta porque el listado no es el único sitio que la necesita: a la ficha se puede
+// llegar por enlace directo, sin pasar por el listado que ya filtra.
+export const haCaducado = (fecha?: string | null): boolean => {
+  if (typeof fecha !== "string" || fecha === "") return false;
   const local = /^\d{4}-\d{2}-\d{2}$/.test(fecha) ? `${fecha}T23:59:59` : fecha;
-  return new Date(local).getTime() > Date.now();
+  return new Date(local).getTime() <= Date.now();
 };
+
+const noCaducado = (row: Row): boolean =>
+  !haCaducado(typeof row.fecha_caducidad === "string" ? row.fecha_caducidad : null);
 
 const readOnly = (): never => {
   throw new Error("Versión estática: solo lectura");

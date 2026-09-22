@@ -1,14 +1,18 @@
+import type { ReactNode } from "react";
 import { useParams, Link } from "react-router";
 import { useOne } from "@refinedev/core";
 import {
-  Alert,
   Breadcrumb,
+  Button,
   Divider,
+  Result,
   Spin,
   Tag,
   Typography,
 } from "antd";
+import { ClockCircleOutlined, FileSearchOutlined } from "@ant-design/icons";
 import { formatFecha, imgUrl } from "../../../config";
+import { haCaducado } from "../../../providers/staticDataProvider";
 import { colors, softTagStyle, type TagTone } from "../../../theme";
 import { ContenidoRico } from "../../components/ContenidoRico";
 import { ImagenAmpliable } from "../../components/ImagenAmpliable";
@@ -39,6 +43,33 @@ const TIPO_TONE: Record<string, TagTone> = {
   otro: "gris",
 };
 
+// Un anuncio caducado se quita del tablón, pero el enlace puede seguir circulando por
+// WhatsApp: en vez de enseñarlo, se avisa de que ya no está y se ofrece volver al tablón.
+function NoDisponible({
+  icono,
+  titulo,
+  texto,
+}: {
+  icono: ReactNode;
+  titulo: string;
+  texto: string;
+}) {
+  return (
+    <Result
+      // La ilustración que antd pone en el status 404 es azul y desentona con la
+      // paleta del pueblo, así que se sustituye por un icono de la casa.
+      icon={icono}
+      title={titulo}
+      subTitle={texto}
+      extra={
+        <Link to="/tablon">
+          <Button type="primary">Ver el tablón</Button>
+        </Link>
+      }
+    />
+  );
+}
+
 export function AnunciosShow() {
   const { id } = useParams<{ id: string }>();
   const { result, query } = useOne<Anuncio>({
@@ -49,9 +80,24 @@ export function AnunciosShow() {
   if (query.isLoading)
     return <Spin style={{ display: "block", margin: "60px auto" }} />;
   if (query.isError || !result)
-    return <Alert type="error" message="Anuncio no encontrado" />;
+    return (
+      <NoDisponible
+        icono={<FileSearchOutlined style={{ color: colors.marronSuave }} />}
+        titulo="Anuncio no encontrado"
+        texto="Puede que se haya retirado del tablón."
+      />
+    );
 
   const a = result;
+
+  if (haCaducado(a.fecha_caducidad))
+    return (
+      <NoDisponible
+        icono={<ClockCircleOutlined style={{ color: colors.dorado }} />}
+        titulo="Anuncio caducado"
+        texto={`Este anuncio estuvo disponible hasta el ${formatFecha(a.fecha_caducidad)}.`}
+      />
+    );
 
   return (
     <div style={{ maxWidth: 800, margin: "0 auto" }}>
