@@ -69,7 +69,20 @@
     {
       "clave": "logo",
       "tipo": "archivo",
-      "etiqueta": "Logo o foto del negocio"
+      "etiqueta": "Logo o foto del negocio",
+      "opciones": {
+        "allowedFiles": {
+          "image/*": [
+            ".jpg",
+            ".jpeg",
+            ".png",
+            ".svg"
+          ]
+        },
+        "hasMaxFileSize": true,
+        "maxFileSize": 8,
+        "maxFileSizeUnit": "MB"
+      }
     },
     {
       "clave": "persona_contacto",

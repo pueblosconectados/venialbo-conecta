@@ -38,10 +38,22 @@ alguien la repase en el CMS y marque *Visible en la web*. Esa revisión es el pu
 todo esto: lo manda un vecino, y alguien tiene que leerlo antes de publicarlo con su
 teléfono.
 
+Se puede lanzar **sin terminal**, desde el botón *Traer las altas de negocio* de la
+barra lateral del CMS, que dispara `.github/workflows/altas-negocio.yml`. El workflow
+hace lo mismo y commitea las fichas, así que a los pocos segundos aparecen en la lista
+de Negocios, ocultas. Necesita el secreto `TALLY_API_KEY` en el repositorio (Settings →
+Secrets and variables → Actions).
+
 Detalles que conviene conocer:
 
-- **El logo se baja** a `public/media/imagenes/<slug>-logo.<ext>` y queda enlazado en la
-  ficha. El despliegue ya reduce a 1600 px lo que venga grande, así que no se toca aquí.
+- **La foto no se descarga, a propósito.** Un binario que manda un desconocido, una vez
+  commiteado, se queda en el historial de git para siempre: quitarlo obliga a reescribir
+  la historia con `push --force` sobre una rama donde el CMS commitea por su cuenta. El
+  script deja el enlace, alguien la mira, y si vale se sube desde el CMS.
+- **Este repositorio es público, y los registros de Actions también.** Por eso el script
+  tiene modo discreto (`--discreto`, automático con `CI=true`): ahí no imprime ni quién
+  manda la ficha ni el enlace de la foto, que va firmado y la abre a cualquiera que lo
+  lea. En local sí los enseña, que es donde se necesitan.
 - **"Quién nos lo manda" no se escribe en la ficha.** El aviso de privacidad dice que eso
   no se publica, así que se enseña por pantalla y ahí se queda.
 - **Avisa si el negocio no dejó ninguna forma de contacto**, que para un directorio es la

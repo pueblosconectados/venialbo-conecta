@@ -38,7 +38,24 @@
     {
       "clave": "foto",
       "tipo": "archivo",
-      "etiqueta": "Foto (opcional)"
+      "etiqueta": "Foto (opcional)",
+      "opciones": {
+        "allowedFiles": {
+          "image/*": [
+            ".jpg",
+            ".jpeg",
+            ".png",
+            ".svg"
+          ]
+        },
+        "hasMaxFileSize": true,
+        "maxFileSize": 8,
+        "maxFileSizeUnit": "MB",
+        "hasMultipleFiles": true,
+        "hasMinFiles": false,
+        "hasMaxFiles": true,
+        "maxFiles": 4
+      }
     },
     {
       "clave": "quien_lo_manda",

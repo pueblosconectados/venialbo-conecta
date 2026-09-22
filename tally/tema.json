@@ -6,6 +6,17 @@
     "cambiar algo, lo seguro es tocarlo en el panel de Tally y volver a leerlo."
   ],
   "idioma": "es",
+  "avisos": {
+    "hasSelfEmailNotifications": true,
+    "selfEmailTo": {
+      "safeHTMLSchema": [
+        [
+          "info@venialboconecta.es"
+        ]
+      ],
+      "mentions": []
+    }
+  },
   "logo": "https://storage.tally.so/753dd297-ee3a-4e23-83fe-8b43c8cdb727/logo-venialbo-conecta.png",
   "styles": {
     "theme": "CUSTOM",

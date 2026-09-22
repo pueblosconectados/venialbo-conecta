@@ -108,6 +108,9 @@ const bloquesDeCampo = (slug, campo) => {
 
   const payload = { isRequired: requerido };
   if (ayuda) payload.placeholder = ayuda;
+  // Restricciones del campo (formatos, tamaño máximo, cuántos archivos). Se copian tal
+  // cual de lo que escribe el editor de Tally, como el tema: aquí no se inventa nada.
+  if (campo.opciones) Object.assign(payload, campo.opciones);
 
   bloques.push({
     uuid: uuidEstable(slug, clave, "campo"),
@@ -170,6 +173,9 @@ const cuerpoDe = (slug, definicion, tema = {}) => {
   // El idioma cambia los textos que pone Tally: el botón de enviar, los avisos de
   // campo obligatorio y la pantalla de "gracias".
   if (tema.idioma) settings.language = tema.idioma;
+  // Avisos por correo al recibir una respuesta. Van aquí para que un formulario nuevo
+  // nazca con ellos; en los que ya existen, la API fusiona y no hace falta.
+  if (tema.avisos) Object.assign(settings, tema.avisos);
   if (Object.keys(settings).length) cuerpo.settings = settings;
   return cuerpo;
 };

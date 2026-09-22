@@ -9,6 +9,12 @@
 // en la web hasta que alguien la repase en el CMS y la marque como visible. Esa revisión
 // es el punto de todo esto: lo manda un vecino y alguien tiene que leerlo antes.
 //
+// LA FOTO NO SE DESCARGA A PROPÓSITO. Un binario que manda un desconocido, una vez
+// commiteado, se queda en el historial de git para siempre: quitarlo obliga a reescribir
+// la historia con push --force sobre una rama donde el CMS commitea por su cuenta. Así
+// que el script deja el enlace de la imagen, alguien la mira, y si vale se sube desde el
+// CMS con el selector de imágenes de siempre.
+//
 // La clave de API se lee igual que en crear-formularios.mjs (TALLY_API_KEY, o el fichero
 // de TALLY_API_KEY_FILE, o ~/.config/tally/api-key).
 
@@ -23,12 +29,15 @@ const FICHERO_IDS = join(AQUI, "formularios-creados.json");
 const FICHERO_DEFINICION = join(AQUI, "formularios", "alta-negocio.json");
 const FICHERO_IMPORTADAS = join(AQUI, "respuestas-importadas.json");
 const DIR_FICHAS = join(RAIZ, "web-static", "content", "negocios");
-const DIR_IMAGENES = join(RAIZ, "web-static", "public", "media", "imagenes");
 const API = "https://api.tally.so";
 
 const args = process.argv.slice(2);
 const TODAS = args.includes("--todas");
 const FORZAR = args.includes("--forzar");
+// El repositorio es público y los registros de Actions también, así que cuando esto
+// corre ahí no se imprime nada personal: ni quién manda la ficha ni el enlace de su
+// foto, que va firmado y abre la imagen a cualquiera que lo lea.
+const DISCRETO = args.includes("--discreto") || process.env.CI === "true";
 const pedidas = args.filter((a) => !a.startsWith("--"));
 
 const leerClave = async () => {
@@ -97,21 +106,6 @@ const llamar = async (clave, ruta) => {
   return respuesta.json();
 };
 
-const bajarLogo = async (adjunto, slug) => {
-  const respuesta = await fetch(adjunto.url);
-  if (!respuesta.ok) {
-    console.warn(`  ⚠ no se pudo bajar el logo (HTTP ${respuesta.status}), queda sin poner`);
-    return null;
-  }
-  const extension = (adjunto.name?.match(/\.[a-z0-9]+$/i)?.[0] ?? ".jpg").toLowerCase();
-  const nombre = `${slug}-logo${extension}`;
-  await mkdir(DIR_IMAGENES, { recursive: true });
-  await writeFile(join(DIR_IMAGENES, nombre), Buffer.from(await respuesta.arrayBuffer()));
-  console.log(`  logo guardado en public/media/imagenes/${nombre}`);
-  // El despliegue ya reduce a 1600 px lo que suba grande, así que se deja tal cual.
-  return `/media/imagenes/${nombre}`;
-};
-
 const existe = async (ruta) =>
   readFile(ruta, "utf8").then(
     () => true,
@@ -130,6 +124,7 @@ const main = async () => {
 
   const importadas = JSON.parse(await readFile(FICHERO_IMPORTADAS, "utf8").catch(() => "[]"));
 
+  const urlEnTally = `https://tally.so/forms/${formId}/submissions`;
   const datos = await llamar(clave, `/forms/${formId}/submissions`);
   const preguntas = new Map(datos.questions.map((q) => [q.id, q.title]));
 
@@ -148,6 +143,10 @@ const main = async () => {
   }
 
   if (!TODAS && pedidas.length === 0) {
+    if (DISCRETO) {
+      console.log(`${pendientes.length} respuesta(s) sin importar. Se ven en ${urlEnTally}`);
+      return;
+    }
     console.log(`${pendientes.length} respuesta(s) sin importar:\n`);
     for (const s of pendientes) {
       const nombre = s.responses.find((r) => preguntas.get(r.questionId) === "Nombre del negocio");
@@ -191,8 +190,7 @@ const main = async () => {
       const destinoCampo = A_FICHA[campo];
       if (!destinoCampo) continue; // persona_contacto y compañía
       if (campo === "logo") {
-        const ruta = await bajarLogo(valor[0], slug);
-        if (ruta) ficha.logo_url = ruta;
+        continue; // la foto no entra en el repositorio; se avisa más abajo
       } else if (Array.isArray(destinoCampo)) {
         const [grupo, sub] = destinoCampo;
         ficha[grupo] = { ...(ficha[grupo] ?? {}), [sub]: valor };
@@ -210,7 +208,18 @@ const main = async () => {
     console.log(`  escrito content/negocios/${slug}.json  (activo: false, no sale en la web todavía)`);
 
     const quien = valores.get("persona_contacto");
-    if (quien) console.log(`  lo manda: ${quien}  ← esto no se publica, no va en la ficha`);
+    if (quien && !DISCRETO) {
+      console.log(`  lo manda: ${quien}  ← esto no se publica, no va en la ficha`);
+    }
+
+    const fotos = valores.get("logo") ?? [];
+    if (fotos.length && DISCRETO) {
+      console.log(`  lleva foto: míralo en Tally antes de subirla al CMS → ${urlEnTally}`);
+    }
+    for (const foto of DISCRETO ? [] : fotos) {
+      console.log(`  FOTO SIN REVISAR: ${foto.url}`);
+      console.log("    ábrela, mírala, y si vale súbela desde el CMS en 'Logo o foto'.");
+    }
 
     const faltan = ["telefono", "telefono_movil", "email", "web_url"].filter((c) => !valores.has(c));
     if (faltan.length === 4) console.log("  ⚠ no ha dejado ninguna forma de contacto");

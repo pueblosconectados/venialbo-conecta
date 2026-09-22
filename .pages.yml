@@ -10,6 +10,18 @@ actions:
     # La rama que se este editando en el CMS (main)
     ref: current
 
+  - name: altas-negocio
+    label: Traer las altas de negocio
+    workflow: altas-negocio.yml
+    ref: current
+    confirm:
+      title: ¿Traer las altas pendientes?
+      message: >-
+        Se crean fichas con lo que han mandado los negocios por el formulario, siempre
+        ocultas: no se publica nada hasta que las repases aquí y las marques como
+        visibles. Las fotos no se traen, se miran en Tally y se suben a mano.
+      button: Traer las altas
+
   - name: imagenes-huerfanas-pr
     label: Proponer borrar las imágenes sin usar
     workflow: imagenes-huerfanas-pr.yml
