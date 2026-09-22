@@ -25,9 +25,9 @@ el bibliobús, sin registrarse ni instalar nada.
 
 |    | Sección | Qué encontrarás |
 |----|---------|-----------------|
-| 📰 | **Noticias** | Lo último que pasa en el pueblo, en 11 categorías: fiestas, obras, avisos urgentes, cultura… |
+| 📰 | **Noticias** | Lo último que pasa en el pueblo, en 12 categorías: fiestas, obras, avisos urgentes, cultura… |
 | 🏪 | **Negocios** | El directorio del comercio local, con contacto y enlaces a sus redes |
-| 🏥 | **Servicios** | Médico, comedor, bibliobús y demás servicios, con sus horarios |
+| 🏥 | **Servicios e instituciones** | Médico, comedor, bibliobús, asociaciones y el Ayuntamiento, con horarios y contacto |
 | 📌 | **Tablón** | Anuncios entre vecinos: mascotas perdidas, compraventa, objetos perdidos |
 | 🤝 | **Pueblos Conectados** | El proyecto del que forma parte esta web |
 
