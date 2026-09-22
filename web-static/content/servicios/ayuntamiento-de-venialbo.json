@@ -1,0 +1,13 @@
+{
+  "nombre": "Ayuntamiento de Venialbo",
+  "tipo": "institucion",
+  "logo_url": "/media/imagenes/ayuntamiento-png-fondo-blanco.png",
+  "direccion": "http://www.venialbo.es/",
+  "telefono": "*34 980 573 054",
+  "email": "info@venialbo.es",
+  "redes_sociales": {
+    "facebook": "https://www.facebook.com/profile.php?id=100064525009202"
+  },
+  "horario": "De 09:00 a 14:00",
+  "activo": true
+}
