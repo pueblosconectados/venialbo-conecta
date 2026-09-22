@@ -1,0 +1,9 @@
+{
+  "titulo": "Misas",
+  "fecha_publicacion": "2026-09-22T10:09",
+  "categoria": "web-static/content/categorias/religion.json",
+  "destacada": true,
+  "activa": true,
+  "imagen_url": "/media/imagenes/misas-septiembre.jpg",
+  "contenido": "Horario de misas para el mes de **septiembre**"
+}
