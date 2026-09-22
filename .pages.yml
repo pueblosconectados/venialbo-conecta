@@ -143,6 +143,9 @@ content:
           - name: instagram
             label: Instagram (URL)
             type: string
+          - name: youtube
+            label: YouTube (URL)
+            type: string
       - name: horario
         label: Horario
         type: string

@@ -17,6 +17,7 @@ import {
   InstagramOutlined,
   MailOutlined,
   PhoneOutlined,
+  YoutubeOutlined,
 } from "@ant-design/icons";
 import { imgUrl } from "../../../config";
 import { colors, softTagStyle } from "../../../theme";
@@ -145,6 +146,16 @@ export function NegociosShow() {
             rel="noopener noreferrer"
           >
             Instagram
+          </Button>
+        )}
+        {redes.youtube && (
+          <Button
+            icon={<YoutubeOutlined />}
+            href={redes.youtube}
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            YouTube
           </Button>
         )}
         {n.email && (
