@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Outlet, Link, useLocation } from "react-router";
 import { Layout, Menu, Button, Drawer, Grid, Typography } from "antd";
 import { MenuOutlined, EnvironmentFilled } from "@ant-design/icons";
+import { FORMULARIOS } from "../../config";
 import { colors, fonts } from "../../theme";
 import { BannerAvisos } from "../components/BannerAvisos";
 
@@ -127,6 +128,25 @@ export function PublicLayout() {
           borderTop: `1px solid ${colors.borde}`,
         }}
       >
+        <div style={{ marginBottom: 6 }}>
+          {/* Contacto sale fuera, al formulario de Tally; privacidad es página propia.
+              Van aquí y no en el menú de arriba, que ya va justo de sitio. */}
+          <a
+            href={FORMULARIOS.contacto}
+            target="_blank"
+            rel="noopener noreferrer"
+            style={{ color: colors.musgo, fontWeight: 500, fontSize: 13 }}
+          >
+            Contacto
+          </a>
+          <span style={{ color: colors.borde, margin: "0 10px" }}>·</span>
+          <Link
+            to="/privacidad"
+            style={{ color: colors.musgo, fontWeight: 500, fontSize: 13 }}
+          >
+            Privacidad
+          </Link>
+        </div>
         <Typography.Text style={{ color: colors.marronSuave, fontSize: 13 }}>
           Hecho con cariño para Venialbo · {new Date().getFullYear()}
         </Typography.Text>

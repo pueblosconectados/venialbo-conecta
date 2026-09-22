@@ -3,6 +3,7 @@ import { Link } from "react-router";
 import { useList } from "@refinedev/core";
 import {
   Alert,
+  Button,
   Card,
   Col,
   Pagination,
@@ -11,7 +12,8 @@ import {
   Tag,
   Typography,
 } from "antd";
-import { formatFecha } from "../../../config";
+import { PlusOutlined } from "@ant-design/icons";
+import { FORMULARIOS, formatFecha } from "../../../config";
 import { softTagStyle, type TagTone } from "../../../theme";
 import { textoPlano } from "../../../markdown";
 
@@ -58,7 +60,18 @@ export function AnunciosList() {
 
   return (
     <div>
-      <Typography.Title level={2} style={{ marginBottom: 24 }}>Tablón de anuncios</Typography.Title>
+      <div className="vc-cabecera-lista" style={{ marginBottom: 24 }}>
+        <Typography.Title level={2} style={{ margin: 0 }}>Tablón de anuncios</Typography.Title>
+        <Button
+          type="primary"
+          icon={<PlusOutlined />}
+          href={FORMULARIOS.tablon}
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          Publicar un anuncio
+        </Button>
+      </div>
       <Row gutter={[16, 16]}>
         {items.map((a) => (
           <Col key={a.id} xs={24} sm={12} lg={8}>

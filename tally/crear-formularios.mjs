@@ -153,6 +153,17 @@ const cuerpoDe = (slug, definicion, tema = {}) => {
 
   for (const campo of definicion.campos) bloques.push(...bloquesDeCampo(slug, campo));
 
+  // Aviso de privacidad, al final: enlaza a /privacidad de la web.
+  if (definicion.nota) {
+    bloques.push({
+      uuid: uuidEstable(slug, "nota"),
+      type: "TEXT",
+      groupUuid: uuidEstable(slug, "grupo-nota"),
+      groupType: "TEXT",
+      payload: { html: definicion.nota },
+    });
+  }
+
   const cuerpo = { status: PUBLICAR ? "PUBLISHED" : "DRAFT", blocks: bloques };
   const settings = {};
   if (tema.styles) settings.styles = tema.styles;

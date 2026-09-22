@@ -1,20 +1,81 @@
 {
   "titulo": "Dar de alta un negocio en el directorio",
   "intro": "Manda los datos de tu negocio y lo añadimos al directorio de la web. Solo el nombre es obligatorio: lo demás, lo que quieras poner.",
+  "nota": "Al enviar este formulario aceptas cómo tratamos tus datos. Lo explicamos en <a href=\"https://venialboconecta.es/privacidad\">venialboconecta.es/privacidad</a>.",
   "campos": [
-    { "clave": "nombre", "tipo": "texto", "etiqueta": "Nombre del negocio", "requerido": true },
-    { "clave": "categoria_negocio", "tipo": "texto", "etiqueta": "Tipo de negocio", "ayuda": "Por ejemplo: Bar, Panadería, Taller…" },
-    { "clave": "descripcion", "tipo": "parrafo", "etiqueta": "Descripción" },
-    { "clave": "direccion", "tipo": "texto", "etiqueta": "Dirección" },
-    { "clave": "horario", "tipo": "texto", "etiqueta": "Horario" },
-    { "clave": "telefono", "tipo": "telefono", "etiqueta": "Teléfono fijo" },
-    { "clave": "telefono_movil", "tipo": "telefono", "etiqueta": "Teléfono móvil" },
-    { "clave": "email", "tipo": "email", "etiqueta": "Correo electrónico" },
-    { "clave": "web_url", "tipo": "enlace", "etiqueta": "Página web" },
-    { "clave": "facebook", "tipo": "enlace", "etiqueta": "Facebook" },
-    { "clave": "instagram", "tipo": "enlace", "etiqueta": "Instagram" },
-    { "clave": "youtube", "tipo": "enlace", "etiqueta": "YouTube" },
-    { "clave": "logo", "tipo": "archivo", "etiqueta": "Logo o foto del negocio" },
-    { "clave": "persona_contacto", "tipo": "texto", "etiqueta": "Quién nos lo manda", "requerido": true, "ayuda": "Nombre y teléfono, por si tenemos que preguntar algo. Esto no se publica" }
+    {
+      "clave": "nombre",
+      "tipo": "texto",
+      "etiqueta": "Nombre del negocio",
+      "requerido": true
+    },
+    {
+      "clave": "categoria_negocio",
+      "tipo": "texto",
+      "etiqueta": "Tipo de negocio",
+      "ayuda": "Por ejemplo: Bar, Panadería, Taller…"
+    },
+    {
+      "clave": "descripcion",
+      "tipo": "parrafo",
+      "etiqueta": "Descripción"
+    },
+    {
+      "clave": "direccion",
+      "tipo": "texto",
+      "etiqueta": "Dirección"
+    },
+    {
+      "clave": "horario",
+      "tipo": "texto",
+      "etiqueta": "Horario"
+    },
+    {
+      "clave": "telefono",
+      "tipo": "telefono",
+      "etiqueta": "Teléfono fijo"
+    },
+    {
+      "clave": "telefono_movil",
+      "tipo": "telefono",
+      "etiqueta": "Teléfono móvil"
+    },
+    {
+      "clave": "email",
+      "tipo": "email",
+      "etiqueta": "Correo electrónico"
+    },
+    {
+      "clave": "web_url",
+      "tipo": "enlace",
+      "etiqueta": "Página web"
+    },
+    {
+      "clave": "facebook",
+      "tipo": "enlace",
+      "etiqueta": "Facebook"
+    },
+    {
+      "clave": "instagram",
+      "tipo": "enlace",
+      "etiqueta": "Instagram"
+    },
+    {
+      "clave": "youtube",
+      "tipo": "enlace",
+      "etiqueta": "YouTube"
+    },
+    {
+      "clave": "logo",
+      "tipo": "archivo",
+      "etiqueta": "Logo o foto del negocio"
+    },
+    {
+      "clave": "persona_contacto",
+      "tipo": "texto",
+      "etiqueta": "Quién nos lo manda",
+      "requerido": true,
+      "ayuda": "Nombre y teléfono, por si tenemos que preguntar algo. Esto no se publica"
+    }
   ]
 }

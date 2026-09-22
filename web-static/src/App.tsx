@@ -15,6 +15,7 @@ import { NoticiasList } from "./public/pages/noticias/NoticiasList";
 import { NoticiasShow } from "./public/pages/noticias/NoticiasShow";
 import { NegociosList } from "./public/pages/negocios/NegociosList";
 import { NegociosShow } from "./public/pages/negocios/NegociosShow";
+import { Privacidad } from "./public/pages/Privacidad";
 import { ServiciosList } from "./public/pages/servicios/ServiciosList";
 import { ServiciosShow } from "./public/pages/servicios/ServiciosShow";
 import { AnunciosList } from "./public/pages/anuncios/AnunciosList";
@@ -44,6 +45,7 @@ function App() {
               <Route path="/tablon" element={<AnunciosList />} />
               <Route path="/tablon/:id" element={<AnunciosShow />} />
               <Route path="/pueblos-conectados" element={<PueblosConectados />} />
+              <Route path="/privacidad" element={<Privacidad />} />
             </Route>
             {/* 404 */}
             <Route path="*" element={<NotFound />} />

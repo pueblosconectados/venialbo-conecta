@@ -1,18 +1,51 @@
 {
   "titulo": "Publicar un anuncio en el tablón",
   "intro": "Rellena esto y nosotros lo publicamos en el tablón de la web. Si es una mascota perdida, cuanto antes mejor.",
+  "nota": "Al enviar este formulario aceptas cómo tratamos tus datos. Lo explicamos en <a href=\"https://venialboconecta.es/privacidad\">venialboconecta.es/privacidad</a>.",
   "campos": [
-    { "clave": "titulo", "tipo": "texto", "etiqueta": "Título del anuncio", "requerido": true, "ayuda": "Por ejemplo: Se ha perdido un perro pequeño y marrón" },
+    {
+      "clave": "titulo",
+      "tipo": "texto",
+      "etiqueta": "Título del anuncio",
+      "requerido": true,
+      "ayuda": "Por ejemplo: Se ha perdido un perro pequeño y marrón"
+    },
     {
       "clave": "tipo",
       "tipo": "desplegable",
       "etiqueta": "¿De qué se trata?",
       "requerido": true,
-      "opciones": ["Mascota perdida", "Compra / Venta", "Objeto perdido", "Otro"]
+      "opciones": [
+        "Mascota perdida",
+        "Compra / Venta",
+        "Objeto perdido",
+        "Otro"
+      ]
     },
-    { "clave": "descripcion", "tipo": "parrafo", "etiqueta": "Cuéntalo con detalle", "requerido": true },
-    { "clave": "contacto", "tipo": "texto", "etiqueta": "Cómo te pueden localizar", "requerido": true, "ayuda": "Teléfono, o dónde preguntar por ti. Esto sale publicado en el anuncio" },
-    { "clave": "foto", "tipo": "archivo", "etiqueta": "Foto (opcional)" },
-    { "clave": "quien_lo_manda", "tipo": "texto", "etiqueta": "Tu nombre", "requerido": true, "ayuda": "Para saber quién nos lo manda. Esto no se publica" }
+    {
+      "clave": "descripcion",
+      "tipo": "parrafo",
+      "etiqueta": "Cuéntalo con detalle",
+      "requerido": true
+    },
+    {
+      "clave": "contacto",
+      "tipo": "texto",
+      "etiqueta": "Cómo te pueden localizar",
+      "requerido": true,
+      "ayuda": "Teléfono, o dónde preguntar por ti. Esto sale publicado en el anuncio"
+    },
+    {
+      "clave": "foto",
+      "tipo": "archivo",
+      "etiqueta": "Foto (opcional)"
+    },
+    {
+      "clave": "quien_lo_manda",
+      "tipo": "texto",
+      "etiqueta": "Tu nombre",
+      "requerido": true,
+      "ayuda": "Para saber quién nos lo manda. Esto no se publica"
+    }
   ]
 }

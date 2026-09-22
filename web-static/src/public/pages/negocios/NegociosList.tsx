@@ -3,6 +3,7 @@ import { Link } from "react-router";
 import { useList } from "@refinedev/core";
 import {
   Alert,
+  Button,
   Card,
   Col,
   Pagination,
@@ -11,8 +12,8 @@ import {
   Tag,
   Typography,
 } from "antd";
-import { MobileOutlined, PhoneOutlined, ShopOutlined } from "@ant-design/icons";
-import { imgUrl } from "../../../config";
+import { MobileOutlined, PhoneOutlined, PlusOutlined, ShopOutlined } from "@ant-design/icons";
+import { FORMULARIOS, imgUrl } from "../../../config";
 import { colors, softTagStyle } from "../../../theme";
 
 type Negocio = {
@@ -48,9 +49,20 @@ export function NegociosList() {
 
   return (
     <div>
-      <Typography.Title level={2} style={{ marginBottom: 24 }}>
-        Directorio de negocios
-      </Typography.Title>
+      <div className="vc-cabecera-lista" style={{ marginBottom: 24 }}>
+        <Typography.Title level={2} style={{ margin: 0 }}>
+          Directorio de negocios
+        </Typography.Title>
+        <Button
+          type="primary"
+          icon={<PlusOutlined />}
+          href={FORMULARIOS.negocios}
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          Dar de alta mi negocio
+        </Button>
+      </div>
       <Row gutter={[16, 16]}>
         {items.map((n) => (
           <Col key={n.id} xs={24} sm={12} lg={8}>
