@@ -1,12 +1,9 @@
-import { Refine } from "@refinedev/core";
-import { useNotificationProvider } from "@refinedev/antd";
 import { BrowserRouter, Route, Routes } from "react-router";
-import { App as AntdApp, ConfigProvider } from "antd";
+import { ConfigProvider } from "antd";
 import esES from "antd/locale/es_ES";
 import "antd/dist/reset.css";
 import { venialboTheme } from "./theme";
 
-import { staticDataProvider } from "./providers/staticDataProvider";
 import { BASE_URL } from "./config";
 
 import { PublicLayout } from "./public/layout/PublicLayout";
@@ -27,31 +24,23 @@ function App() {
   return (
     <BrowserRouter basename={BASE_URL}>
       <ConfigProvider locale={esES} theme={venialboTheme}>
-        <AntdApp>
-        <Refine
-          dataProvider={staticDataProvider(BASE_URL)}
-          notificationProvider={useNotificationProvider}
-          options={{ disableTelemetry: true }}
-        >
-          <Routes>
-            <Route element={<PublicLayout />}>
-              <Route path="/" element={<Home />} />
-              <Route path="/noticias" element={<NoticiasList />} />
-              <Route path="/noticias/:id" element={<NoticiasShow />} />
-              <Route path="/negocios" element={<NegociosList />} />
-              <Route path="/negocios/:id" element={<NegociosShow />} />
-              <Route path="/servicios" element={<ServiciosList />} />
-              <Route path="/servicios/:id" element={<ServiciosShow />} />
-              <Route path="/tablon" element={<AnunciosList />} />
-              <Route path="/tablon/:id" element={<AnunciosShow />} />
-              <Route path="/pueblos-conectados" element={<PueblosConectados />} />
-              <Route path="/privacidad" element={<Privacidad />} />
-            </Route>
-            {/* 404 */}
-            <Route path="*" element={<NotFound />} />
-          </Routes>
-        </Refine>
-        </AntdApp>
+        <Routes>
+          <Route element={<PublicLayout />}>
+            <Route path="/" element={<Home />} />
+            <Route path="/noticias" element={<NoticiasList />} />
+            <Route path="/noticias/:id" element={<NoticiasShow />} />
+            <Route path="/negocios" element={<NegociosList />} />
+            <Route path="/negocios/:id" element={<NegociosShow />} />
+            <Route path="/servicios" element={<ServiciosList />} />
+            <Route path="/servicios/:id" element={<ServiciosShow />} />
+            <Route path="/tablon" element={<AnunciosList />} />
+            <Route path="/tablon/:id" element={<AnunciosShow />} />
+            <Route path="/pueblos-conectados" element={<PueblosConectados />} />
+            <Route path="/privacidad" element={<Privacidad />} />
+          </Route>
+          {/* 404 */}
+          <Route path="*" element={<NotFound />} />
+        </Routes>
       </ConfigProvider>
     </BrowserRouter>
   );

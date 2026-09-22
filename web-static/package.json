@@ -15,10 +15,6 @@
   },
   "dependencies": {
     "@ant-design/icons": "^6.2.2",
-    "@refinedev/antd": "^6.0.3",
-    "@refinedev/core": "^5.0.12",
-    "@refinedev/react-router": "^2.0.4",
-    "@refinedev/simple-rest": "^6.0.1",
     "antd": "^5.29.3",
     "markdown-it": "^15.0.2",
     "react": "^19.2.5",

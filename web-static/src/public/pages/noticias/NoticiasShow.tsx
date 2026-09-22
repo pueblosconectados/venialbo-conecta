@@ -1,5 +1,5 @@
 import { useParams, Link } from "react-router";
-import { useOne } from "@refinedev/core";
+import { useOne } from "../../../datos";
 import {
   Alert,
   Breadcrumb,

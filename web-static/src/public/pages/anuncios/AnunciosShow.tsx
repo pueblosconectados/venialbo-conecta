@@ -1,6 +1,6 @@
 import type { ReactNode } from "react";
 import { useParams, Link } from "react-router";
-import { useOne } from "@refinedev/core";
+import { useOne } from "../../../datos";
 import {
   Breadcrumb,
   Button,
@@ -12,7 +12,7 @@ import {
 } from "antd";
 import { ClockCircleOutlined, FileSearchOutlined } from "@ant-design/icons";
 import { formatFecha, imgUrl } from "../../../config";
-import { haCaducado } from "../../../providers/staticDataProvider";
+import { haCaducado } from "../../../datos";
 import { colors, softTagStyle, type TagTone } from "../../../theme";
 import { ContenidoRico } from "../../components/ContenidoRico";
 import { ImagenAmpliable } from "../../components/ImagenAmpliable";

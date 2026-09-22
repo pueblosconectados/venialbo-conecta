@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Link } from "react-router";
 import { Alert } from "antd";
-import { useList } from "@refinedev/core";
+import { useList } from "../../datos";
 
 type Aviso = {
   id: string;

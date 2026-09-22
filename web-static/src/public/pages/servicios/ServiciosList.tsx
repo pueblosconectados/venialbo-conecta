@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link } from "react-router";
-import { useList } from "@refinedev/core";
+import { useList } from "../../../datos";
 import {
   Alert,
   Card,
@@ -64,8 +64,8 @@ export function ServiciosList() {
       <Alert type="error" message="No se pudieron cargar los servicios" />
     );
 
-  const items = result.data ?? [];
-  const total = result.total ?? 0;
+  const items = result?.data ?? [];
+  const total = result?.total ?? 0;
 
   return (
     <div>

@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link } from "react-router";
-import { useList } from "@refinedev/core";
+import { useList } from "../../../datos";
 import {
   Alert,
   Card,

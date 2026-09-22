@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link } from "react-router";
-import { useList } from "@refinedev/core";
+import { useList } from "../../../datos";
 import {
   Alert,
   Button,
@@ -45,8 +45,8 @@ export function NegociosList() {
       <Alert type="error" message="No se pudo cargar el directorio de negocios" />
     );
 
-  const items = result.data ?? [];
-  const total = result.total ?? 0;
+  const items = result?.data ?? [];
+  const total = result?.total ?? 0;
 
   return (
     <div>
