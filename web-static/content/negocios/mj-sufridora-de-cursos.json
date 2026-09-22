@@ -1,0 +1,15 @@
+{
+  "nombre": "MJ sufridora de cursos",
+  "categoria_negocio": "Dar cursos",
+  "descripcion": "pues nada se trata de dar cursos y cursos para que la gente del pueblo aprenda",
+  "direccion": "La casa de todos",
+  "telefono": "123456789",
+  "telefono_movil": "987654321",
+  "email": "alaartvdrt@hiugg.com",
+  "web_url": "https://es.wikipedia.org/wiki/Wikipedia:Portada",
+  "redes_sociales": {
+    "facebook": "https://www.google.com/url?q=https://www.cyldigital.es/&sa=U&sqi=2&ved=2ahUKEwjGh8DLr4KXAxXT-gIHHaa6EtsQFnoECCcQAQ&usg=AOvVaw2wnMB9I6Z8zszON9YaJxdW"
+  },
+  "horario": "Indefinido",
+  "activo": false
+}
