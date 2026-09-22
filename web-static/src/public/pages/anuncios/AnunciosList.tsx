@@ -14,7 +14,8 @@ import {
 } from "antd";
 import { PlusOutlined } from "@ant-design/icons";
 import { FORMULARIOS, formatFecha } from "../../../config";
-import { softTagStyle, type TagTone } from "../../../theme";
+import { colors, softTagStyle, type TagTone } from "../../../theme";
+import { Imagen } from "../../components/Imagen";
 import { textoPlano } from "../../../markdown";
 
 type Anuncio = {
@@ -22,6 +23,7 @@ type Anuncio = {
   tipo: string;
   titulo: string;
   descripcion?: string;
+  imagen_url?: string;
   fecha_publicacion: string;
   activo: boolean;
 };
@@ -76,7 +78,23 @@ export function AnunciosList() {
         {items.map((a) => (
           <Col key={a.id} xs={24} sm={12} lg={8}>
             <Link to={`/tablon/${a.id}`} className="vc-card-link">
-              <Card styles={{ body: { padding: 12 } }}>
+              <Card
+                cover={
+                  a.imagen_url ? (
+                    <Imagen
+                      src={a.imagen_url}
+                      alt={a.titulo}
+                      sizes="(max-width: 575px) 100vw, (max-width: 991px) 50vw, 33vw"
+                      style={{
+                        height: 180,
+                        objectFit: "cover",
+                        borderBottom: `1px solid ${colors.borde}`,
+                      }}
+                    />
+                  ) : undefined
+                }
+                styles={{ body: { padding: 12 } }}
+              >
                 <Tag style={{ ...softTagStyle(TIPO_TONE[a.tipo] ?? "gris"), marginBottom: 6 }}>
                   {TIPO_LABEL[a.tipo] ?? a.tipo}
                 </Tag>
