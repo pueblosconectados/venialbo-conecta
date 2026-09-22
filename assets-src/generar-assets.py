@@ -8,8 +8,8 @@ Quita el fondo blanco de los originales y produce:
 
 Y, fuera de public/, en tally/:
 
-    logo-venialbo-conecta.png         el logo entero para los formularios
-    logo-venialbo-conecta-relleno.png igual, con la piedra del puente opaca
+    logo-venialbo-conecta.png         el logo entero, para usos varios
+    logo-venialbo-conecta-circulo.png el icono para los formularios de Tally
 
 Uso (necesita Pillow, que no esta instalado en el sistema):
 
@@ -18,6 +18,7 @@ Uso (necesita Pillow, que no esta instalado en el sistema):
     .venv-assets/bin/python generar-assets.py
 """
 
+import math
 from collections import deque
 from pathlib import Path
 
@@ -85,6 +86,22 @@ def cuadrar(rgba, aire=1.12):
     return lienzo
 
 
+def encajar_en_circulo(rgba, lado=800, holgura=0.94):
+    """Centra la imagen en un cuadrado de modo que quepa dentro del circulo inscrito.
+
+    Tally pinta el logo de un formulario a 100x100 con object-fit: cover y
+    border-radius: 50%, o sea recortado en circulo, y sus ajustes de logo son de pago.
+    Lo unico que controlamos es la imagen, asi que se encoge hasta que su diagonal cabe
+    en el diametro: lo que entra, entra entero.
+    """
+    diagonal = math.hypot(*rgba.size)
+    k = (lado * holgura) / diagonal
+    chico = rgba.resize((round(rgba.width * k), round(rgba.height * k)), Image.LANCZOS)
+    lienzo = Image.new("RGBA", (lado, lado), (0, 0, 0, 0))
+    lienzo.paste(chico, ((lado - chico.width) // 2, (lado - chico.height) // 2))
+    return lienzo
+
+
 def rellenar_interior(rgba):
     """Devuelve el icono con el blanco que estaba encerrado hecho opaco.
 
@@ -146,10 +163,10 @@ def main():
     # Favicon: la casa, el wifi y el puente del logo de Venialbo, sin las
     # letras, que a 32px no se leerian. Se cuadra sin aire (aire=1.0) porque el
     # icono es apaisado y ya deja de sobra margen arriba y abajo.
-    icono = cuadrar(
-        rellenar_interior(sin_fondo(AQUI / "Venialbo_Conecta.jpeg", BBOX_LOGO_ICONO)),
-        aire=1.0,
-    )
+    # rellenar_interior() modifica la imagen que recibe, de ahi la copia: el favicon
+    # lleva la piedra del puente rellena y el logo de Tally la lleva calada.
+    icono_crudo = sin_fondo(AQUI / "Venialbo_Conecta.jpeg", BBOX_LOGO_ICONO)
+    icono = cuadrar(rellenar_interior(icono_crudo.copy()), aire=1.0)
     icono.resize((32, 32), Image.LANCZOS).save(PUB / "favicon.png", optimize=True)
 
     # iOS ignora el canal alfa y compone sobre negro, asi que el
@@ -175,9 +192,11 @@ def main():
         ancho = 600
         chico = logo.resize((ancho, round(logo.height * ancho / logo.width)), Image.LANCZOS)
         chico.save(tally / "logo-venialbo-conecta.png", optimize=True)
-        # Variante con la piedra del puente opaca, por si el fondo no es claro.
-        rellenar_interior(chico.copy()).save(
-            tally / "logo-venialbo-conecta-relleno.png", optimize=True
+        # El que se sube a Tally: solo el icono, encajado en el circulo con el que
+        # recorta los logos. Con el logotipo entero se comia las letras. Va calado,
+        # como en la web: el fondo crema del formulario se ve a traves del puente.
+        encajar_en_circulo(icono_crudo).save(
+            tally / "logo-venialbo-conecta-circulo.png", optimize=True
         )
 
     # Pueblos Conectados: el icono suelto para la tarjeta de la portada (se ve
@@ -195,7 +214,7 @@ def main():
     print("apple-touch-icon.png 180x180")
     print(f"venialbo-conecta.webp {logo.width}x{logo.height}")
     if (AQUI.parent / "tally").is_dir():
-        print("tally/logo-venialbo-conecta.png y su variante rellena, 600 px de ancho")
+        print("tally/logo-venialbo-conecta.png 600 px y logo-...-circulo.png 800x800")
     print(f"pueblos-conectados-icono.webp {icono_pc.width}x{icono_pc.height}")
     print(f"pueblos-conectados.webp {lockup.width}x{lockup.height}")
 
