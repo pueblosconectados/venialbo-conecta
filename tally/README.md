@@ -21,6 +21,39 @@ La segunda ejecución **actualiza** en vez de duplicar, porque `formularios-crea
 guarda el identificador que devolvió Tally. Ese fichero sí se commitea: los
 identificadores no son secretos y son lo que enlaza cada definición con su formulario.
 
+## Pasar las respuestas al CMS
+
+`importar-negocios.mjs` convierte las respuestas del formulario de alta de negocios en
+fichas de `web-static/content/negocios/`:
+
+```bash
+node tally/importar-negocios.mjs                 # lista lo que hay sin importar
+node tally/importar-negocios.mjs WJdlvAa         # escribe el borrador de esa respuesta
+node tally/importar-negocios.mjs --todas         # todas las que falten
+node tally/importar-negocios.mjs WJdlvAa --forzar  # reescribe una ficha que ya existía
+```
+
+La ficha se escribe **con `"activo": false`**, así que no sale en la web hasta que
+alguien la repase en el CMS y marque *Visible en la web*. Esa revisión es el punto de
+todo esto: lo manda un vecino, y alguien tiene que leerlo antes de publicarlo con su
+teléfono.
+
+Detalles que conviene conocer:
+
+- **El logo se baja** a `public/media/imagenes/<slug>-logo.<ext>` y queda enlazado en la
+  ficha. El despliegue ya reduce a 1600 px lo que venga grande, así que no se toca aquí.
+- **"Quién nos lo manda" no se escribe en la ficha.** El aviso de privacidad dice que eso
+  no se publica, así que se enseña por pantalla y ahí se queda.
+- **Avisa si el negocio no dejó ninguna forma de contacto**, que para un directorio es la
+  ficha que no sirve para nada.
+- **No pisa fichas que ya existan** salvo con `--forzar`, por si el nombre coincide con
+  uno del directorio.
+- `respuestas-importadas.json` lleva la cuenta de lo ya pasado, para no duplicar en la
+  siguiente ejecución. Se commitea.
+- El mapeo de campos va por la **etiqueta** de la pregunta, que sale de
+  `formularios/alta-negocio.json`. Si allí se renombra una etiqueta, el script avisa de
+  que esa pregunta no tiene sitio en la ficha en vez de perder el dato en silencio.
+
 ## La clave de API
 
 **Nunca va en el repositorio.** El script la busca en este orden:

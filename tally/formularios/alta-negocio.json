@@ -33,7 +33,8 @@
     {
       "clave": "telefono",
       "tipo": "telefono",
-      "etiqueta": "Teléfono fijo"
+      "etiqueta": "Teléfono fijo",
+      "requerido": true
     },
     {
       "clave": "telefono_movil",
