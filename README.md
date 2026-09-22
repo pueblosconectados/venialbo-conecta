@@ -10,7 +10,7 @@
 </p>
 
 <p align="center">
-  <a href="https://pueblosconectados.github.io/venialbo-conecta/"><img src="https://img.shields.io/badge/visitar_la_web-487824?style=for-the-badge&logo=googlechrome&logoColor=white" alt="Visitar la web"></a>
+  <a href="https://venialboconecta.es"><img src="https://img.shields.io/badge/visitar_la_web-487824?style=for-the-badge&logo=googlechrome&logoColor=white" alt="Visitar la web"></a>
   &nbsp;
   <a href="https://github.com/pueblosconectados/venialbo-conecta/actions/workflows/web-static-pages.yml"><img src="https://img.shields.io/github/actions/workflow/status/pueblosconectados/venialbo-conecta/web-static-pages.yml?branch=main&style=for-the-badge&label=publicaci%C3%B3n" alt="Estado de la publicación"></a>
 </p>
@@ -35,7 +35,7 @@ el bibliobús, sin registrarse ni instalar nada.
 
 <img src="web-static/public/pueblos-conectados-icono.webp" alt="" align="right" width="120">
 
-Esta web forma parte de **[Pueblos Conectados](https://pueblosconectados.github.io/venialbo-conecta/pueblos-conectados)**,
+Esta web forma parte de **[Pueblos Conectados](https://venialboconecta.es/pueblos-conectados)**,
 un proyecto colaborativo entre las localidades de
 [Venialbo](https://es.wikipedia.org/wiki/Venialbo) (Zamora) y
 [Aldearrubia](https://es.wikipedia.org/wiki/Aldearrubia) (Salamanca), nacido
@@ -77,15 +77,30 @@ venialbo-conecta/
 │   ├── public/       ← imágenes y logos que se sirven tal cual
 │   └── src/          ← el código de la web
 ├── assets-src/       ← originales de los logos y el script que los genera
-├── .pages.yml        ← configuración de Pages CMS: qué campos tiene cada sección
-├── web/              ← versión con backend y panel de administración (en segundo plano)
-├── backend/          ← API en FastAPI (en segundo plano)
-└── android/          ← app Android en Kotlin + Jetpack Compose (en segundo plano)
+├── tally/            ← los formularios: sus definiciones y los scripts que los crean
+└── .pages.yml        ← configuración de Pages CMS: qué campos tiene cada sección
 ```
 
-El proyecto empezó como app Android con backend propio. Hoy el producto
-principal es `web-static/`: más barato de mantener y sin servidores. El resto
-del código se conserva para retomarlo más adelante.
+## Lo que ya no está aquí
+
+El proyecto empezó como app Android con backend propio. Hoy el producto es
+`web-static/`: más barato de mantener y sin servidores, así que en septiembre de
+2026 el resto salió de `main` para dejar a la vista solo lo que se usa.
+
+No se ha borrado nada: está completo, con su historial, en la etiqueta
+[`archivo-app-backend-2026-09`](https://github.com/pueblosconectados/venialbo-conecta/tree/archivo-app-backend-2026-09).
+
+| Qué era | Último cambio |
+| --- | --- |
+| `android/` — app en Kotlin + Jetpack Compose, fases 1 a 8 | abril de 2026 |
+| `backend/` — API en FastAPI + SQLAlchemy | junio de 2026 |
+| `web/` — frontend con Refine sobre ese backend | junio de 2026 |
+
+Para recuperar cualquiera de ellos:
+
+```bash
+git checkout archivo-app-backend-2026-09 -- android/
+```
 
 ## Colores
 
