@@ -1,0 +1,33 @@
+{
+  "_comentario": [
+    "Tema de los formularios. NO se inventa: es el objeto que escribe el propio editor",
+    "de Tally al personalizar los colores, leido por API del formulario de contacto.",
+    "Escribir aqui claves inventadas rompe el formulario publico, asi que si hay que",
+    "cambiar algo, lo seguro es tocarlo en el panel de Tally y volver a leerlo."
+  ],
+  "idioma": "es",
+  "logo": "https://storage.tally.so/753dd297-ee3a-4e23-83fe-8b43c8cdb727/logo-venialbo-conecta.png",
+  "styles": {
+    "theme": "CUSTOM",
+    "color": {
+      "background": "#faf6ef",
+      "text": "#3d2f1f",
+      "accent": "#d05211",
+      "buttonBackground": "#487824",
+      "buttonText": "#ffffff"
+    },
+    "advanced": {
+      "baseFontSize": 16,
+      "inputHeight": 36,
+      "inputHorizontalPadding": 10,
+      "inputMarginBottom": 10,
+      "inputBorderRadius": 8,
+      "inputBorderWidth": 1,
+      "inputBackground": "#faf6ef",
+      "logoWidth": 100,
+      "logoHeight": 100,
+      "logoBorderRadius": 0
+    },
+    "direction": "ltr"
+  }
+}

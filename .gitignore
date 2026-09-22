@@ -81,3 +81,8 @@ CLAUDE.local.md
 # Notas locales de trabajo (no se suben)
 # ──────────────────────────────────────────────
 MEJORAS.md
+
+# ──────────────────────────────────────────────
+# Secretos locales (claves de API). Nunca se suben.
+# ──────────────────────────────────────────────
+.secretos/

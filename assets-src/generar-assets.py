@@ -6,6 +6,11 @@ Quita el fondo blanco de los originales y produce:
     apple-touch-icon.png  180x180, opaco (iOS ignora el alfa)
     venialbo-conecta.webp logo de la portada, resolucion completa
 
+Y, fuera de public/, en tally/:
+
+    logo-venialbo-conecta.png         el logo entero para los formularios
+    logo-venialbo-conecta-relleno.png igual, con la piedra del puente opaca
+
 Uso (necesita Pillow, que no esta instalado en el sistema):
 
     python3 -m venv .venv-assets
@@ -162,6 +167,19 @@ def main():
     logo = sin_fondo(AQUI / "Venialbo_Conecta.jpeg", BBOX_LOGO, margen=8)
     logo.save(PUB / "venialbo-conecta.webp", "WEBP", quality=88, method=6)
 
+    # El mismo logo en PNG para subirlo a servicios de fuera (los formularios de
+    # Tally), que no admiten WebP con transparencia de forma fiable. 600 px de ancho
+    # sobra: en un formulario se ve a 150 px como mucho, y asi el fichero no engorda.
+    tally = AQUI.parent / "tally"
+    if tally.is_dir():
+        ancho = 600
+        chico = logo.resize((ancho, round(logo.height * ancho / logo.width)), Image.LANCZOS)
+        chico.save(tally / "logo-venialbo-conecta.png", optimize=True)
+        # Variante con la piedra del puente opaca, por si el fondo no es claro.
+        rellenar_interior(chico.copy()).save(
+            tally / "logo-venialbo-conecta-relleno.png", optimize=True
+        )
+
     # Pueblos Conectados: el icono suelto para la tarjeta de la portada (se ve
     # a ~96px, 300 basta de sobra) y el lockup entero para su propia pagina.
     icono_pc = cuadrar(
@@ -176,6 +194,8 @@ def main():
     print("favicon.png 32x32")
     print("apple-touch-icon.png 180x180")
     print(f"venialbo-conecta.webp {logo.width}x{logo.height}")
+    if (AQUI.parent / "tally").is_dir():
+        print("tally/logo-venialbo-conecta.png y su variante rellena, 600 px de ancho")
     print(f"pueblos-conectados-icono.webp {icono_pc.width}x{icono_pc.height}")
     print(f"pueblos-conectados.webp {lockup.width}x{lockup.height}")
 

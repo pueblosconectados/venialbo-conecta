@@ -1,0 +1,26 @@
+{
+  "contacto": {
+    "id": "obJXzX",
+    "nombre": "Contacto — VenialboConecta",
+    "estado": "DRAFT",
+    "url": "https://tally.so/r/obJXzX",
+    "editar": "https://tally.so/forms/obJXzX/edit",
+    "actualizado": "2026-09-22"
+  },
+  "alta-negocio": {
+    "id": "ZjxqQa",
+    "nombre": "Dar de alta un negocio en el directorio",
+    "estado": "PUBLISHED",
+    "url": "https://tally.so/r/ZjxqQa",
+    "editar": "https://tally.so/forms/ZjxqQa/edit",
+    "actualizado": "2026-09-22"
+  },
+  "tablon": {
+    "id": "NpzGOW",
+    "nombre": "Publicar un anuncio en el tablón",
+    "estado": "PUBLISHED",
+    "url": "https://tally.so/r/NpzGOW",
+    "editar": "https://tally.so/forms/NpzGOW/edit",
+    "actualizado": "2026-09-22"
+  }
+}

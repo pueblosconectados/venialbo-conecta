@@ -1,0 +1,10 @@
+{
+  "titulo": "Contacto — VenialboConecta",
+  "intro": "Escríbenos lo que quieras contarnos y te contestamos. Los datos solo se usan para responderte.",
+  "campos": [
+    { "clave": "nombre", "tipo": "texto", "etiqueta": "Tu nombre", "requerido": true },
+    { "clave": "email", "tipo": "email", "etiqueta": "Tu correo electrónico", "requerido": true, "ayuda": "Para poder contestarte" },
+    { "clave": "telefono", "tipo": "telefono", "etiqueta": "Teléfono (opcional)" },
+    { "clave": "mensaje", "tipo": "parrafo", "etiqueta": "¿Qué nos quieres contar?", "requerido": true }
+  ]
+}
