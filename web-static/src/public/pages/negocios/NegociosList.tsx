@@ -11,7 +11,7 @@ import {
   Tag,
   Typography,
 } from "antd";
-import { PhoneOutlined, ShopOutlined } from "@ant-design/icons";
+import { MobileOutlined, PhoneOutlined, ShopOutlined } from "@ant-design/icons";
 import { imgUrl } from "../../../config";
 import { colors, softTagStyle } from "../../../theme";
 
@@ -20,6 +20,7 @@ type Negocio = {
   nombre: string;
   descripcion?: string;
   telefono?: string;
+  telefono_movil?: string;
   logo_url?: string;
   categoria_negocio?: string;
   activo: boolean;
@@ -99,8 +100,19 @@ export function NegociosList() {
                   {n.nombre}
                 </Typography.Text>
                 {n.telefono && (
-                  <Typography.Text type="secondary" style={{ fontSize: 12 }}>
+                  <Typography.Text
+                    type="secondary"
+                    style={{ fontSize: 12, display: "block" }}
+                  >
                     <PhoneOutlined /> {n.telefono}
+                  </Typography.Text>
+                )}
+                {n.telefono_movil && (
+                  <Typography.Text
+                    type="secondary"
+                    style={{ fontSize: 12, display: "block" }}
+                  >
+                    <MobileOutlined /> {n.telefono_movil}
                   </Typography.Text>
                 )}
               </Card>

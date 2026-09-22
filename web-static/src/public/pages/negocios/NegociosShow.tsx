@@ -16,6 +16,7 @@ import {
   GlobalOutlined,
   InstagramOutlined,
   MailOutlined,
+  MobileOutlined,
   PhoneOutlined,
   YoutubeOutlined,
 } from "@ant-design/icons";
@@ -30,6 +31,7 @@ type Negocio = {
   descripcion?: string;
   direccion?: string;
   telefono?: string;
+  telefono_movil?: string;
   email?: string;
   web_url?: string;
   redes_sociales?: Record<string, string>;
@@ -98,8 +100,13 @@ export function NegociosShow() {
           <Descriptions.Item label="Horario">{n.horario}</Descriptions.Item>
         )}
         {n.telefono && (
-          <Descriptions.Item label="Teléfono">
+          <Descriptions.Item label="Teléfono fijo">
             <a href={`tel:${n.telefono}`}>{n.telefono}</a>
+          </Descriptions.Item>
+        )}
+        {n.telefono_movil && (
+          <Descriptions.Item label="Teléfono móvil">
+            <a href={`tel:${n.telefono_movil}`}>{n.telefono_movil}</a>
           </Descriptions.Item>
         )}
         {n.email && (
@@ -115,7 +122,16 @@ export function NegociosShow() {
             type="primary"
             href={`tel:${n.telefono}`}
           >
-            Llamar
+            {n.telefono_movil ? "Llamar al fijo" : "Llamar"}
+          </Button>
+        )}
+        {n.telefono_movil && (
+          <Button
+            icon={<MobileOutlined />}
+            type="primary"
+            href={`tel:${n.telefono_movil}`}
+          >
+            {n.telefono ? "Llamar al móvil" : "Llamar"}
           </Button>
         )}
         {n.web_url && (

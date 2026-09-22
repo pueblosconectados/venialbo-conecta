@@ -159,7 +159,10 @@ content:
         label: Dirección
         type: string
       - name: telefono
-        label: Teléfono
+        label: Teléfono fijo
+        type: string
+      - name: telefono_movil
+        label: Teléfono móvil
         type: string
       - name: email
         label: Email
