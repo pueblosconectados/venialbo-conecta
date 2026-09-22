@@ -39,13 +39,12 @@
       "clave": "foto",
       "tipo": "archivo",
       "etiqueta": "Foto (opcional)",
-      "opciones": {
+      "restricciones": {
         "allowedFiles": {
           "image/*": [
             ".jpg",
             ".jpeg",
-            ".png",
-            ".svg"
+            ".png"
           ]
         },
         "hasMaxFileSize": true,

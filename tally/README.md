@@ -157,6 +157,16 @@ bloque de Tally correspondiente:
 | `archivo` | `FILE_UPLOAD` |
 | `desplegable` | varios `DROPDOWN_OPTION` con el mismo `groupUuid` |
 
+Un campo de tipo `archivo` puede llevar `restricciones`: formatos admitidos, tamaño
+máximo y cuántos archivos. Se copian tal cual de lo que escribe el editor de Tally
+—igual que el tema— y se llaman así, y no `opciones`, porque eso ya son las opciones de
+un desplegable. Hoy: `.jpg`, `.jpeg` y `.png`, 8 MB, y hasta 4 fotos en el tablón.
+
+*Se quitó el `.svg` el 2026-09-22. No era peligroso tal como se usa —la web pinta los
+logos con `<img>`, donde un SVG no ejecuta nada—, pero sí lo sería si alguien abriera el
+fichero suelto en el navegador. Y no se admite PDF: la web no puede enseñarlo como logo,
+así que solo serviría para recibir algo que hay que convertir igualmente.*
+
 Los `uuid` de los bloques no son aleatorios: se derivan del nombre del formulario y de
 la clave del campo (uuid v5). Así la segunda ejecución manda los mismos identificadores
 y Tally entiende que son las mismas preguntas, en vez de verlas como nuevas y perder el

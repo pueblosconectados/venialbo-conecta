@@ -70,13 +70,12 @@
       "clave": "logo",
       "tipo": "archivo",
       "etiqueta": "Logo o foto del negocio",
-      "opciones": {
+      "restricciones": {
         "allowedFiles": {
           "image/*": [
             ".jpg",
             ".jpeg",
-            ".png",
-            ".svg"
+            ".png"
           ]
         },
         "hasMaxFileSize": true,

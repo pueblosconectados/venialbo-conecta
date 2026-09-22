@@ -108,9 +108,11 @@ const bloquesDeCampo = (slug, campo) => {
 
   const payload = { isRequired: requerido };
   if (ayuda) payload.placeholder = ayuda;
-  // Restricciones del campo (formatos, tamaño máximo, cuántos archivos). Se copian tal
-  // cual de lo que escribe el editor de Tally, como el tema: aquí no se inventa nada.
-  if (campo.opciones) Object.assign(payload, campo.opciones);
+  // Restricciones del campo de archivo (formatos, tamaño máximo, cuántos archivos). Se
+  // copian tal cual de lo que escribe el editor de Tally, como el tema: no se inventa
+  // nada. Se llaman "restricciones" y no "opciones" porque eso ya son las del
+  // desplegable, y mezclarlas se presta a confusión.
+  if (campo.restricciones) Object.assign(payload, campo.restricciones);
 
   bloques.push({
     uuid: uuidEstable(slug, clave, "campo"),
