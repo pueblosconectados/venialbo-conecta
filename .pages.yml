@@ -21,11 +21,22 @@ actions:
         de imágenes que nadie usa, para revisarla y aceptarla o descartarla.
       button: Preparar la propuesta
 
+# Dos fuentes separadas: al elegir la foto de una noticia no aparecen los PDF,
+# y al adjuntar un PDF no aparecen las fotos. Cada campo dice cual usa con
+# options.media, que es obligatorio en cuanto hay mas de una.
 media:
-  input: web-static/public/media/imagenes
-  output: /media/imagenes
-  categories: [image]
-  rename: safe
+  - name: imagenes
+    label: Imágenes
+    input: web-static/public/media/imagenes
+    output: /media/imagenes
+    categories: [image]
+    rename: safe
+  - name: documentos
+    label: Documentos
+    input: web-static/public/media/documentos
+    output: /media/documentos
+    extensions: [pdf]
+    rename: safe
 
 content:
   - name: noticias
@@ -78,6 +89,8 @@ content:
       - name: imagen_url
         label: Imagen
         type: image
+        options:
+          media: imagenes
       - name: contenido
         label: Contenido
         description: Negrita, cursiva, enlaces, listas, encabezados, citas, tablas e imágenes.
@@ -87,6 +100,26 @@ content:
           # markdown ya es el valor por defecto, pero se deja explícito: se
           # guarda legible en el JSON y la web lo renderiza con markdown-it.
           format: markdown
+      - name: documentos
+        label: Documentos para descargar
+        description: >-
+          Hasta 3 archivos PDF, de 10 MB como máximo cada uno. Si alguno se pasa
+          de tamaño, la web no se publica hasta quitarlo.
+        type: object
+        list:
+          max: 3
+        fields:
+          - name: archivo
+            label: Archivo PDF
+            type: file
+            required: true
+            options:
+              media: documentos
+              extensions: [pdf]
+          - name: titulo
+            label: Título del enlace
+            description: Cómo se leerá en la noticia. Si lo dejas vacío, se usa el nombre del archivo.
+            type: string
 
   - name: negocios
     label: Negocios
@@ -120,6 +153,8 @@ content:
       - name: logo_url
         label: Logo o foto
         type: image
+        options:
+          media: imagenes
       - name: direccion
         label: Dirección
         type: string
@@ -202,6 +237,8 @@ content:
       - name: logo_url
         label: Logo o foto
         type: image
+        options:
+          media: imagenes
       - name: direccion
         label: Dirección
         type: string
@@ -285,6 +322,8 @@ content:
       - name: imagen_url
         label: Imagen
         type: image
+        options:
+          media: imagenes
       - name: fecha_publicacion
         label: Fecha de publicación
         type: date

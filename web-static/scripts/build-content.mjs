@@ -6,13 +6,20 @@
 // El id de cada entrada es el nombre del fichero sin extensión. La forma de los datos
 // imita la antigua API del backend para que las páginas no tengan que cambiar.
 
-import { mkdir, readdir, readFile, rm, writeFile } from "node:fs/promises";
+import { mkdir, readdir, readFile, rm, stat, writeFile } from "node:fs/promises";
 import { basename, dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
 const CONTENT_DIR = join(ROOT, "content");
-const DATA_DIR = join(ROOT, "public", "data");
+const PUBLIC_DIR = join(ROOT, "public");
+const DATA_DIR = join(PUBLIC_DIR, "data");
+
+// Adjuntos de las noticias. Pages CMS sabe limitar el numero de archivos y la
+// extension, pero no el peso, asi que el tamano se comprueba aqui: si algo se
+// pasa, el build falla y la web no se publica.
+const MAX_PDFS = 3;
+const MAX_BYTES_PDF = 10 * 1024 * 1024;
 
 const idDe = (fichero) => basename(fichero, ".json");
 
@@ -59,6 +66,38 @@ const porFechaDesc = (a, b) => (b.fecha_publicacion ?? "").localeCompare(a.fecha
 const quitar = (obj, ...campos) =>
   Object.fromEntries(Object.entries(obj).filter(([k]) => !campos.includes(k)));
 
+const mb = (bytes) => `${(bytes / 1024 / 1024).toFixed(1)} MB`;
+
+// Comprueba los PDF de una noticia y les añade el tamaño, para poder avisar en
+// la web de lo que pesa cada descarga.
+const revisarDocumentos = async (noticia) => {
+  const docs = (noticia.documentos ?? []).filter((d) => d?.archivo);
+  if (docs.length > MAX_PDFS) {
+    throw new Error(
+      `noticia ${noticia.id}: ${docs.length} documentos, el máximo son ${MAX_PDFS}`,
+    );
+  }
+  return Promise.all(
+    docs.map(async (d) => {
+      const ruta = join(PUBLIC_DIR, d.archivo.replace(/^\//, ""));
+      if (!/\.pdf$/i.test(d.archivo)) {
+        throw new Error(`noticia ${noticia.id}: ${d.archivo} no es un PDF`);
+      }
+      const info = await stat(ruta).catch(() => null);
+      if (!info) {
+        throw new Error(`noticia ${noticia.id}: no se encuentra ${d.archivo}`);
+      }
+      if (info.size > MAX_BYTES_PDF) {
+        throw new Error(
+          `noticia ${noticia.id}: ${d.archivo} pesa ${mb(info.size)} y el máximo` +
+            ` son ${mb(MAX_BYTES_PDF)}`,
+        );
+      }
+      return { ...d, tamano: info.size };
+    }),
+  );
+};
+
 await rm(DATA_DIR, { recursive: true, force: true });
 
 // Categorías
@@ -67,18 +106,23 @@ const categoriaPorId = new Map(categorias.map((c) => [c.id, c]));
 await escribir("categorias", categorias, categorias);
 
 // Noticias — la categoría se guarda como ruta del fichero referenciado
-const noticias = (await leerColeccion("noticias"))
-  .filter((n) => n.activa !== false)
-  .map((n) => {
-    const categoria = categoriaPorId.get(n.categoria ? idDe(n.categoria) : "");
-    if (!categoria) console.warn(`  ⚠ noticia ${n.id}: categoría no encontrada (${n.categoria})`);
-    return {
-      ...n,
-      categoria: categoria ?? { id: "", nombre: "Sin categoría", icono: null, color: null },
-    };
-  })
-  .sort(porFechaDesc);
-await escribir("noticias", noticias.map((n) => quitar(n, "contenido")), noticias);
+const noticias = (
+  await Promise.all(
+    (await leerColeccion("noticias"))
+      .filter((n) => n.activa !== false)
+      .map(async (n) => {
+        const categoria = categoriaPorId.get(n.categoria ? idDe(n.categoria) : "");
+        if (!categoria) console.warn(`  ⚠ noticia ${n.id}: categoría no encontrada (${n.categoria})`);
+        return {
+          ...n,
+          categoria: categoria ?? { id: "", nombre: "Sin categoría", icono: null, color: null },
+          documentos: await revisarDocumentos(n),
+        };
+      }),
+  )
+).sort(porFechaDesc);
+// Los adjuntos solo se usan en la ficha, no en el listado.
+await escribir("noticias", noticias.map((n) => quitar(n, "contenido", "documentos")), noticias);
 
 // Negocios
 const negocios = (await leerColeccion("negocios"))
