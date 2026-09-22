@@ -23,26 +23,45 @@ identificadores no son secretos y son lo que enlaza cada definición con su form
 
 ## Pasar las respuestas al CMS
 
-`importar-negocios.mjs` convierte las respuestas del formulario de alta de negocios en
-fichas de `web-static/content/negocios/`:
+Dos scripts, uno por formulario, con las mismas órdenes. Lo que comparten (la clave, los
+uuid, las llamadas y la cuenta de lo ya importado) vive en `comun.mjs`.
 
 ```bash
 node tally/importar-negocios.mjs                 # lista lo que hay sin importar
 node tally/importar-negocios.mjs WJdlvAa         # escribe el borrador de esa respuesta
 node tally/importar-negocios.mjs --todas         # todas las que falten
 node tally/importar-negocios.mjs WJdlvAa --forzar  # reescribe una ficha que ya existía
+
+node tally/importar-tablon.mjs --todas           # lo mismo para el tablón
 ```
+
+El del tablón tiene tres cosas propias:
+
+- **El tipo llega como un uuid**, no como texto: Tally devuelve el identificador del
+  bloque de la opción elegida. Como esos uuid los genera este repositorio y son
+  estables, se recalculan y se traducen a la clave del CMS. Por eso las opciones del
+  desplegable en `formularios/tablon.json` llevan `{texto, valor}`: "Compra / Venta" es
+  `compra_venta`, que no se puede deducir del texto.
+- **La fecha de caducidad la pone el script**, porque el vecino no la rellena y el CMS
+  la exige: un mes desde que lo manda (`DIAS_QUE_DURA` en el script). Quien quiera otra
+  la cambia en el CMS antes de publicar.
+- **La fecha de publicación va en hora de Madrid**, no en UTC, que es la que devuelve la
+  API. Un anuncio mandado a las 00:30 llevaría si no la fecha del día anterior.
+
+El formulario admite hasta 4 fotos y el anuncio solo tiene hueco para una, así que el
+script las lista y quien repasa elige.
 
 La ficha se escribe **con `"activo": false`**, así que no sale en la web hasta que
 alguien la repase en el CMS y marque *Visible en la web*. Esa revisión es el punto de
 todo esto: lo manda un vecino, y alguien tiene que leerlo antes de publicarlo con su
 teléfono.
 
-Se puede lanzar **sin terminal**, desde el botón *Traer las altas de negocio* de la
-barra lateral del CMS, que dispara `.github/workflows/altas-negocio.yml`. El workflow
-hace lo mismo y commitea las fichas, así que a los pocos segundos aparecen en la lista
-de Negocios, ocultas. Necesita el secreto `TALLY_API_KEY` en el repositorio (Settings →
-Secrets and variables → Actions).
+Se pueden lanzar **sin terminal**, desde los botones *Traer las altas de negocio* y
+*Traer los anuncios del tablón* de la barra lateral del CMS, que disparan
+`.github/workflows/altas-negocio.yml` y `anuncios-tablon.yml`. Los workflows hacen lo
+mismo y commitean, así que a los pocos segundos aparece todo en el CMS, oculto.
+Necesitan el secreto `TALLY_API_KEY` en el repositorio (Settings → Secrets and variables
+→ Actions).
 
 Detalles que conviene conocer:
 

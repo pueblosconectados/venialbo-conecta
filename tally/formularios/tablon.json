@@ -16,10 +16,22 @@
       "etiqueta": "¿De qué se trata?",
       "requerido": true,
       "opciones": [
-        "Mascota perdida",
-        "Compra / Venta",
-        "Objeto perdido",
-        "Otro"
+        {
+          "texto": "Mascota perdida",
+          "valor": "mascota_perdida"
+        },
+        {
+          "texto": "Compra / Venta",
+          "valor": "compra_venta"
+        },
+        {
+          "texto": "Objeto perdido",
+          "valor": "objeto_perdido"
+        },
+        {
+          "texto": "Otro",
+          "valor": "otro"
+        }
       ]
     },
     {

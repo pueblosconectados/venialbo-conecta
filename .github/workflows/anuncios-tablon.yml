@@ -1,0 +1,85 @@
+name: Traer los anuncios del tablon
+
+# Se lanza a mano: desde el boton "Traer los anuncios del tablon" de Pages CMS
+# (ver actions: en .pages.yml) o desde la pestaña Actions de GitHub.
+#
+# Crea un anuncio por cada uno que hayan mandado por el formulario de Tally, SIEMPRE
+# con "activo": false, o sea oculta: no sale en la web hasta que alguien la repase en
+# el CMS y lo marque como visible.
+#
+# La foto NO se trae, y aqui importa mas que en los negocios: en el tablon la foto es
+# lo normal. Un binario que manda un desconocido, una vez commiteado, se queda en el
+# historial de git para siempre. El informe dice cuantas hay y donde verlas.
+#
+# El anuncio se escribe con fecha de caducidad a 30 dias de cuando lo mandaron.
+#
+# Este repositorio es publico y los registros de Actions tambien, asi que el script
+# corre en modo discreto (CI=true): no imprime ni quien manda la ficha ni el enlace
+# firmado de su foto.
+on:
+  workflow_dispatch:
+    inputs:
+      payload:
+        description: Payload de Pages CMS (JSON). Vacio si se lanza a mano.
+        required: false
+        type: string
+
+permissions:
+  contents: write
+
+# Dos pulsaciones seguidas del boton no deben pelearse por el mismo commit
+concurrency:
+  group: anuncios-tablon
+  cancel-in-progress: false
+
+jobs:
+  importar:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+
+      - name: Traer los anuncios pendientes
+        env:
+          TALLY_API_KEY: ${{ secrets.TALLY_API_KEY }}
+        run: |
+          if [ -z "$TALLY_API_KEY" ]; then
+            echo "Falta el secreto TALLY_API_KEY del repositorio." | tee informe.txt
+            echo "Se crea en Settings → Secrets and variables → Actions." | tee -a informe.txt
+            exit 1
+          fi
+          set -o pipefail
+          node tally/importar-tablon.mjs --todas | tee informe.txt
+
+      - name: Commitear los anuncios nuevos
+        run: |
+          if [ -z "$(git status --porcelain web-static/content/anuncios tally/respuestas-importadas.json)" ]; then
+            echo "No habia ningun anuncio nuevo que traer"
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add web-static/content/anuncios tally/respuestas-importadas.json
+          git commit -m "content: anuncios del tablon recibidos por el formulario"
+          # El CMS commitea por su cuenta en main: rebasar antes de empujar
+          git pull --rebase origin main
+          git push origin HEAD:main
+
+      - name: Publicar el informe en el resumen
+        if: always()
+        run: |
+          {
+            echo "## Anuncios del tablón"
+            echo
+            echo '```'
+            cat informe.txt 2>/dev/null || echo "(el script no llego a dar salida)"
+            echo '```'
+            echo
+            echo "Los anuncios entran **ocultos**, y caducan a los 30 dias. Repasalos en"
+            echo "el CMS, en Tablón, y marca *Visible en la web* los que valgan."
+            echo
+            echo "Las fotos no se traen: se miran en Tally y se sube a mano la que valga."
+          } >> "$GITHUB_STEP_SUMMARY"

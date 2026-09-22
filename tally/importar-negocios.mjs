@@ -19,17 +19,23 @@
 // de TALLY_API_KEY_FILE, o ~/.config/tally/api-key).
 
 import { mkdir, readFile, writeFile } from "node:fs/promises";
-import { homedir } from "node:os";
-import { dirname, join } from "node:path";
-import { fileURLToPath } from "node:url";
+import { join } from "node:path";
+import {
+  AQUI,
+  DISCRETO,
+  RAIZ,
+  existe,
+  guardarImportadas,
+  idDelFormulario,
+  leerClave,
+  leerImportadas,
+  pedirJson,
+  slugificar,
+} from "./comun.mjs";
 
-const AQUI = dirname(fileURLToPath(import.meta.url));
-const RAIZ = join(AQUI, "..");
-const FICHERO_IDS = join(AQUI, "formularios-creados.json");
-const FICHERO_DEFINICION = join(AQUI, "formularios", "alta-negocio.json");
-const FICHERO_IMPORTADAS = join(AQUI, "respuestas-importadas.json");
+const SLUG = "alta-negocio";
+const FICHERO_DEFINICION = join(AQUI, "formularios", `${SLUG}.json`);
 const DIR_FICHAS = join(RAIZ, "web-static", "content", "negocios");
-const API = "https://api.tally.so";
 
 const args = process.argv.slice(2);
 const TODAS = args.includes("--todas");
@@ -37,27 +43,7 @@ const FORZAR = args.includes("--forzar");
 // El repositorio es público y los registros de Actions también, así que cuando esto
 // corre ahí no se imprime nada personal: ni quién manda la ficha ni el enlace de su
 // foto, que va firmado y abre la imagen a cualquiera que lo lea.
-const DISCRETO = args.includes("--discreto") || process.env.CI === "true";
 const pedidas = args.filter((a) => !a.startsWith("--"));
-
-const leerClave = async () => {
-  if (process.env.TALLY_API_KEY) return process.env.TALLY_API_KEY.trim();
-  const ruta = process.env.TALLY_API_KEY_FILE ?? join(homedir(), ".config/tally/api-key");
-  const clave = await readFile(ruta, "utf8").catch(() => null);
-  if (!clave) throw new Error(`No hay clave: ni TALLY_API_KEY ni ${ruta}`);
-  return clave.trim();
-};
-
-// El nombre del fichero sigue el patrón del CMS ("{primary}.json") y se limpia igual
-// que hace Pages CMS con su "rename: safe": sin tildes, sin mayúsculas, con guiones.
-const slugificar = (texto) =>
-  texto
-    .normalize("NFD")
-    .replace(/[̀-ͯ]/g, "")
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, "-")
-    .replace(/^-+|-+$/g, "")
-    .slice(0, 60);
 
 // Del campo del formulario al campo de la ficha. Las claves son las del fichero de
 // definición, así que si allí se renombra un campo, aquí salta el aviso en vez de
@@ -96,40 +82,23 @@ const ORDEN = [
   "activo",
 ];
 
-const llamar = async (clave, ruta) => {
-  const respuesta = await fetch(`${API}${ruta}`, {
-    headers: { Authorization: `Bearer ${clave}` },
-  });
-  if (!respuesta.ok) {
-    throw new Error(`GET ${ruta} → HTTP ${respuesta.status}: ${await respuesta.text()}`);
-  }
-  return respuesta.json();
-};
-
-const existe = async (ruta) =>
-  readFile(ruta, "utf8").then(
-    () => true,
-    () => false,
-  );
-
 const main = async () => {
   const clave = await leerClave();
-  const ids = JSON.parse(await readFile(FICHERO_IDS, "utf8"));
-  const formId = ids["alta-negocio"]?.id;
-  if (!formId) throw new Error("No sé el id del formulario: falta alta-negocio en formularios-creados.json");
+  const formId = await idDelFormulario(SLUG);
 
   const definicion = JSON.parse(await readFile(FICHERO_DEFINICION, "utf8"));
   // etiqueta → clave, porque la API devuelve las preguntas por su título.
   const porEtiqueta = new Map(definicion.campos.map((c) => [c.etiqueta, c.clave]));
 
-  const importadas = JSON.parse(await readFile(FICHERO_IMPORTADAS, "utf8").catch(() => "[]"));
+  const importadas = await leerImportadas();
+  const yaHechas = importadas.negocios ?? [];
 
   const urlEnTally = `https://tally.so/forms/${formId}/submissions`;
-  const datos = await llamar(clave, `/forms/${formId}/submissions`);
+  const datos = await pedirJson(clave, `/forms/${formId}/submissions`);
   const preguntas = new Map(datos.questions.map((q) => [q.id, q.title]));
 
   const pendientes = datos.submissions.filter(
-    (s) => s.isCompleted && (pedidas.length ? pedidas.includes(s.id) : !importadas.includes(s.id)),
+    (s) => s.isCompleted && (pedidas.length ? pedidas.includes(s.id) : !yaHechas.includes(s.id)),
   );
 
   if (pendientes.length === 0) {
@@ -224,10 +193,11 @@ const main = async () => {
     const faltan = ["telefono", "telefono_movil", "email", "web_url"].filter((c) => !valores.has(c));
     if (faltan.length === 4) console.log("  ⚠ no ha dejado ninguna forma de contacto");
 
-    importadas.push(envio.id);
+    yaHechas.push(envio.id);
   }
 
-  await writeFile(FICHERO_IMPORTADAS, `${JSON.stringify(importadas, null, 2)}\n`, "utf8");
+  importadas.negocios = yaHechas;
+  await guardarImportadas(importadas);
   console.log(`\nRepásalas en el CMS y marca "Visible en la web" las que valgan.`);
 };
 

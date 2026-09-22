@@ -84,7 +84,9 @@ const bloquesDeCampo = (slug, campo) => {
     // Todas las opciones de un desplegable comparten groupUuid: eso es lo que las
     // agrupa como opciones de la misma pregunta.
     const grupo = uuidEstable(slug, clave, "grupo-opciones");
-    const opciones = campo.opciones ?? [];
+    // Una opción es un texto suelto, o {texto, valor} cuando el CMS usa otra clave
+    // para lo mismo ("Compra / Venta" → compra_venta). A Tally solo le va el texto.
+    const opciones = (campo.opciones ?? []).map((o) => (typeof o === "string" ? o : o.texto));
     opciones.forEach((texto, i) => {
       bloques.push({
         uuid: uuidEstable(slug, clave, `opcion-${i}`),

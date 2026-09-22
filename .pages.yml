@@ -22,6 +22,18 @@ actions:
         visibles. Las fotos no se traen, se miran en Tally y se suben a mano.
       button: Traer las altas
 
+  - name: anuncios-tablon
+    label: Traer los anuncios del tablón
+    workflow: anuncios-tablon.yml
+    ref: current
+    confirm:
+      title: ¿Traer los anuncios pendientes?
+      message: >-
+        Se crean los anuncios que han mandado los vecinos, siempre ocultos y con un mes
+        de caducidad: no se publica nada hasta que los repases aquí y los marques como
+        visibles. Las fotos no se traen, se miran en Tally y se suben a mano.
+      button: Traer los anuncios
+
   - name: imagenes-huerfanas-pr
     label: Proponer borrar las imágenes sin usar
     workflow: imagenes-huerfanas-pr.yml
