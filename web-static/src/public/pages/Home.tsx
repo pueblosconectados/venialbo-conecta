@@ -27,8 +27,8 @@ const SECCIONES = [
   },
   {
     icon: <MedicineBoxOutlined />,
-    title: "Servicios",
-    desc: "Médico, comedor, bibliobús",
+    title: "Servicios e instituciones",
+    desc: "Médico, comedor, instituciones",
     to: "/servicios",
     color: "#8b6db5",
     bg: "#efe8f7",

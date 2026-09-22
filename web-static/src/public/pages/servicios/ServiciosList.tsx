@@ -12,7 +12,8 @@ import {
   Typography,
 } from "antd";
 import { PhoneOutlined } from "@ant-design/icons";
-import { softTagStyle, type TagTone } from "../../../theme";
+import { imgUrl } from "../../../config";
+import { colors, softTagStyle, type TagTone } from "../../../theme";
 import { textoPlano } from "../../../markdown";
 
 type Servicio = {
@@ -20,6 +21,7 @@ type Servicio = {
   nombre: string;
   tipo: string;
   descripcion?: string;
+  logo_url?: string;
   direccion?: string;
   telefono?: string;
   activo: boolean;
@@ -30,6 +32,8 @@ const TIPO_LABEL: Record<string, string> = {
   comedor: "Comedor",
   bibliobus: "Bibliobús",
   venta_ambulante: "Venta ambulante",
+  asociacion: "Asociación",
+  institucion: "Institución",
   otro: "Otro",
 };
 
@@ -38,6 +42,8 @@ const TIPO_TONE: Record<string, TagTone> = {
   comedor: "terracota",
   bibliobus: "azul",
   venta_ambulante: "musgo",
+  asociacion: "lila",
+  institucion: "dorado",
   otro: "gris",
 };
 
@@ -63,12 +69,33 @@ export function ServiciosList() {
 
   return (
     <div>
-      <Typography.Title level={2} style={{ marginBottom: 24 }}>Servicios</Typography.Title>
+      <Typography.Title level={2} style={{ marginBottom: 24 }}>
+        Servicios e instituciones
+      </Typography.Title>
       <Row gutter={[16, 16]}>
         {items.map((s) => (
           <Col key={s.id} xs={24} sm={12} lg={8}>
             <Link to={`/servicios/${s.id}`} className="vc-card-link">
-              <Card styles={{ body: { padding: 16 } }}>
+              <Card
+                cover={
+                  s.logo_url ? (
+                    <img
+                      src={imgUrl(s.logo_url)}
+                      alt={s.nombre}
+                      loading="lazy"
+                      decoding="async"
+                      style={{
+                        height: 180,
+                        objectFit: "contain",
+                        padding: 16,
+                        background: colors.crema,
+                        borderBottom: `1px solid ${colors.borde}`,
+                      }}
+                    />
+                  ) : undefined
+                }
+                styles={{ body: { padding: 16 } }}
+              >
                 <Tag style={{ ...softTagStyle(TIPO_TONE[s.tipo] ?? "gris"), marginBottom: 8 }}>
                   {TIPO_LABEL[s.tipo] ?? s.tipo}
                 </Tag>

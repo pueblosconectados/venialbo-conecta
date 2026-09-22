@@ -11,7 +11,7 @@ const { useBreakpoint } = Grid;
 const NAV_ITEMS = [
   { key: "/noticias", label: "Noticias" },
   { key: "/negocios", label: "Negocios" },
-  { key: "/servicios", label: "Servicios" },
+  { key: "/servicios", label: "Servicios e instituciones" },
   { key: "/tablon", label: "Tablón" },
   { key: "/pueblos-conectados", label: "Pueblos Conectados" },
 ];

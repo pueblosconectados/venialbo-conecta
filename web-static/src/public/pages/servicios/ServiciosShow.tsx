@@ -11,17 +11,28 @@ import {
   Tag,
   Typography,
 } from "antd";
-import { PhoneOutlined } from "@ant-design/icons";
+import {
+  FacebookOutlined,
+  InstagramOutlined,
+  MailOutlined,
+  PhoneOutlined,
+  YoutubeOutlined,
+} from "@ant-design/icons";
+import { imgUrl } from "../../../config";
 import { colors, softTagStyle, type TagTone } from "../../../theme";
 import { ContenidoRico } from "../../components/ContenidoRico";
+import { ImagenAmpliable } from "../../components/ImagenAmpliable";
 
 type Servicio = {
   id: string;
   nombre: string;
   tipo: string;
   descripcion?: string;
+  logo_url?: string;
   direccion?: string;
   telefono?: string;
+  email?: string;
+  redes_sociales?: Record<string, string>;
   horario?: string;
   informacion_adicional?: string;
   activo: boolean;
@@ -32,6 +43,8 @@ const TIPO_LABEL: Record<string, string> = {
   comedor: "Comedor",
   bibliobus: "Bibliobús",
   venta_ambulante: "Venta ambulante",
+  asociacion: "Asociación",
+  institucion: "Institución",
   otro: "Otro",
 };
 
@@ -40,6 +53,8 @@ const TIPO_TONE: Record<string, TagTone> = {
   comedor: "terracota",
   bibliobus: "azul",
   venta_ambulante: "musgo",
+  asociacion: "lila",
+  institucion: "dorado",
   otro: "gris",
 };
 
@@ -56,16 +71,35 @@ export function ServiciosShow() {
     return <Alert type="error" message="Servicio no encontrado" />;
 
   const s = result;
+  const redes = s.redes_sociales ?? {};
 
   return (
     <div style={{ maxWidth: 800, margin: "0 auto" }}>
       <Breadcrumb
         style={{ marginBottom: 16 }}
         items={[
-          { title: <Link to="/servicios">Servicios</Link> },
+          { title: <Link to="/servicios">Servicios e instituciones</Link> },
           { title: s.nombre },
         ]}
       />
+      {s.logo_url && (
+        <div
+          style={{
+            background: colors.crema,
+            border: `1px solid ${colors.borde}`,
+            borderRadius: 14,
+            padding: 20,
+            marginBottom: 20,
+            display: "inline-block",
+          }}
+        >
+          <ImagenAmpliable
+            src={imgUrl(s.logo_url)}
+            alt={s.nombre}
+            style={{ maxHeight: 160, display: "block" }}
+          />
+        </div>
+      )}
       <Tag style={{ ...softTagStyle(TIPO_TONE[s.tipo] ?? "gris"), marginBottom: 12 }}>
         {TIPO_LABEL[s.tipo] ?? s.tipo}
       </Tag>
@@ -84,14 +118,19 @@ export function ServiciosShow() {
             <a href={`tel:${s.telefono}`}>{s.telefono}</a>
           </Descriptions.Item>
         )}
+        {s.email && (
+          <Descriptions.Item label="Email">
+            <a href={`mailto:${s.email}`}>{s.email}</a>
+          </Descriptions.Item>
+        )}
         {s.informacion_adicional && (
           <Descriptions.Item label="Más información">
             {s.informacion_adicional}
           </Descriptions.Item>
         )}
       </Descriptions>
-      {s.telefono && (
-        <Space style={{ marginTop: 16 }}>
+      <Space wrap style={{ marginTop: 16 }}>
+        {s.telefono && (
           <Button
             icon={<PhoneOutlined />}
             type="primary"
@@ -99,11 +138,46 @@ export function ServiciosShow() {
           >
             Llamar
           </Button>
-        </Space>
-      )}
+        )}
+        {redes.facebook && (
+          <Button
+            icon={<FacebookOutlined />}
+            href={redes.facebook}
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            Facebook
+          </Button>
+        )}
+        {redes.instagram && (
+          <Button
+            icon={<InstagramOutlined />}
+            href={redes.instagram}
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            Instagram
+          </Button>
+        )}
+        {redes.youtube && (
+          <Button
+            icon={<YoutubeOutlined />}
+            href={redes.youtube}
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            YouTube
+          </Button>
+        )}
+        {s.email && (
+          <Button icon={<MailOutlined />} href={`mailto:${s.email}`}>
+            Email
+          </Button>
+        )}
+      </Space>
       <div style={{ marginTop: 24 }}>
         <Link to="/servicios" style={{ color: colors.musgo, fontWeight: 500 }}>
-          ← Volver a Servicios
+          ← Volver a Servicios e instituciones
         </Link>
       </div>
     </div>

@@ -155,7 +155,7 @@ content:
         default: true
 
   - name: servicios
-    label: Servicios
+    label: Servicios e instituciones
     type: collection
     path: web-static/content/servicios
     subfolders: false
@@ -188,6 +188,10 @@ content:
               label: Bibliobús
             - name: venta_ambulante
               label: Venta ambulante
+            - name: asociacion
+              label: Asociación
+            - name: institucion
+              label: Institución
             - name: otro
               label: Otro
       - name: descripcion
@@ -195,12 +199,31 @@ content:
         type: rich-text
         options:
           format: markdown
+      - name: logo_url
+        label: Logo o foto
+        type: image
       - name: direccion
         label: Dirección
         type: string
       - name: telefono
         label: Teléfono
         type: string
+      - name: email
+        label: Email
+        type: string
+      - name: redes_sociales
+        label: Redes sociales
+        type: object
+        fields:
+          - name: facebook
+            label: Facebook (URL)
+            type: string
+          - name: instagram
+            label: Instagram (URL)
+            type: string
+          - name: youtube
+            label: YouTube (URL)
+            type: string
       - name: horario
         label: Horario
         type: string
