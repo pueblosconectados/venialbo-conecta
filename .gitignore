@@ -86,3 +86,8 @@ MEJORAS.md
 # Secretos locales (claves de API). Nunca se suben.
 # ──────────────────────────────────────────────
 .secretos/
+
+# ──────────────────────────────────────────────
+# Miniaturas generadas en cada build (scripts/miniaturas.mjs)
+# ──────────────────────────────────────────────
+web-static/public/media/imagenes/derivadas/

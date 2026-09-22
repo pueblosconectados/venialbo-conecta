@@ -1,4 +1,5 @@
 import MarkdownIt from "markdown-it";
+import { juegoDeMiniaturas } from "./miniaturas";
 import { BASE_URL } from "./config";
 
 // html: false escapa el HTML en crudo que venga en el contenido, asi que no
@@ -22,7 +23,15 @@ const atributo = (valor: string | number | null): string =>
 const imagenPorDefecto = md.renderer.rules.image!;
 md.renderer.rules.image = (tokens, idx, options, env, self) => {
   const src = atributo(tokens[idx].attrGet("src"));
-  if (src) tokens[idx].attrSet("src", conBase(src));
+  if (src) {
+    // Las imágenes que el CMS mete dentro del texto también tienen sus miniaturas
+    const miniaturas = juegoDeMiniaturas(src);
+    if (miniaturas) {
+      tokens[idx].attrSet("srcset", miniaturas);
+      tokens[idx].attrSet("sizes", "(max-width: 832px) 100vw, 800px");
+    }
+    tokens[idx].attrSet("src", conBase(src));
+  }
   return imagenPorDefecto(tokens, idx, options, env, self);
 };
 

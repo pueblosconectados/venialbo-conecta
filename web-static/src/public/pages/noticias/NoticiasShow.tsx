@@ -13,6 +13,7 @@ import { FilePdfOutlined, StarFilled } from "@ant-design/icons";
 import { formatFecha, imgUrl } from "../../../config";
 import { ContenidoRico } from "../../components/ContenidoRico";
 import { ImagenAmpliable } from "../../components/ImagenAmpliable";
+import { juegoDeMiniaturas } from "../../../miniaturas";
 import { colors, softTagStyle, softTagStyleFromHex } from "../../../theme";
 
 type Documento = {
@@ -71,6 +72,8 @@ export function NoticiasShow() {
       {n.imagen_url && (
         <ImagenAmpliable
           src={imgUrl(n.imagen_url)}
+          srcSet={juegoDeMiniaturas(n.imagen_url)}
+          sizes="(max-width: 832px) 100vw, 800px"
           alt={n.titulo}
           wrapperStyle={{ display: "block", width: "100%", marginBottom: 24 }}
           style={{

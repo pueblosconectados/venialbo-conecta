@@ -8,6 +8,9 @@ type Props = {
   // la imagen existe, pero el tipo lo arrastra.
   src?: string;
   alt: string;
+  /** Miniaturas webp para que el navegador no se baje el original en la ficha. */
+  srcSet?: string;
+  sizes?: string;
   /** Estilos de la imagen en la pagina (los de la <img> de antes). */
   style?: CSSProperties;
   /** Estilos del hueco que ocupa, porque antd envuelve la imagen en un <div>. */
@@ -18,7 +21,7 @@ type Props = {
 // entera, superpuesta sobre la pagina. Es el <Image> de antd, que ya trae la
 // superposicion, el zoom y el cierre con Esc o pulsando fuera; lo unico que se
 // anade es el cierre con el boton atras.
-export const ImagenAmpliable = ({ src, alt, style, wrapperStyle }: Props) => {
+export const ImagenAmpliable = ({ src, alt, srcSet, sizes, style, wrapperStyle }: Props) => {
   const [abierta, setAbierta] = useState(false);
   useCierreConAtras(abierta, () => setAbierta(false));
 
@@ -26,6 +29,9 @@ export const ImagenAmpliable = ({ src, alt, style, wrapperStyle }: Props) => {
     <Image
       src={src}
       alt={alt}
+      // Al ampliarla, antd usa siempre el `src`: la grande se ve a resolución completa.
+      srcSet={srcSet}
+      sizes={sizes}
       decoding="async"
       style={{ cursor: "zoom-in", ...style }}
       wrapperStyle={wrapperStyle}

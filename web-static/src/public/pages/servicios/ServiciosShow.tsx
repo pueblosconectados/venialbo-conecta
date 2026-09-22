@@ -23,6 +23,7 @@ import { imgUrl } from "../../../config";
 import { colors, softTagStyle, type TagTone } from "../../../theme";
 import { ContenidoRico } from "../../components/ContenidoRico";
 import { ImagenAmpliable } from "../../components/ImagenAmpliable";
+import { juegoDeMiniaturas } from "../../../miniaturas";
 
 type Servicio = {
   id: string;
@@ -97,6 +98,8 @@ export function ServiciosShow() {
         >
           <ImagenAmpliable
             src={imgUrl(s.logo_url)}
+          srcSet={juegoDeMiniaturas(s.logo_url)}
+          sizes="(max-width: 480px) 60vw, 300px"
             alt={s.nombre}
             style={{ maxHeight: 160, display: "block" }}
           />

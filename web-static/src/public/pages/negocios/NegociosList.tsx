@@ -13,7 +13,8 @@ import {
   Typography,
 } from "antd";
 import { MobileOutlined, PhoneOutlined, PlusOutlined, ShopOutlined } from "@ant-design/icons";
-import { FORMULARIOS, imgUrl } from "../../../config";
+import { FORMULARIOS } from "../../../config";
+import { Imagen } from "../../components/Imagen";
 import { colors, softTagStyle } from "../../../theme";
 
 type Negocio = {
@@ -70,11 +71,10 @@ export function NegociosList() {
               <Card
                 cover={
                   n.logo_url ? (
-                    <img
-                      src={imgUrl(n.logo_url)}
+                    <Imagen
+                      src={n.logo_url}
                       alt={n.nombre}
-                      loading="lazy"
-                      decoding="async"
+                      sizes="(max-width: 575px) 100vw, (max-width: 991px) 50vw, 33vw"
                       style={{
                         height: 180,
                         objectFit: "contain",

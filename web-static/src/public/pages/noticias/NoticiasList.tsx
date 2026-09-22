@@ -14,7 +14,8 @@ import {
   Typography,
 } from "antd";
 import { StarFilled } from "@ant-design/icons";
-import { formatFecha, imgUrl } from "../../../config";
+import { formatFecha } from "../../../config";
+import { Imagen } from "../../components/Imagen";
 import { colors, softTagStyle, softTagStyleFromHex } from "../../../theme";
 
 type Categoria = {
@@ -126,11 +127,10 @@ export function NoticiasList() {
               <Card
                 cover={
                   n.imagen_url ? (
-                    <img
-                      src={imgUrl(n.imagen_url)}
+                    <Imagen
+                      src={n.imagen_url}
                       alt={n.titulo}
-                      loading="lazy"
-                      decoding="async"
+                      sizes="(max-width: 575px) 100vw, (max-width: 991px) 50vw, 33vw"
                       style={{
                         height: 180,
                         objectFit: "cover",

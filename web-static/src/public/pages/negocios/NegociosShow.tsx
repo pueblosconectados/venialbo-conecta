@@ -24,6 +24,7 @@ import { imgUrl } from "../../../config";
 import { colors, softTagStyle } from "../../../theme";
 import { ContenidoRico } from "../../components/ContenidoRico";
 import { ImagenAmpliable } from "../../components/ImagenAmpliable";
+import { juegoDeMiniaturas } from "../../../miniaturas";
 
 type Negocio = {
   id: string;
@@ -78,6 +79,8 @@ export function NegociosShow() {
         >
           <ImagenAmpliable
             src={imgUrl(n.logo_url)}
+          srcSet={juegoDeMiniaturas(n.logo_url)}
+          sizes="(max-width: 480px) 60vw, 300px"
             alt={n.nombre}
             style={{ maxHeight: 160, display: "block" }}
           />

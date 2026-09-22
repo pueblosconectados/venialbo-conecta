@@ -12,7 +12,7 @@ import {
   Typography,
 } from "antd";
 import { PhoneOutlined } from "@ant-design/icons";
-import { imgUrl } from "../../../config";
+import { Imagen } from "../../components/Imagen";
 import { colors, softTagStyle, type TagTone } from "../../../theme";
 import { textoPlano } from "../../../markdown";
 
@@ -79,11 +79,10 @@ export function ServiciosList() {
               <Card
                 cover={
                   s.logo_url ? (
-                    <img
-                      src={imgUrl(s.logo_url)}
+                    <Imagen
+                      src={s.logo_url}
                       alt={s.nombre}
-                      loading="lazy"
-                      decoding="async"
+                      sizes="(max-width: 575px) 100vw, (max-width: 991px) 50vw, 33vw"
                       style={{
                         height: 180,
                         objectFit: "contain",

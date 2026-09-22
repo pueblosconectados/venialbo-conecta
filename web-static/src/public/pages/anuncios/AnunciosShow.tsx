@@ -16,6 +16,7 @@ import { haCaducado } from "../../../providers/staticDataProvider";
 import { colors, softTagStyle, type TagTone } from "../../../theme";
 import { ContenidoRico } from "../../components/ContenidoRico";
 import { ImagenAmpliable } from "../../components/ImagenAmpliable";
+import { juegoDeMiniaturas } from "../../../miniaturas";
 
 type Anuncio = {
   id: string;
@@ -111,6 +112,8 @@ export function AnunciosShow() {
       {a.imagen_url && (
         <ImagenAmpliable
           src={imgUrl(a.imagen_url)}
+          srcSet={juegoDeMiniaturas(a.imagen_url)}
+          sizes="(max-width: 832px) 100vw, 800px"
           alt={a.titulo}
           wrapperStyle={{ display: "block", width: "100%", marginBottom: 24 }}
           style={{
