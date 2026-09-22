@@ -1,0 +1,7 @@
+{
+  "nombre": "Venta de fruta",
+  "tipo": "venta_ambulante",
+  "descripcion": "Puestos de venta de fruta en la plaza de la Iglesia",
+  "horario": "Miércoles por la mañana",
+  "activo": true
+}
