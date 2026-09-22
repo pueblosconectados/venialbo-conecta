@@ -5,10 +5,10 @@
   "direccion": "Plaza Mayor 1, 49153 Venialbo - Zamora",
   "telefono": "+34 980 573 054",
   "email": "info@venialbo.es",
+  "web_url": "http://www.venialbo.es/",
   "redes_sociales": {
     "facebook": "https://www.facebook.com/profile.php?id=100064525009202"
   },
   "horario": "De 09:00 a 14:00",
-  "informacion_adicional": "http://www.venialbo.es/",
   "activo": true
 }
