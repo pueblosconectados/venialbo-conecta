@@ -211,6 +211,10 @@ content:
       - name: email
         label: Email
         type: string
+      - name: web_url
+        label: Página web
+        description: Dirección completa, empezando por https://
+        type: string
       - name: redes_sociales
         label: Redes sociales
         type: object

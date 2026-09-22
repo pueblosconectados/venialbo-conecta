@@ -13,6 +13,7 @@ import {
 } from "antd";
 import {
   FacebookOutlined,
+  GlobalOutlined,
   InstagramOutlined,
   MailOutlined,
   PhoneOutlined,
@@ -32,6 +33,7 @@ type Servicio = {
   direccion?: string;
   telefono?: string;
   email?: string;
+  web_url?: string;
   redes_sociales?: Record<string, string>;
   horario?: string;
   informacion_adicional?: string;
@@ -137,6 +139,16 @@ export function ServiciosShow() {
             href={`tel:${s.telefono}`}
           >
             Llamar
+          </Button>
+        )}
+        {s.web_url && (
+          <Button
+            icon={<GlobalOutlined />}
+            href={s.web_url}
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            Web
           </Button>
         )}
         {redes.facebook && (
