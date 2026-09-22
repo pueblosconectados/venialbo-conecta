@@ -1,0 +1,12 @@
+{
+  "nombre": "AVAE Venialbo",
+  "categoria_negocio": "Asociación",
+  "descripcion": "Asociación Venialbense para las Artes Escénicas AVAE",
+  "logo_url": "/media/imagenes/avae-png-para-fondo-negro-logo.png",
+  "direccion": "Calle Tajada 66",
+  "email": "avae.venialbo@gmail.com",
+  "redes_sociales": {
+    "facebook": "https://www.facebook.com/AVAE.Venialbo"
+  },
+  "activo": true
+}
