@@ -2,7 +2,7 @@
 
 Quita el fondo blanco de los originales y produce:
 
-    favicon.png           32x32, transparente
+    favicon.png           32x32, transparente, solo el icono de Venialbo
     apple-touch-icon.png  180x180, opaco (iOS ignora el alfa)
     venialbo-conecta.webp logo de la portada, resolucion completa
 
@@ -13,6 +13,7 @@ Uso (necesita Pillow, que no esta instalado en el sistema):
     .venv-assets/bin/python generar-assets.py
 """
 
+from collections import deque
 from pathlib import Path
 
 from PIL import Image
@@ -22,8 +23,12 @@ PUB = AQUI.parent / "web-static" / "public"
 
 # Contenido real de cada original, medido ignorando el ruido del JPEG. Si se
 # cambia un original hay que volver a medirlo (ver medir_bbox() al final).
-BBOX_ICONO = (97, 126, 733, 685)  # Logo_Pueblos.jpeg, 827x827
+BBOX_ICONO = (97, 126, 733, 685)  # Logo_Pueblos.jpeg, 827x827 (ya no se usa)
 BBOX_LOGO = (49, 79, 1210, 1197)  # Venialbo_Conecta.jpeg, 1254x1254
+# Del mismo original, solo la parte de arriba: la casa, el wifi y el puente,
+# sin "VENIALBO CONECTA". El texto empieza en y=825, y entre medias hay una
+# franja en blanco de 22 filas que marca el corte.
+BBOX_LOGO_ICONO = (155, 79, 1107, 803)
 # Logo_Pueblos_conectados.jpeg (1254x1254) se usa de dos formas: el lockup
 # entero en su pagina y solo el icono en la tarjeta de portada y el menu.
 BBOX_CONECTADOS = (244, 127, 1022, 1065)
@@ -75,6 +80,53 @@ def cuadrar(rgba, aire=1.12):
     return lienzo
 
 
+def rellenar_interior(rgba):
+    """Devuelve el icono con el blanco que estaba encerrado hecho opaco.
+
+    La piedra del puente esta dibujada con contornos dorados y relleno blanco,
+    asi que al quitar el fondo se va con el. A 32 px eso deja el puente como un
+    borron oscuro en las pestanas de tema oscuro. El blanco que toca el borde
+    del lienzo es fondo de verdad; el que queda encerrado por el dibujo es
+    relleno, y se recupera pintandolo de blanco opaco. Los huecos de los arcos
+    llegan hasta abajo, conectan con el exterior y siguen calados, que es lo
+    que toca: por un arco se ve el otro lado.
+    """
+    ancho, alto = rgba.size
+    px = rgba.load()
+    fuera = bytearray(ancho * alto)
+    cola = deque()
+
+    def sembrar(x, y):
+        if not fuera[y * ancho + x] and px[x, y][3] == 0:
+            fuera[y * ancho + x] = 1
+            cola.append((x, y))
+
+    for x in range(ancho):
+        sembrar(x, 0)
+        sembrar(x, alto - 1)
+    for y in range(alto):
+        sembrar(0, y)
+        sembrar(ancho - 1, y)
+
+    while cola:
+        x, y = cola.popleft()
+        if x > 0:
+            sembrar(x - 1, y)
+        if x < ancho - 1:
+            sembrar(x + 1, y)
+        if y > 0:
+            sembrar(x, y - 1)
+        if y < alto - 1:
+            sembrar(x, y + 1)
+
+    for y in range(alto):
+        for x in range(ancho):
+            if px[x, y][3] == 0 and not fuera[y * ancho + x]:
+                px[x, y] = (255, 255, 255, 255)
+
+    return rgba
+
+
 def medir_bbox(ruta):
     """Ayuda para recalcular el BBOX si se sustituye un original."""
     from PIL import ImageChops
@@ -86,9 +138,13 @@ def medir_bbox(ruta):
 
 
 def main():
-    # Favicon: el icono a 32px necesita ocupar todo lo posible, de ahi el
-    # recorte del margen blanco antes de escalar.
-    icono = cuadrar(sin_fondo(AQUI / "Logo_Pueblos.jpeg", BBOX_ICONO))
+    # Favicon: la casa, el wifi y el puente del logo de Venialbo, sin las
+    # letras, que a 32px no se leerian. Se cuadra sin aire (aire=1.0) porque el
+    # icono es apaisado y ya deja de sobra margen arriba y abajo.
+    icono = cuadrar(
+        rellenar_interior(sin_fondo(AQUI / "Venialbo_Conecta.jpeg", BBOX_LOGO_ICONO)),
+        aire=1.0,
+    )
     icono.resize((32, 32), Image.LANCZOS).save(PUB / "favicon.png", optimize=True)
 
     # iOS ignora el canal alfa y compone sobre negro, asi que el

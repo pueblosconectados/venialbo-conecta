@@ -5,11 +5,11 @@ originales y el script que los produce, para poder rehacerlos sin partir de cero
 
 | Original | Genera en `web-static/public/` |
 |---|---|
-| `Logo_Pueblos.jpeg` (827×827) | `favicon.png`, `apple-touch-icon.png` |
-| `Venialbo_Conecta.jpeg` (1254×1254) | `venialbo-conecta.webp` (logo de la portada) |
+| `Venialbo_Conecta.jpeg` (1254×1254) | `venialbo-conecta.webp` (logo de la portada), `favicon.png` y `apple-touch-icon.png` (solo el icono: la casa, el wifi y el puente, sin las letras) |
+| `Logo_Pueblos.jpeg` (827×827) | nada. Era el favicon hasta que se cambió por el icono de Venialbo; se guarda por si hace falta volver |
 | `Logo_Pueblos_conectados.jpeg` (1254×1254) | `pueblos-conectados.webp` (lockup entero, cabecera de su página) y `pueblos-conectados-icono.webp` (solo el icono, tarjeta de la portada) |
 
-Los dos originales son JPEG con fondo blanco; el script lo recorta, lo vuelve
+Los originales son JPEG con fondo blanco; el script lo recorta, lo vuelve
 transparente y escala a los tamaños que toca. No edites a mano lo que hay en
 `public/`: se sobrescribe en la siguiente ejecución.
 
@@ -33,7 +33,11 @@ actualiza la constante `BBOX_*` correspondiente.
 - **El puente del logo queda calado.** En el original está dibujado con
   contornos dorados y la piedra rellena de blanco; al quitar el fondo, ese
   relleno se va con él. Sobre la tarjeta blanca de la portada no se nota, pero
-  sobre un fondo de color el fondo se verá a través de las piedras.
+  sobre un fondo de color el fondo se verá a través de las piedras. El favicon
+  sí lo recupera, con `rellenar_interior()`: pinta de blanco opaco el hueco que
+  el dibujo deja encerrado, porque a 32 px y en una pestaña de tema oscuro el
+  puente calado se convertía en un borrón. Los arcos siguen calados, que es lo
+  suyo. El logo de la portada se deja como está.
 - **El logo no se puede vectorizar automáticamente.** Se intentó con vtracer:
   salen 1,5 MB y ~1500 trazados, porque los degradados y la textura del puente
   no son formas geométricas. Si algún día hace falta un SVG de verdad, hay que
