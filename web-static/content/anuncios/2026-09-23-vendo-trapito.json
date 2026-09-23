@@ -1,0 +1,9 @@
+{
+  "titulo": "Vendo trapito",
+  "tipo": "compra_venta",
+  "descripcion": "Teng un trapito de sobra que seguro que a alguien le viene bien",
+  "contacto": "123567345",
+  "fecha_publicacion": "2026-09-23T18:29",
+  "fecha_caducidad": "2026-10-23",
+  "activo": false
+}
