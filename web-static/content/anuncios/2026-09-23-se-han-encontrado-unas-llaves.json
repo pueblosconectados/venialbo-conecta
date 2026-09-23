@@ -1,0 +1,9 @@
+{
+  "titulo": "Se han encontrado unas llaves",
+  "tipo": "objeto_perdido",
+  "descripcion": "Llaves en la panadería, me las encontré en la calle Pozo",
+  "contacto": "En la panadería",
+  "fecha_publicacion": "2026-09-23T16:59",
+  "fecha_caducidad": "2026-10-23",
+  "activo": false
+}
