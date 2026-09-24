@@ -1,6 +1,7 @@
 {
   "nombre": "Reparto de Gas - Repsol",
   "tipo": "otro",
+  "descripcion": "El reparto en Venialbo aparece en la ruta de los LUNES",
   "logo_url": "/media/imagenes/gas-butano.webp",
   "web_url": "https://gas-olmar.es/zonas-de-reparto-zamora/",
   "activo": true
