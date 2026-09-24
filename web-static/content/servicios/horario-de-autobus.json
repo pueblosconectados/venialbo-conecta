@@ -2,7 +2,7 @@
   "nombre": "Horario de Autobús",
   "tipo": "otro",
   "descripcion": "Líneas **Tamame-bus**  de Lunes a Viernes a no ser que se indique en su tabla lo contrario. (Días Festivos y fines de semana no disponen de líneas).",
-  "logo_url": "/media/imagenes/tamame-bus.jpg",
+  "logo_url": "/media/imagenes/tamame-bus.webp",
   "web_url": "https://www.tamame-bus.com/horario-lineas-autobuses-tamame",
   "activo": true
 }
