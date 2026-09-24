@@ -15,7 +15,7 @@ const CONTENT_DIR = join(ROOT, "content");
 const PUBLIC_DIR = join(ROOT, "public");
 const DATA_DIR = join(PUBLIC_DIR, "data");
 
-// Adjuntos de las noticias. Pages CMS sabe limitar el numero de archivos y la
+// Adjuntos de noticias y actividades. Pages CMS sabe limitar el numero de archivos y la
 // extension, pero no el peso, asi que el tamano se comprueba aqui: si algo se
 // pasa, el build falla y la web no se publica.
 const MAX_PDFS = 3;
@@ -68,29 +68,26 @@ const quitar = (obj, ...campos) =>
 
 const mb = (bytes) => `${(bytes / 1024 / 1024).toFixed(1)} MB`;
 
-// Comprueba los PDF de una noticia y les añade el tamaño, para poder avisar en
-// la web de lo que pesa cada descarga.
-const revisarDocumentos = async (noticia) => {
-  const docs = (noticia.documentos ?? []).filter((d) => d?.archivo);
+// Comprueba los PDF de una noticia o una actividad y les añade el tamaño, para poder
+// avisar en la web de lo que pesa cada descarga. `quien` es para el mensaje de error.
+const revisarDocumentos = async (quien, entrada) => {
+  const docs = (entrada.documentos ?? []).filter((d) => d?.archivo);
   if (docs.length > MAX_PDFS) {
-    throw new Error(
-      `noticia ${noticia.id}: ${docs.length} documentos, el máximo son ${MAX_PDFS}`,
-    );
+    throw new Error(`${quien}: ${docs.length} documentos, el máximo son ${MAX_PDFS}`);
   }
   return Promise.all(
     docs.map(async (d) => {
       const ruta = join(PUBLIC_DIR, d.archivo.replace(/^\//, ""));
       if (!/\.pdf$/i.test(d.archivo)) {
-        throw new Error(`noticia ${noticia.id}: ${d.archivo} no es un PDF`);
+        throw new Error(`${quien}: ${d.archivo} no es un PDF`);
       }
       const info = await stat(ruta).catch(() => null);
       if (!info) {
-        throw new Error(`noticia ${noticia.id}: no se encuentra ${d.archivo}`);
+        throw new Error(`${quien}: no se encuentra ${d.archivo}`);
       }
       if (info.size > MAX_BYTES_PDF) {
         throw new Error(
-          `noticia ${noticia.id}: ${d.archivo} pesa ${mb(info.size)} y el máximo` +
-            ` son ${mb(MAX_BYTES_PDF)}`,
+          `${quien}: ${d.archivo} pesa ${mb(info.size)} y el máximo son ${mb(MAX_BYTES_PDF)}`,
         );
       }
       return { ...d, tamano: info.size };
@@ -116,7 +113,7 @@ const noticias = (
         return {
           ...n,
           categoria: categoria ?? { id: "", nombre: "Sin categoría", icono: null, color: null },
-          documentos: await revisarDocumentos(n),
+          documentos: await revisarDocumentos(`noticia ${n.id}`, n),
         };
       }),
   )
@@ -135,6 +132,50 @@ const servicios = (await leerColeccion("servicios"))
   .filter((s) => s.activo !== false)
   .sort((a, b) => porTexto("tipo")(a, b) || porTexto("nombre")(a, b));
 await escribir("servicios", servicios, servicios);
+
+// Actividades — el álbum de lo que se ha hecho. No caducan. "Organiza" y la noticia
+// que la anunció se guardan como ruta del fichero referenciado: se sustituyen por lo
+// justo para pintar el enlace, y si lo referenciado está oculto o ya no existe, se
+// quita el enlace en vez de dejarlo roto.
+const servicioPorId = new Map(servicios.map((s) => [s.id, s]));
+const noticiaPorId = new Map(noticias.map((n) => [n.id, n]));
+const enlaceA = (ruta, porId, campo, quien) => {
+  if (!ruta) return null;
+  const destino = porId.get(idDe(ruta));
+  if (!destino) {
+    console.warn(`  ⚠ ${quien}: no se encuentra ${ruta}, o está oculto`);
+    return null;
+  }
+  return { id: destino.id, [campo]: destino[campo] };
+};
+const actividades = (
+  await Promise.all(
+    (await leerColeccion("actividades"))
+      .filter((a) => a.activa !== false)
+      .map(async (a) => {
+        const quien = `actividad ${a.id}`;
+        return {
+          ...a,
+          organiza: enlaceA(a.organiza, servicioPorId, "nombre", quien),
+          noticia: enlaceA(a.noticia, noticiaPorId, "titulo", quien),
+          // Una fila de la galería que se quedó sin foto no pinta nada
+          galeria: (a.galeria ?? []).filter((g) => g?.imagen),
+          documentos: await revisarDocumentos(quien, a),
+        };
+      }),
+  )
+)
+  // A igual fecha, el id (que empieza por la fecha de creación) desempata
+  .sort((a, b) => (b.fecha ?? "").localeCompare(a.fecha ?? "") || b.id.localeCompare(a.id));
+// El listado solo necesita la tarjeta
+await escribir(
+  "actividades",
+  actividades.map((a) => ({
+    ...quitar(a, "contenido", "documentos", "galeria", "noticia", "video_url", "album_externo"),
+    fotos: a.galeria.length,
+  })),
+  actividades,
+);
 
 // Avisos de portada — la banda de arriba. Caducan solos igual que los anuncios.
 // El orden importa porque se apilan: primero el mas grave, y a igual nivel el mas

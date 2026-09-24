@@ -7,7 +7,7 @@ import { colors } from "../../theme";
 // tarde en tarde y conviene que quede en el repositorio, con su historial de cambios.
 // Si se cambia algo de cómo se tratan los datos (otro servicio de formularios, otro
 // plazo), hay que actualizar también este texto y la fecha de abajo.
-const ACTUALIZADO = "22 de septiembre de 2026";
+const ACTUALIZADO = "24 de septiembre de 2026";
 
 export function Privacidad() {
   return (
@@ -52,6 +52,16 @@ export function Privacidad() {
           nosotros a mano, y antes lo leemos.
         </p>
 
+        <h3>Fotos de las actividades</h3>
+        <p>
+          En <Link to="/actividades">Actividades</Link> publicamos fotos de lo que se
+          hace en el pueblo, y en ellas sale gente. No subimos fotos en las que se
+          reconozca a menores, salvo con permiso de sus padres o tutores. Si sales en
+          alguna y prefieres que la quitemos, escríbenos a{" "}
+          <a href={`mailto:${CONTACTO_EMAIL}`}>{CONTACTO_EMAIL}</a> y la quitamos sin
+          preguntar.
+        </p>
+
         <h3>Dónde se guardan</h3>
         <p>
           Los formularios los lleva <strong>Tally</strong>, una empresa belga, y las
@@ -78,7 +88,9 @@ export function Privacidad() {
           Esta web no lleva analítica, ni rastreadores, ni cookies de publicidad. Lo único
           que guarda tu navegador es qué avisos de la banda superior has cerrado, para no
           volver a enseñártelos; eso se queda en tu móvil o tu ordenador y no llega a
-          nosotros. Los formularios de Tally, al abrirlos, se rigen por{" "}
+          nosotros. Los vídeos de YouTube no se cargan hasta que pulsas para verlos, y a
+          partir de ahí se rigen por las normas de Google. Los formularios de Tally, al
+          abrirlos, se rigen por{" "}
           <a
             href="https://tally.so/help/privacy-policy"
             target="_blank"

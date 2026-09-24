@@ -207,7 +207,10 @@ a:hover {
   padding: 0;
 }
 
-/* Banda ancha de Pueblos Conectados, bajo la rejilla de secciones */
+/* Pueblos Conectados, junto al tablón bajo la rejilla de secciones. En escritorio
+   ocupa tres cuartos y va en horizontal; por debajo de md (768 px, el corte de las
+   columnas de antd) es media tarjeta y se pone como las demás: centrada, con el
+   logo arriba y la frase corta. */
 .vc-banda {
   display: flex;
   align-items: center;
@@ -220,7 +223,11 @@ a:hover {
   flex-shrink: 0;
 }
 
-@media (max-width: 640px) {
+.vc-banda-corta {
+  display: none;
+}
+
+@media (max-width: 767px) {
   .vc-banda {
     flex-direction: column;
     gap: 14px;
@@ -228,7 +235,15 @@ a:hover {
   }
 
   .vc-banda img {
-    width: 76px;
+    width: 60px;
+  }
+
+  .vc-banda-larga {
+    display: none;
+  }
+
+  .vc-banda-corta {
+    display: inline;
   }
 }
 
@@ -245,4 +260,82 @@ a:hover {
 .vc-card-link:hover .ant-card {
   transform: translateY(-2px);
   box-shadow: 0 8px 24px rgba(61, 47, 31, 0.1);
+}
+
+/* Galería de fotos de una ficha (Galeria.tsx): cuadrícula de miniaturas cuadradas.
+   Son 4 como mucho: 2×2 en móvil y las cuatro en fila en pantallas anchas. */
+.vc-galeria {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 8px;
+}
+
+@media (min-width: 576px) {
+  .vc-galeria {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+.vc-galeria-foto {
+  aspect-ratio: 1;
+  padding: 0;
+  border: 1px solid #e8e0d0;
+  border-radius: 10px;
+  overflow: hidden;
+  background: #f0e9d8;
+  cursor: zoom-in;
+}
+
+.vc-galeria-foto:focus-visible {
+  outline: 3px solid #487824;
+  outline-offset: 2px;
+}
+
+/* El pie de foto va encima de los botones de la superposición */
+.vc-galeria-barra {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  max-width: min(640px, calc(100vw - 32px));
+}
+
+.vc-galeria-pie {
+  margin: 0;
+  padding: 6px 14px;
+  border-radius: 10px;
+  background: rgba(0, 0, 0, 0.55);
+  color: #ffffff;
+  font-size: 15px;
+  text-align: center;
+}
+
+/* Vídeo de YouTube que se carga al pulsar (VideoYoutube.tsx) */
+.vc-video {
+  aspect-ratio: 16 / 9;
+  border-radius: 14px;
+  overflow: hidden;
+  background: #3d2f1f;
+}
+
+.vc-video iframe,
+.vc-video button {
+  width: 100%;
+  height: 100%;
+  border: 0;
+}
+
+.vc-video button {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  background: #3d2f1f;
+  color: #ffffff;
+  cursor: pointer;
+}
+
+.vc-video button:hover {
+  background: #4a3a27;
 }

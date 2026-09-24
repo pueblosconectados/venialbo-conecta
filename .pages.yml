@@ -145,6 +145,165 @@ content:
             description: Cómo se leerá en la noticia. Si lo dejas vacío, se usa el nombre del archivo.
             type: string
 
+  # El álbum de lo que se ha hecho. La frontera con Noticias: la noticia avisa antes
+  # ("el martes empieza el curso") y la actividad cuenta después lo que pasó.
+  - name: actividades
+    label: Actividades
+    description: >-
+      Lo que ya se ha hecho en el pueblo, con fotos: un curso, un taller, una
+      excursión. Para anunciar algo que va a pasar, usa Noticias.
+    type: collection
+    path: web-static/content/actividades
+    subfolders: false
+    format: json
+    filename: "{year}-{month}-{day}-{primary}.json"
+    view:
+      primary: titulo
+      fields: [titulo, fecha, categoria, activa]
+      sort: [fecha, titulo]
+      search: [titulo]
+      default:
+        sort: fecha
+        order: desc
+    fields:
+      - name: titulo
+        label: Título
+        type: string
+        required: true
+      - name: fecha
+        label: Fecha
+        description: El día en que se hizo, o el primero si duró varios.
+        type: date
+        required: true
+        options:
+          format: yyyy-MM-dd
+      - name: fecha_fin
+        label: Hasta
+        description: Solo si duró varios días. En la web sale "del 3 al 24 de marzo".
+        type: date
+        options:
+          format: yyyy-MM-dd
+      # Las etiquetas y los colores de la web están en src/public/pages/actividades/categorias.ts:
+      # si se añade una aquí, añadirla también allí.
+      - name: categoria
+        label: Categoría
+        type: select
+        required: true
+        options:
+          values:
+            - name: formacion
+              label: Formación y talleres
+            - name: mayores
+              label: Mayores
+            - name: infancia
+              label: Infancia y juventud
+            - name: cultura
+              label: Cultura
+            - name: deporte
+              label: Deporte
+            - name: fiestas
+              label: Fiestas y tradiciones
+            - name: medio-ambiente
+              label: Medio ambiente
+            - name: salud
+              label: Salud
+            - name: otra
+              label: Otra
+      - name: organiza
+        label: Organiza
+        description: Opcional. El ayuntamiento, una asociación… Enlaza con su ficha de Servicios.
+        type: reference
+        options:
+          collection: servicios
+          value: "{path}"
+          label: "{nombre}"
+          search: nombre
+      - name: noticia
+        label: Noticia en la que se anunció
+        description: Opcional. Enlaza la actividad con la noticia que la anunciaba.
+        type: reference
+        options:
+          collection: noticias
+          value: "{path}"
+          label: "{titulo}"
+          search: titulo
+      - name: destacada
+        label: Destacada
+        type: boolean
+        default: false
+      - name: activa
+        label: Visible en la web
+        description: Desmárcala para ocultar la actividad sin borrarla.
+        type: boolean
+        default: true
+      - name: resumen
+        label: Resumen
+        description: Opcional. Una línea para la tarjeta del listado.
+        type: string
+      - name: imagen_url
+        label: Foto de portada
+        description: >-
+          Ojo con las fotos de menores: solo si no se les reconoce o con permiso de
+          sus padres o tutores.
+        type: image
+        options:
+          media: imagenes
+      - name: contenido
+        label: Qué se hizo
+        description: El relato. Negrita, cursiva, enlaces, listas, encabezados, citas, tablas e imágenes.
+        type: rich-text
+        options:
+          format: markdown
+      - name: galeria
+        label: Fotos
+        description: >-
+          Hasta 4, las mejores. Ojo con las fotos de menores: solo si no se les
+          reconoce o con permiso de sus padres o tutores. Si hay más, súbelas a un
+          álbum y pon el enlace abajo: cada foto que se sube aquí se queda en el
+          repositorio para siempre.
+        type: object
+        list:
+          max: 4
+        fields:
+          - name: imagen
+            label: Foto
+            type: image
+            required: true
+            options:
+              media: imagenes
+          - name: pie
+            label: Pie de foto
+            description: Opcional. Lo que se lee al ampliarla.
+            type: string
+      - name: video_url
+        label: Vídeo de YouTube
+        description: Opcional. El enlace del vídeo, tal cual lo da YouTube al compartir.
+        type: string
+      - name: album_externo
+        label: Álbum con más fotos
+        description: Opcional. Un enlace a Google Fotos o similar.
+        type: string
+      - name: documentos
+        label: Documentos para descargar
+        description: >-
+          Hasta 3 archivos PDF, de 10 MB como máximo cada uno (el temario, un
+          díptico…). Si alguno se pasa de tamaño, la web no se publica hasta quitarlo.
+        type: object
+        list:
+          max: 3
+        fields:
+          - name: archivo
+            label: Archivo PDF
+            type: file
+            required: true
+            options:
+              media: documentos
+              extensions: [pdf]
+          - name: titulo
+            label: Título del enlace
+            description: Cómo se leerá en la actividad. Si lo dejas vacío, se usa el nombre del archivo.
+            type: string
+
   - name: negocios
     label: Negocios
     type: collection

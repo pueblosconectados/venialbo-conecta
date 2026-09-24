@@ -10,6 +10,8 @@ import { PublicLayout } from "./public/layout/PublicLayout";
 import { Home } from "./public/pages/Home";
 import { NoticiasList } from "./public/pages/noticias/NoticiasList";
 import { NoticiasShow } from "./public/pages/noticias/NoticiasShow";
+import { ActividadesList } from "./public/pages/actividades/ActividadesList";
+import { ActividadesShow } from "./public/pages/actividades/ActividadesShow";
 import { NegociosList } from "./public/pages/negocios/NegociosList";
 import { NegociosShow } from "./public/pages/negocios/NegociosShow";
 import { Privacidad } from "./public/pages/Privacidad";
@@ -29,6 +31,8 @@ function App() {
             <Route path="/" element={<Home />} />
             <Route path="/noticias" element={<NoticiasList />} />
             <Route path="/noticias/:id" element={<NoticiasShow />} />
+            <Route path="/actividades" element={<ActividadesList />} />
+            <Route path="/actividades/:id" element={<ActividadesShow />} />
             <Route path="/negocios" element={<NegociosList />} />
             <Route path="/negocios/:id" element={<NegociosShow />} />
             <Route path="/servicios" element={<ServiciosList />} />
