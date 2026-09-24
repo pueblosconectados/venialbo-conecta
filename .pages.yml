@@ -304,6 +304,126 @@ content:
             description: Cómo se leerá en la actividad. Si lo dejas vacío, se usa el nombre del archivo.
             type: string
 
+  # "Qué ver" de Descubre Venialbo: sitios que se pueden visitar en cualquier momento.
+  # Van sobre todo para el que viene de fuera: lo importante es dónde está y si se
+  # puede entrar.
+  - name: lugares
+    label: Lugares (Descubre Venialbo)
+    description: >-
+      Lo que se puede ver en el pueblo y alrededores: la iglesia, las bodegas, una
+      fuente, un mirador. Salen en Descubre Venialbo, en "Qué ver".
+    type: collection
+    path: web-static/content/lugares
+    subfolders: false
+    format: json
+    filename: "{primary}.json"
+    view:
+      primary: nombre
+      fields: [nombre, tipo, activo]
+      sort: [nombre, tipo]
+      search: [nombre]
+      default:
+        sort: nombre
+        order: asc
+    fields:
+      - name: nombre
+        label: Nombre
+        type: string
+        required: true
+      # Las etiquetas de la web están en src/public/pages/descubre/lugares.ts:
+      # si se añade una aquí, añadirla también allí. Lo mismo con "visitable".
+      - name: tipo
+        label: Tipo
+        type: select
+        required: true
+        options:
+          values:
+            - name: religioso
+              label: Patrimonio religioso
+            - name: popular
+              label: Patrimonio popular (bodegas, palomares, lagares, fuentes…)
+            - name: naturaleza
+              label: Naturaleza y paisaje
+            - name: mirador
+              label: Mirador
+            - name: publico
+              label: Edificios y espacios públicos
+            - name: otro
+              label: Otro
+      - name: activo
+        label: Visible en la web
+        description: Desmárcalo para ocultar el lugar sin borrarlo.
+        type: boolean
+        default: true
+      - name: resumen
+        label: Resumen
+        description: Opcional. Una línea para la tarjeta del listado.
+        type: string
+      - name: imagen_url
+        label: Foto principal
+        type: image
+        options:
+          media: imagenes
+      - name: contenido
+        label: Descripción
+        description: Qué es, su historia, curiosidades. Negrita, cursiva, enlaces, listas e imágenes.
+        type: rich-text
+        options:
+          format: markdown
+      - name: galeria
+        label: Más fotos
+        description: >-
+          Hasta 4. Ojo con las fotos de menores: solo si no se les reconoce o con
+          permiso de sus padres o tutores.
+        type: object
+        list:
+          max: 4
+        fields:
+          - name: imagen
+            label: Foto
+            type: image
+            required: true
+            options:
+              media: imagenes
+          - name: pie
+            label: Pie de foto
+            description: Opcional. Lo que se lee al ampliarla.
+            type: string
+      - name: direccion
+        label: Dirección
+        description: 'Opcional. "Plaza Mayor", "Camino de la Ermita"…'
+        type: string
+      - name: coordenadas
+        label: Coordenadas
+        description: >-
+          Para el mapa y el botón "Cómo llegar". En Google Maps, pulsa sobre el sitio
+          y copia los números que salen (por ejemplo 41.3871, -5.5412). Si no se
+          entienden, la web no se publica hasta corregirlas.
+        type: string
+      - name: visitable
+        label: ¿Se puede visitar?
+        type: select
+        options:
+          values:
+            - name: abierto
+              label: Siempre abierto
+            - name: horario
+              label: Con horario
+            - name: cita
+              label: Con cita o preguntando
+            - name: fuera
+              label: Solo se ve por fuera
+      - name: como_visitar
+        label: Cómo visitarlo
+        description: >-
+          Opcional. El horario, o a quién pedir la llave y su teléfono. Lo que le
+          haría falta saber a alguien de fuera.
+        type: text
+      - name: accesible
+        label: Accesible en silla de ruedas o con carrito
+        type: boolean
+        default: false
+
   - name: negocios
     label: Negocios
     type: collection

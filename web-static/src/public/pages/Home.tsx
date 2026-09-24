@@ -4,6 +4,7 @@ import type { ReactNode } from "react";
 import {
   BankOutlined,
   CameraOutlined,
+  CompassOutlined,
   MedicineBoxOutlined,
   NotificationOutlined,
   ReadOutlined,
@@ -19,6 +20,7 @@ type Seccion = {
   bg: string;
 };
 
+// Arriba lo que cambia y se consulta a menudo; abajo, lo que es más de directorio.
 const SECCIONES: Seccion[] = [
   {
     icon: <ReadOutlined />,
@@ -37,6 +39,26 @@ const SECCIONES: Seccion[] = [
     bg: "#e0eaf2",
   },
   {
+    icon: <NotificationOutlined />,
+    title: "Tablón",
+    desc: "Anuncios entre vecinos",
+    to: "/tablon",
+    color: colors.dorado,
+    bg: "#fbf3e0",
+  },
+  {
+    icon: <CompassOutlined />,
+    title: "Descubre Venialbo",
+    desc: "Qué ver en el pueblo",
+    to: "/descubre",
+    color: colors.terracotaOscuro,
+    bg: "#f9eae2",
+  },
+];
+
+// Abajo, junto a Pueblos Conectados
+const DIRECTORIO: Seccion[] = [
+  {
     icon: <BankOutlined />,
     title: "Negocios",
     desc: "Directorio del comercio local",
@@ -53,16 +75,6 @@ const SECCIONES: Seccion[] = [
     bg: "#efe8f7",
   },
 ];
-
-// El tablón va abajo, en la fila de Pueblos Conectados
-const TABLON: Seccion = {
-  icon: <NotificationOutlined />,
-  title: "Tablón",
-  desc: "Anuncios entre vecinos",
-  to: "/tablon",
-  color: colors.dorado,
-  bg: "#fbf3e0",
-};
 
 export function Home() {
   return (
@@ -118,13 +130,16 @@ export function Home() {
         ))}
       </Row>
 
-      {/* Segunda fila: el tablón, del mismo tamaño que las de arriba, y Pueblos
-          Conectados en lo que queda. En móvil van las dos a medias, como las demás. */}
+      {/* Segunda fila: Negocios y Servicios del mismo tamaño que las de arriba, y
+          Pueblos Conectados en la mitad que queda. En móvil, Pueblos Conectados baja
+          sola a una fila entera. */}
       <Row gutter={[20, 20]} style={{ marginTop: 20 }}>
-        <Col xs={12} sm={12} md={6}>
-          <TarjetaSeccion seccion={TABLON} />
-        </Col>
-        <Col xs={12} sm={12} md={18}>
+        {DIRECTORIO.map((s) => (
+          <Col key={s.to} xs={12} sm={12} md={6}>
+            <TarjetaSeccion seccion={s} />
+          </Col>
+        ))}
+        <Col xs={24} sm={24} md={12}>
           <Link to="/pueblos-conectados" className="vc-card-link">
             <Card
               styles={{ body: { padding: 24 } }}
@@ -151,19 +166,9 @@ export function Home() {
                   >
                     Pueblos Conectados
                   </Typography.Title>
-                  {/* Media tarjeta en móvil no da para la frase entera */}
-                  <Typography.Text
-                    className="vc-banda-larga"
-                    style={{ fontSize: 14, color: colors.marronSuave }}
-                  >
+                  <Typography.Text style={{ fontSize: 14, color: colors.marronSuave }}>
                     Un proyecto colaborativo entre las localidades de Venialbo
                     (Zamora) y Aldearrubia (Salamanca).
-                  </Typography.Text>
-                  <Typography.Text
-                    className="vc-banda-corta"
-                    style={{ fontSize: 13, color: colors.marronSuave }}
-                  >
-                    Venialbo y Aldearrubia
                   </Typography.Text>
                 </div>
               </div>

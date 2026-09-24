@@ -177,6 +177,42 @@ await escribir(
   actividades,
 );
 
+// Lugares — "Qué ver" de Descubre Venialbo. No caducan.
+//
+// Las coordenadas se escriben en un solo campo, tal cual las da Google Maps
+// ("41.3871, -5.5412"), y aquí se separan. También vale un enlace largo de Google Maps
+// que las lleve dentro (".../@41.3871,-5.5412,17z"); los cortos (maps.app.goo.gl) no,
+// porque no las llevan. Si no se entienden, el build falla: un lugar con el mapa en
+// mitad del océano es peor que uno sin mapa.
+const leerCoordenadas = (texto, quien) => {
+  if (!texto) return { latitud: null, longitud: null };
+  const m = String(texto).match(/(-?\d{1,2}\.\d+)\s*,\s*(-?\d{1,3}\.\d+)/);
+  const latitud = m ? Number(m[1]) : NaN;
+  const longitud = m ? Number(m[2]) : NaN;
+  // Un recuadro holgado alrededor de España: pilla las coordenadas del revés, que es
+  // el error más fácil de cometer, sin tener que afinar.
+  if (!(latitud > 27 && latitud < 44.5 && longitud > -19 && longitud < 5)) {
+    throw new Error(
+      `${quien}: no se entienden las coordenadas "${texto}". Tienen que ser dos números` +
+        ` con punto decimal, primero la latitud: 41.3871, -5.5412`,
+    );
+  }
+  return { latitud, longitud };
+};
+const lugares = (await leerColeccion("lugares"))
+  .filter((l) => l.activo !== false)
+  .map((l) => ({
+    ...quitar(l, "coordenadas"),
+    ...leerCoordenadas(l.coordenadas, `lugar ${l.id}`),
+    galeria: (l.galeria ?? []).filter((g) => g?.imagen),
+  }))
+  .sort(porTexto("nombre"));
+await escribir(
+  "lugares",
+  lugares.map((l) => quitar(l, "contenido", "galeria", "como_visitar")),
+  lugares,
+);
+
 // Avisos de portada — la banda de arriba. Caducan solos igual que los anuncios.
 // El orden importa porque se apilan: primero el mas grave, y a igual nivel el mas
 // reciente (el id empieza por la fecha, asi que basta con ordenar por id).

@@ -89,7 +89,9 @@ export function Privacidad() {
           que guarda tu navegador es qué avisos de la banda superior has cerrado, para no
           volver a enseñártelos; eso se queda en tu móvil o tu ordenador y no llega a
           nosotros. Los vídeos de YouTube no se cargan hasta que pulsas para verlos, y a
-          partir de ahí se rigen por las normas de Google. Los formularios de Tally, al
+          partir de ahí se rigen por las normas de Google. Los mapas de los lugares son de
+          OpenStreetMap: al abrir uno, tu navegador le pide el mapa a sus servidores,
+          como con cualquier imagen. Los formularios de Tally, al
           abrirlos, se rigen por{" "}
           <a
             href="https://tally.so/help/privacy-policy"

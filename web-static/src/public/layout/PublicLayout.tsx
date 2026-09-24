@@ -12,6 +12,7 @@ const { useBreakpoint } = Grid;
 const NAV_ITEMS = [
   { key: "/noticias", label: "Noticias" },
   { key: "/actividades", label: "Actividades" },
+  { key: "/descubre", label: "Descubre Venialbo" },
   { key: "/negocios", label: "Negocios" },
   { key: "/servicios", label: "Servicios e instituciones" },
   { key: "/tablon", label: "Tablón" },

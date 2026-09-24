@@ -207,10 +207,8 @@ a:hover {
   padding: 0;
 }
 
-/* Pueblos Conectados, junto al tablón bajo la rejilla de secciones. En escritorio
-   ocupa tres cuartos y va en horizontal; por debajo de md (768 px, el corte de las
-   columnas de antd) es media tarjeta y se pone como las demás: centrada, con el
-   logo arriba y la frase corta. */
+/* Pueblos Conectados, en la segunda fila de la portada: media fila en escritorio y
+   la fila entera en móvil. Siempre en horizontal; en móvil, con el logo más pequeño. */
 .vc-banda {
   display: flex;
   align-items: center;
@@ -223,27 +221,13 @@ a:hover {
   flex-shrink: 0;
 }
 
-.vc-banda-corta {
-  display: none;
-}
-
 @media (max-width: 767px) {
   .vc-banda {
-    flex-direction: column;
-    gap: 14px;
-    text-align: center;
+    gap: 16px;
   }
 
   .vc-banda img {
-    width: 60px;
-  }
-
-  .vc-banda-larga {
-    display: none;
-  }
-
-  .vc-banda-corta {
-    display: inline;
+    width: 64px;
   }
 }
 
@@ -338,4 +322,44 @@ a:hover {
 
 .vc-video button:hover {
   background: #4a3a27;
+}
+
+/* Mapa de OpenStreetMap en la ficha de un lugar (Mapa.tsx). La capa de encima evita
+   que en el móvil el dedo se quede arrastrando el mapa en vez de bajar por la página. */
+.vc-mapa {
+  position: relative;
+  height: 320px;
+  border: 1px solid #e8e0d0;
+  border-radius: 14px;
+  overflow: hidden;
+  background: #f0e9d8;
+}
+
+.vc-mapa iframe {
+  width: 100%;
+  height: 100%;
+  border: 0;
+  display: block;
+}
+
+.vc-mapa-capa {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  /* Arriba y centrado: abajo están los créditos de OpenStreetMap, que tienen que
+     verse, y arriba a la derecha los botones de zoom */
+  padding: 12px 0 0;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+}
+
+.vc-mapa-capa span {
+  padding: 6px 12px;
+  border-radius: 8px;
+  background: rgba(61, 47, 31, 0.75);
+  color: #ffffff;
+  font-size: 13px;
 }
