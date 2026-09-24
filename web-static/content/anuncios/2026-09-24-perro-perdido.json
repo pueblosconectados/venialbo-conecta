@@ -1,0 +1,9 @@
+{
+  "titulo": "Perro perdido",
+  "tipo": "mascota_perdida",
+  "descripcion": "Se ha perdido perro pequeño. Si lo veis, por favor avisarme",
+  "contacto": "613179125",
+  "fecha_publicacion": "2026-09-24T08:28",
+  "fecha_caducidad": "2026-10-24",
+  "activo": false
+}
