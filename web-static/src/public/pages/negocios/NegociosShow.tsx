@@ -2,7 +2,6 @@ import { useParams, Link } from "react-router";
 import { useOne } from "../../../datos";
 import {
   Alert,
-  Breadcrumb,
   Button,
   Descriptions,
   Divider,
@@ -22,6 +21,7 @@ import {
 } from "@ant-design/icons";
 import { imgUrl } from "../../../config";
 import { colors, softTagStyle } from "../../../theme";
+import { CabeceraFicha } from "../../components/CabeceraFicha";
 import { ContenidoRico } from "../../components/ContenidoRico";
 import { ImagenAmpliable } from "../../components/ImagenAmpliable";
 import { juegoDeMiniaturas } from "../../../miniaturas";
@@ -59,13 +59,10 @@ export function NegociosShow() {
 
   return (
     <div style={{ maxWidth: 800, margin: "0 auto" }}>
-      <Breadcrumb
-        style={{ marginBottom: 16 }}
-        items={[
+      <CabeceraFicha titulo={n.nombre} migas={[
           { title: <Link to="/negocios">Negocios</Link> },
           { title: n.nombre },
-        ]}
-      />
+        ]} />
       {n.logo_url && (
         <div
           style={{

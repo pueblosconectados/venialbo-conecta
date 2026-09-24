@@ -2,7 +2,6 @@ import { useParams, Link } from "react-router";
 import { useOne } from "../../../datos";
 import {
   Alert,
-  Breadcrumb,
   Button,
   Descriptions,
   Divider,
@@ -21,6 +20,7 @@ import {
 } from "@ant-design/icons";
 import { imgUrl } from "../../../config";
 import { colors, softTagStyle, type TagTone } from "../../../theme";
+import { CabeceraFicha } from "../../components/CabeceraFicha";
 import { ContenidoRico } from "../../components/ContenidoRico";
 import { ImagenAmpliable } from "../../components/ImagenAmpliable";
 import { juegoDeMiniaturas } from "../../../miniaturas";
@@ -78,13 +78,10 @@ export function ServiciosShow() {
 
   return (
     <div style={{ maxWidth: 800, margin: "0 auto" }}>
-      <Breadcrumb
-        style={{ marginBottom: 16 }}
-        items={[
+      <CabeceraFicha titulo={s.nombre} migas={[
           { title: <Link to="/servicios">Servicios e instituciones</Link> },
           { title: s.nombre },
-        ]}
-      />
+        ]} />
       {s.logo_url && (
         <div
           style={{

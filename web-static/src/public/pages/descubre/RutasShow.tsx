@@ -1,8 +1,9 @@
 import { useParams, Link } from "react-router";
 import { useOne } from "../../../datos";
-import { Alert, Breadcrumb, Button, Divider, Spin, Tag, Typography } from "antd";
+import { Alert, Button, Divider, Spin, Tag, Typography } from "antd";
 import { DownloadOutlined, EnvironmentOutlined, ExportOutlined } from "@ant-design/icons";
 import { imgUrl } from "../../../config";
+import { CabeceraFicha } from "../../components/CabeceraFicha";
 import { ContenidoRico } from "../../components/ContenidoRico";
 import { Galeria, type Foto } from "../../components/Galeria";
 import { ImagenAmpliable } from "../../components/ImagenAmpliable";
@@ -54,10 +55,7 @@ export function RutasShow() {
 
   return (
     <div style={{ maxWidth: 800, margin: "0 auto" }}>
-      <Breadcrumb
-        style={{ marginBottom: 16 }}
-        items={[{ title: <Link to="/descubre">Descubre Venialbo</Link> }, { title: r.nombre }]}
-      />
+      <CabeceraFicha titulo={r.nombre} migas={[{ title: <Link to="/descubre">Descubre Venialbo</Link> }, { title: r.nombre }]} />
       {r.imagen_url && (
         <ImagenAmpliable
           src={imgUrl(r.imagen_url)}

@@ -2,7 +2,6 @@ import { useParams, Link } from "react-router";
 import { useOne } from "../../../datos";
 import {
   Alert,
-  Breadcrumb,
   Divider,
   Spin,
   Tag,
@@ -10,6 +9,7 @@ import {
 } from "antd";
 import { StarFilled } from "@ant-design/icons";
 import { formatFecha, imgUrl } from "../../../config";
+import { CabeceraFicha } from "../../components/CabeceraFicha";
 import { ContenidoRico } from "../../components/ContenidoRico";
 import { Documentos, type Documento } from "../../components/Documentos";
 import { ImagenAmpliable } from "../../components/ImagenAmpliable";
@@ -44,13 +44,10 @@ export function NoticiasShow() {
 
   return (
     <div style={{ maxWidth: 800, margin: "0 auto" }}>
-      <Breadcrumb
-        style={{ marginBottom: 16 }}
-        items={[
+      <CabeceraFicha titulo={n.titulo} migas={[
           { title: <Link to="/noticias">Noticias</Link> },
           { title: n.titulo },
-        ]}
-      />
+        ]} />
       {n.imagen_url && (
         <ImagenAmpliable
           src={imgUrl(n.imagen_url)}

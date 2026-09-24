@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Outlet, Link, useLocation } from "react-router";
 import { Layout, Menu, Button, Drawer, Grid, Typography } from "antd";
 import { MenuOutlined, EnvironmentFilled } from "@ant-design/icons";
@@ -23,6 +23,17 @@ export function PublicLayout() {
   const [drawerOpen, setDrawerOpen] = useState(false);
   const screens = useBreakpoint();
   const location = useLocation();
+
+  // Al cambiar de página, la pestaña vuelve a su título. Las fichas ponen el suyo en
+  // cuanto cargan (CabeceraFicha), que es siempre después de esto.
+  useEffect(() => {
+    document.title = "VenialboConecta";
+  }, [location.pathname]);
+
+  // Las secciones llegan a veces con barra final ("/noticias/"): GitHub Pages redirige
+  // ahí porque cada sección es una carpeta con su index.html (paginas-compartir.mjs).
+  // Sin quitarla, el menú no marcaría la sección.
+  const seccionActual = location.pathname.replace(/(.)\/$/, "$1");
 
   const menuItems = NAV_ITEMS.map((item) => ({
     key: item.key,
@@ -68,7 +79,7 @@ export function PublicLayout() {
         {screens.md ? (
           <Menu
             mode="horizontal"
-            selectedKeys={[location.pathname]}
+            selectedKeys={[seccionActual]}
             items={menuItems}
             style={{
               flex: 1,
@@ -103,7 +114,7 @@ export function PublicLayout() {
       >
         <Menu
           mode="vertical"
-          selectedKeys={[location.pathname]}
+          selectedKeys={[seccionActual]}
           items={menuItems}
           style={{ border: "none" }}
         />

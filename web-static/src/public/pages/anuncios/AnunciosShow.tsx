@@ -2,7 +2,6 @@ import type { ReactNode } from "react";
 import { useParams, Link } from "react-router";
 import { useOne } from "../../../datos";
 import {
-  Breadcrumb,
   Button,
   Divider,
   Result,
@@ -14,6 +13,7 @@ import { ClockCircleOutlined, FileSearchOutlined } from "@ant-design/icons";
 import { formatFecha, imgUrl } from "../../../config";
 import { haCaducado } from "../../../datos";
 import { colors, softTagStyle, type TagTone } from "../../../theme";
+import { CabeceraFicha } from "../../components/CabeceraFicha";
 import { ContenidoRico } from "../../components/ContenidoRico";
 import { ImagenAmpliable } from "../../components/ImagenAmpliable";
 import { juegoDeMiniaturas } from "../../../miniaturas";
@@ -102,13 +102,10 @@ export function AnunciosShow() {
 
   return (
     <div style={{ maxWidth: 800, margin: "0 auto" }}>
-      <Breadcrumb
-        style={{ marginBottom: 16 }}
-        items={[
+      <CabeceraFicha titulo={a.titulo} migas={[
           { title: <Link to="/tablon">Tablón</Link> },
           { title: a.titulo },
-        ]}
-      />
+        ]} />
       {a.imagen_url && (
         <ImagenAmpliable
           src={imgUrl(a.imagen_url)}

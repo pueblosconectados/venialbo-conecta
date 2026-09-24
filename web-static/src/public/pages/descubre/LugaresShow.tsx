@@ -1,8 +1,9 @@
 import { useParams, Link } from "react-router";
 import { useOne } from "../../../datos";
-import { Alert, Breadcrumb, Divider, Spin, Tag, Typography } from "antd";
+import { Alert, Divider, Spin, Tag, Typography } from "antd";
 import { EnvironmentOutlined } from "@ant-design/icons";
 import { imgUrl } from "../../../config";
+import { CabeceraFicha } from "../../components/CabeceraFicha";
 import { ContenidoRico } from "../../components/ContenidoRico";
 import { Galeria, type Foto } from "../../components/Galeria";
 import { ImagenAmpliable } from "../../components/ImagenAmpliable";
@@ -51,10 +52,7 @@ export function LugaresShow() {
 
   return (
     <div style={{ maxWidth: 800, margin: "0 auto" }}>
-      <Breadcrumb
-        style={{ marginBottom: 16 }}
-        items={[{ title: <Link to="/descubre">Descubre Venialbo</Link> }, { title: l.nombre }]}
-      />
+      <CabeceraFicha titulo={l.nombre} migas={[{ title: <Link to="/descubre">Descubre Venialbo</Link> }, { title: l.nombre }]} />
       {l.imagen_url && (
         <ImagenAmpliable
           src={imgUrl(l.imagen_url)}

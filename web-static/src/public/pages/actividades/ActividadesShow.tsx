@@ -1,8 +1,9 @@
 import { useParams, Link } from "react-router";
 import { useOne } from "../../../datos";
-import { Alert, Breadcrumb, Button, Divider, Spin, Tag, Typography } from "antd";
+import { Alert, Button, Divider, Spin, Tag, Typography } from "antd";
 import { PictureOutlined, ReadOutlined, StarFilled, TeamOutlined } from "@ant-design/icons";
 import { imgUrl } from "../../../config";
+import { CabeceraFicha } from "../../components/CabeceraFicha";
 import { ContenidoRico } from "../../components/ContenidoRico";
 import { Documentos, type Documento } from "../../components/Documentos";
 import { Galeria, type Foto } from "../../components/Galeria";
@@ -51,10 +52,7 @@ export function ActividadesShow() {
 
   return (
     <div style={{ maxWidth: 800, margin: "0 auto" }}>
-      <Breadcrumb
-        style={{ marginBottom: 16 }}
-        items={[{ title: <Link to="/actividades">Actividades</Link> }, { title: a.titulo }]}
-      />
+      <CabeceraFicha titulo={a.titulo} migas={[{ title: <Link to="/actividades">Actividades</Link> }, { title: a.titulo }]} />
       {a.imagen_url && (
         <ImagenAmpliable
           src={imgUrl(a.imagen_url)}
