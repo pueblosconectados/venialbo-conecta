@@ -13,7 +13,7 @@ import {
   Tag,
   Typography,
 } from "antd";
-import { StarFilled } from "@ant-design/icons";
+import { FilterOutlined, StarFilled } from "@ant-design/icons";
 import { formatFecha } from "../../../config";
 import { Imagen } from "../../components/Imagen";
 import { colors, softTagStyle, softTagStyleFromHex } from "../../../theme";
@@ -79,6 +79,11 @@ export function NoticiasList() {
       <Typography.Title level={2} style={{ margin: 0 }}>Noticias</Typography.Title>
       <Select
         value={categoria}
+        size="large"
+        prefix={<FilterOutlined />}
+        // Blanco sobre crema no se veia: los vecinos que lo probaron no lo
+        // encontraban. Va en verde, y en verde lleno cuando hay un filtro puesto.
+        className={categoria ? "vc-filtro vc-filtro-activo" : "vc-filtro"}
         onChange={(valor) => {
           setCategoria(valor);
           setPage(1);
