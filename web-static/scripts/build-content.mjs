@@ -207,10 +207,55 @@ const lugares = (await leerColeccion("lugares"))
     galeria: (l.galeria ?? []).filter((g) => g?.imagen),
   }))
   .sort(porTexto("nombre"));
+
+// Rutas — "Rutas" de Descubre Venialbo. No caducan. Los lugares por los que pasa
+// llegan como rutas de fichero (reference multiple): se cambian por {id, nombre}, en
+// el orden en que se pusieron, y los ocultos o borrados se quitan con un aviso.
+const lugarPorId = new Map(lugares.map((l) => [l.id, l]));
+const revisarGpx = async (ruta, quien) => {
+  if (!ruta) return null;
+  if (!/\.gpx$/i.test(ruta)) throw new Error(`${quien}: ${ruta} no es un GPX`);
+  const info = await stat(join(PUBLIC_DIR, ruta.replace(/^\//, ""))).catch(() => null);
+  if (!info) throw new Error(`${quien}: no se encuentra ${ruta}`);
+  return ruta;
+};
+const rutas = (
+  await Promise.all(
+    (await leerColeccion("rutas"))
+      .filter((r) => r.activa !== false)
+      .map(async (r) => {
+        const quien = `ruta ${r.id}`;
+        return {
+          ...quitar(r, "coordenadas_salida"),
+          ...leerCoordenadas(r.coordenadas_salida, quien),
+          lugares: (r.lugares ?? [])
+            .map((ruta) => enlaceA(ruta, lugarPorId, "nombre", quien))
+            .filter(Boolean),
+          gpx: await revisarGpx(r.gpx, quien),
+          galeria: (r.galeria ?? []).filter((g) => g?.imagen),
+        };
+      }),
+  )
+).sort(porTexto("nombre"));
+await escribir(
+  "rutas",
+  rutas.map((r) =>
+    quitar(r, "contenido", "galeria", "recomendaciones", "lugares", "gpx", "wikiloc_url"),
+  ),
+  rutas,
+);
+
+// Y al revés: cada lugar lleva las rutas que pasan por él, para enlazarlas desde su ficha
+const rutasPorLugar = new Map();
+for (const r of rutas) {
+  for (const l of r.lugares) {
+    rutasPorLugar.set(l.id, [...(rutasPorLugar.get(l.id) ?? []), { id: r.id, nombre: r.nombre }]);
+  }
+}
 await escribir(
   "lugares",
   lugares.map((l) => quitar(l, "contenido", "galeria", "como_visitar")),
-  lugares,
+  lugares.map((l) => ({ ...l, rutas: rutasPorLugar.get(l.id) ?? [] })),
 );
 
 // Avisos de portada — la banda de arriba. Caducan solos igual que los anuncios.

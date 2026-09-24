@@ -26,6 +26,8 @@ type LugarDetail = {
   visitable?: string | null;
   como_visitar?: string | null;
   accesible?: boolean;
+  // Las rutas que lo incluyen en "Por dónde pasa"; las pone build-content.mjs
+  rutas?: { id: string; nombre: string }[];
 };
 
 const tituloSeccion = (texto: string) => (
@@ -119,6 +121,19 @@ export function LugaresShow() {
         <>
           {tituloSeccion("Dónde está")}
           <Mapa latitud={l.latitud!} longitud={l.longitud!} nombre={l.nombre} />
+        </>
+      )}
+
+      {l.rutas && l.rutas.length > 0 && (
+        <>
+          {tituloSeccion("Rutas que pasan por aquí")}
+          <ul className="vc-paradas vc-paradas-sueltas">
+            {l.rutas.map((r) => (
+              <li key={r.id}>
+                <Link to={`/descubre/rutas/${r.id}`}>{r.nombre}</Link>
+              </li>
+            ))}
+          </ul>
         </>
       )}
 

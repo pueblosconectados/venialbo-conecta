@@ -49,7 +49,7 @@ const SECCIONES: Seccion[] = [
   {
     icon: <CompassOutlined />,
     title: "Descubre Venialbo",
-    desc: "Qué ver en el pueblo",
+    desc: "Qué ver y rutas",
     to: "/descubre",
     color: colors.terracotaOscuro,
     bg: "#f9eae2",
@@ -116,8 +116,9 @@ export function Home() {
               lineHeight: 1.55,
             }}
           >
-            Noticias, actividades, negocios, servicios y un tablón para compartir
-            lo que pasa en el pueblo.
+            Todo Venialbo en un sitio: lo que pasa y lo que se ha hecho, qué ver
+            y por dónde pasear, sus negocios y servicios, y un tablón para los
+            vecinos.
           </Typography.Text>
         </div>
       </section>

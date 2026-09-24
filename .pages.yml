@@ -59,7 +59,9 @@ media:
     label: Documentos
     input: web-static/public/media/documentos
     output: /media/documentos
-    extensions: [pdf]
+    # gpx: el track de las rutas. Los campos de PDF siguen pidiendo solo PDF, cada
+    # uno con su options.extensions.
+    extensions: [pdf, gpx]
     rename: safe
 
 content:
@@ -423,6 +425,158 @@ content:
         label: Accesible en silla de ruedas o con carrito
         type: boolean
         default: false
+
+  # "Rutas" de Descubre Venialbo: recorridos a pie, en bici o en coche. Enlazan con los
+  # lugares por los que pasan, y cada lugar enseña las rutas que pasan por él.
+  - name: rutas
+    label: Rutas (Descubre Venialbo)
+    description: >-
+      Recorridos a pie, en bici o en coche por el pueblo y la comarca. Salen en
+      Descubre Venialbo, en "Rutas".
+    type: collection
+    path: web-static/content/rutas
+    subfolders: false
+    format: json
+    filename: "{primary}.json"
+    view:
+      primary: nombre
+      fields: [nombre, modalidad, distancia_km, activa]
+      sort: [nombre, distancia_km]
+      search: [nombre]
+      default:
+        sort: nombre
+        order: asc
+    fields:
+      - name: nombre
+        label: Nombre
+        type: string
+        required: true
+      # Las etiquetas de la web están en src/public/pages/descubre/rutas.ts: si se
+      # añade una opción aquí, añadirla también allí. Igual con dificultad y recorrido.
+      - name: modalidad
+        label: Cómo se hace
+        type: select
+        required: true
+        default: pie
+        options:
+          values:
+            - name: pie
+              label: A pie
+            - name: bici
+              label: En bici
+            - name: coche
+              label: En coche
+      - name: activa
+        label: Visible en la web
+        description: Desmárcala para ocultar la ruta sin borrarla.
+        type: boolean
+        default: true
+      - name: resumen
+        label: Resumen
+        description: Opcional. Una línea para la tarjeta del listado.
+        type: string
+      - name: distancia_km
+        label: Distancia (km)
+        description: Opcional. Con punto para los decimales, 8.5
+        type: number
+      - name: duracion
+        label: Duración
+        description: 'Opcional. Como se diría: "1 h 30 min", "toda la mañana".'
+        type: string
+      - name: desnivel_m
+        label: Desnivel (m)
+        description: Opcional. Lo que se sube en total.
+        type: number
+      - name: dificultad
+        label: Dificultad
+        type: select
+        options:
+          values:
+            - name: facil
+              label: Fácil
+            - name: media
+              label: Media
+            - name: dificil
+              label: Difícil
+      - name: recorrido
+        label: Tipo de recorrido
+        type: select
+        options:
+          values:
+            - name: circular
+              label: Circular (acaba donde empieza)
+            - name: ida-vuelta
+              label: Ida y vuelta por el mismo camino
+            - name: lineal
+              label: Solo ida (acaba en otro sitio)
+      - name: salida
+        label: Punto de salida
+        description: 'Opcional. "Plaza Mayor", "La báscula"…'
+        type: string
+      - name: coordenadas_salida
+        label: Coordenadas de la salida
+        description: >-
+          Para el mapa y el botón "Cómo llegar". En Google Maps, pulsa sobre el sitio
+          y copia los números que salen (por ejemplo 41.3871, -5.5412). Si no se
+          entienden, la web no se publica hasta corregirlas.
+        type: string
+      - name: lugares
+        label: Por dónde pasa
+        description: Opcional. Los lugares de "Qué ver" que se ven por el camino, en orden.
+        type: reference
+        options:
+          collection: lugares
+          value: "{path}"
+          label: "{nombre}"
+          search: nombre
+          multiple: true
+      - name: wikiloc_url
+        label: Enlace de Wikiloc
+        description: Opcional. Si la ruta está en Wikiloc, el enlace; allí se ve el trazado.
+        type: string
+      - name: gpx
+        label: Track GPX
+        description: Opcional. El archivo para seguir la ruta con el GPS o el móvil.
+        type: file
+        options:
+          media: documentos
+          extensions: [gpx]
+      - name: imagen_url
+        label: Foto principal
+        type: image
+        options:
+          media: imagenes
+      - name: contenido
+        label: Descripción
+        description: Cómo es la ruta, qué se ve. Negrita, cursiva, enlaces, listas e imágenes.
+        type: rich-text
+        options:
+          format: markdown
+      - name: recomendaciones
+        label: Recomendaciones
+        description: >-
+          Opcional. La mejor época, si hay sombra o fuentes, si se puede ir con niños
+          o con carrito.
+        type: text
+      - name: galeria
+        label: Más fotos
+        description: >-
+          Hasta 4. Ojo con las fotos de menores: solo si no se les reconoce o con
+          permiso de sus padres o tutores.
+        type: object
+        list:
+          max: 4
+        fields:
+          - name: imagen
+            label: Foto
+            type: image
+            required: true
+            options:
+              media: imagenes
+          - name: pie
+            label: Pie de foto
+            description: Opcional. Lo que se lee al ampliarla.
+            type: string
 
   - name: negocios
     label: Negocios

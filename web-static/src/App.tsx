@@ -14,6 +14,7 @@ import { ActividadesList } from "./public/pages/actividades/ActividadesList";
 import { ActividadesShow } from "./public/pages/actividades/ActividadesShow";
 import { Descubre } from "./public/pages/descubre/Descubre";
 import { LugaresShow } from "./public/pages/descubre/LugaresShow";
+import { RutasShow } from "./public/pages/descubre/RutasShow";
 import { NegociosList } from "./public/pages/negocios/NegociosList";
 import { NegociosShow } from "./public/pages/negocios/NegociosShow";
 import { Privacidad } from "./public/pages/Privacidad";
@@ -37,6 +38,7 @@ function App() {
             <Route path="/actividades/:id" element={<ActividadesShow />} />
             <Route path="/descubre" element={<Descubre />} />
             <Route path="/descubre/lugares/:id" element={<LugaresShow />} />
+            <Route path="/descubre/rutas/:id" element={<RutasShow />} />
             <Route path="/negocios" element={<NegociosList />} />
             <Route path="/negocios/:id" element={<NegociosShow />} />
             <Route path="/servicios" element={<ServiciosList />} />

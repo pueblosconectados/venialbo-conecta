@@ -363,3 +363,93 @@ a:hover {
   color: #ffffff;
   font-size: 13px;
 }
+
+/* Los datos de una ruta (RutasShow.tsx): recuadros pequeños que se reparten el ancho */
+.vc-datos-ruta {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+  gap: 8px;
+  margin-top: 4px;
+}
+
+.vc-datos-ruta > div {
+  padding: 10px 14px;
+  background: #ffffff;
+  border: 1px solid #e8e0d0;
+  border-radius: 10px;
+}
+
+.vc-datos-ruta span {
+  display: block;
+  font-size: 12px;
+  color: #6b5a44;
+}
+
+.vc-datos-ruta strong {
+  font-size: 17px;
+  color: #3d2f1f;
+}
+
+/* "Por dónde pasa": los lugares de una ruta, numerados y unidos por una línea, como
+   las paradas de un recorrido. Con vc-paradas-sueltas (las rutas de un lugar) van
+   sin número ni línea. */
+.vc-paradas {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  counter-reset: parada;
+}
+
+.vc-paradas li {
+  position: relative;
+  padding: 0 0 14px 38px;
+  counter-increment: parada;
+}
+
+.vc-paradas li::before {
+  content: counter(parada);
+  position: absolute;
+  left: 0;
+  top: -1px;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background: #487824;
+  color: #ffffff;
+  font-size: 13px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.vc-paradas li:not(:last-child)::after {
+  content: "";
+  position: absolute;
+  left: 12px;
+  top: 26px;
+  bottom: 0;
+  width: 2px;
+  background: #7fa066;
+}
+
+.vc-paradas a {
+  color: #487824;
+  font-weight: 500;
+  font-size: 15px;
+}
+
+.vc-paradas-sueltas li {
+  padding-left: 22px;
+}
+
+.vc-paradas-sueltas li::before {
+  content: "";
+  top: 7px;
+  width: 10px;
+  height: 10px;
+}
+
+.vc-paradas-sueltas li::after {
+  display: none;
+}
