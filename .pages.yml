@@ -114,6 +114,7 @@ content:
         default: true
       - name: imagen_url
         label: Imagen
+        description: 'Si al subirla da error 413, pesa más de unos 3 MB: redúcela antes (por ejemplo, mándatela por WhatsApp y guarda la que llega).'
         type: image
         options:
           media: imagenes
@@ -129,8 +130,10 @@ content:
       - name: documentos
         label: Documentos para descargar
         description: >-
-          Hasta 3 archivos PDF, de 10 MB como máximo cada uno. Si alguno se pasa
-          de tamaño, la web no se publica hasta quitarlo.
+          Hasta 3 archivos PDF. Desde aquí solo se pueden subir de hasta unos 3 MB
+          (si no, da error 413); uno más grande, hasta 10 MB, hay que subirlo por
+          GitHub a web-static/public/media/documentos y elegirlo después aquí. Si
+          alguno pasa de 10 MB, la web no se publica hasta quitarlo.
         type: object
         list:
           max: 3
@@ -247,6 +250,7 @@ content:
         description: >-
           Ojo con las fotos de menores: solo si no se les reconoce o con permiso de
           sus padres o tutores.
+          Si al subirla da error 413, pesa más de unos 3 MB: redúcela antes (por ejemplo, mándatela por WhatsApp y guarda la que llega).
         type: image
         options:
           media: imagenes
@@ -269,6 +273,7 @@ content:
         fields:
           - name: imagen
             label: Foto
+            description: 'Si al subirla da error 413, pesa más de unos 3 MB: redúcela antes (por ejemplo, mándatela por WhatsApp y guarda la que llega).'
             type: image
             required: true
             options:
@@ -288,8 +293,10 @@ content:
       - name: documentos
         label: Documentos para descargar
         description: >-
-          Hasta 3 archivos PDF, de 10 MB como máximo cada uno (el temario, un
-          díptico…). Si alguno se pasa de tamaño, la web no se publica hasta quitarlo.
+          Hasta 3 archivos PDF (el temario, un díptico…). Desde aquí solo se pueden
+          subir de hasta unos 3 MB (si no, da error 413); uno más grande, hasta 10 MB,
+          hay que subirlo por GitHub a web-static/public/media/documentos y elegirlo
+          después aquí. Si alguno pasa de 10 MB, la web no se publica hasta quitarlo.
         type: object
         list:
           max: 3
@@ -363,6 +370,7 @@ content:
         type: string
       - name: imagen_url
         label: Foto principal
+        description: 'Si al subirla da error 413, pesa más de unos 3 MB: redúcela antes (por ejemplo, mándatela por WhatsApp y guarda la que llega).'
         type: image
         options:
           media: imagenes
@@ -383,6 +391,7 @@ content:
         fields:
           - name: imagen
             label: Foto
+            description: 'Si al subirla da error 413, pesa más de unos 3 MB: redúcela antes (por ejemplo, mándatela por WhatsApp y guarda la que llega).'
             type: image
             required: true
             options:
@@ -543,6 +552,7 @@ content:
           extensions: [gpx]
       - name: imagen_url
         label: Foto principal
+        description: 'Si al subirla da error 413, pesa más de unos 3 MB: redúcela antes (por ejemplo, mándatela por WhatsApp y guarda la que llega).'
         type: image
         options:
           media: imagenes
@@ -569,6 +579,7 @@ content:
         fields:
           - name: imagen
             label: Foto
+            description: 'Si al subirla da error 413, pesa más de unos 3 MB: redúcela antes (por ejemplo, mándatela por WhatsApp y guarda la que llega).'
             type: image
             required: true
             options:
@@ -609,6 +620,7 @@ content:
           format: markdown
       - name: logo_url
         label: Logo o foto
+        description: 'Si al subirla da error 413, pesa más de unos 3 MB: redúcela antes (por ejemplo, mándatela por WhatsApp y guarda la que llega).'
         type: image
         options:
           media: imagenes
@@ -696,6 +708,7 @@ content:
           format: markdown
       - name: logo_url
         label: Logo o foto
+        description: 'Si al subirla da error 413, pesa más de unos 3 MB: redúcela antes (por ejemplo, mándatela por WhatsApp y guarda la que llega).'
         type: image
         options:
           media: imagenes
@@ -781,6 +794,7 @@ content:
         type: string
       - name: imagen_url
         label: Imagen
+        description: 'Si al subirla da error 413, pesa más de unos 3 MB: redúcela antes (por ejemplo, mándatela por WhatsApp y guarda la que llega).'
         type: image
         options:
           media: imagenes
