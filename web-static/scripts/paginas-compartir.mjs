@@ -14,6 +14,7 @@
 //   dist/noticias/<id>.html              → GitHub Pages lo sirve en /noticias/<id>
 //   dist/noticias/index.html             → /noticias (redirige a /noticias/)
 //   dist/og/<resumen>.jpg                → la foto de la vista previa, 1200 × 630
+//   dist/sitemap.xml y dist/robots.txt   → la lista de páginas para los buscadores
 //
 // La foto se hace aquí y no se usan las miniaturas webp porque no todas las
 // aplicaciones entienden webp, y porque el tamaño que esperan es ese.
@@ -186,12 +187,16 @@ const FICHAS = [
   { recurso: "actividades", ruta: "actividades", titulo: (f) => f.titulo, texto: (f) => f.resumen || f.contenido, foto: primeraFoto },
   { recurso: "negocios", ruta: "negocios", titulo: (f) => f.nombre, texto: (f) => f.descripcion || f.categoria_negocio, foto: (f) => f.logo_url, modo: "logo" },
   { recurso: "servicios", ruta: "servicios", titulo: (f) => f.nombre, texto: (f) => f.descripcion, foto: (f) => f.logo_url, modo: "logo" },
-  { recurso: "anuncios", ruta: "tablon", titulo: (f) => f.titulo, texto: (f) => f.descripcion, foto: (f) => f.imagen_url, fuera: (f) => caducado(f.fecha_caducidad) },
+  { recurso: "anuncios", ruta: "tablon", titulo: (f) => f.titulo, texto: (f) => f.descripcion, foto: (f) => f.imagen_url, fuera: (f) => caducado(f.fecha_caducidad), sinSitemap: true },
   { recurso: "lugares", ruta: "descubre/lugares", titulo: (f) => f.nombre, texto: (f) => f.resumen || f.contenido, foto: primeraFoto },
   { recurso: "rutas", ruta: "descubre/rutas", titulo: (f) => f.nombre, texto: (f) => f.resumen || f.contenido, foto: primeraFoto },
 ];
 
 const logo = await fotoOg(LOGO, "logo");
+
+// Las direcciones que van al sitemap. Los anuncios del tablón no: duran unos días y
+// Google los tendría en el índice cuando ya han caducado.
+const enSitemap = [];
 
 for (const s of SECCIONES) {
   const html = pagina({
@@ -202,6 +207,7 @@ for (const s of SECCIONES) {
   });
   // La portada es el propio index.html; el build lo copia después a 404.html
   await escribir(s.ruta ? `${s.ruta}/index.html` : "index.html", html);
+  enSitemap.push(s.ruta ? `${s.ruta}/` : "");
 }
 
 let total = 0;
@@ -222,7 +228,21 @@ for (const f of FICHAS) {
         tipo: "article",
       }),
     );
+    if (!f.sinSitemap) enSitemap.push(`${f.ruta}/${id}`);
     total++;
   }
 }
-console.log(`páginas para compartir: ${SECCIONES.length} secciones y ${total} fichas, ${hechas.size} fotos`);
+
+// Sin <lastmod>: el contenido no guarda cuándo se cambió cada ficha, y Google deja de
+// hacer caso a las fechas de un sitemap si ve que no cuadran con los cambios reales
+await escribir(
+  "sitemap.xml",
+  `<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+${enSitemap.map((ruta) => `  <url><loc>${escapar(`${SITIO}${ruta}`)}</loc></url>`).join("\n")}
+</urlset>
+`,
+);
+await escribir("robots.txt", `User-agent: *\nAllow: /\n\nSitemap: ${SITIO}sitemap.xml\n`);
+
+console.log(`páginas para compartir: ${SECCIONES.length} secciones y ${total} fichas, ${hechas.size} fotos; ${enSitemap.length} direcciones en el sitemap`);
