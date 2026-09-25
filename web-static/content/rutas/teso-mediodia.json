@@ -1,0 +1,15 @@
+{
+  "nombre": "Teso Mediodía",
+  "modalidad": "pie",
+  "activa": true,
+  "resumen": "Subida al Teso Mediodía desde donde se puede observar una bonita panorámica de Venialbo. Salida desde el Ayuntamiento.",
+  "distancia_km": 2.3,
+  "duracion": "33 min",
+  "desnivel_m": 53,
+  "dificultad": "facil",
+  "recorrido": "ida-vuelta",
+  "salida": "Escuelas",
+  "coordenadas_salida": "41.389867, -5.534224",
+  "gpx": "/media/documentos/teso-mediodia.gpx",
+  "imagen_url": "/media/imagenes/03.jpg"
+}
