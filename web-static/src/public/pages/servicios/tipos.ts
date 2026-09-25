@@ -7,13 +7,13 @@ import type { TagTone } from "../../../theme";
 type Etiqueta = { nombre: string; icono: string; tono: TagTone };
 
 export const TIPOS_SERVICIO: Record<string, Etiqueta> = {
-  institucion: { nombre: "Institución", icono: "🏛️", tono: "dorado" },
   salud: { nombre: "Salud", icono: "🩺", tono: "rojo" },
   social: { nombre: "Servicios sociales", icono: "🤝", tono: "terracota" },
   cultura: { nombre: "Cultura y formación", icono: "📚", tono: "lila" },
-  asociacion: { nombre: "Asociación", icono: "👥", tono: "lila" },
   transporte: { nombre: "Transporte", icono: "🚌", tono: "azul" },
   venta_reparto: { nombre: "Venta y reparto", icono: "🛒", tono: "musgo" },
+  asociacion: { nombre: "Asociación", icono: "👥", tono: "lila" },
+  institucion: { nombre: "Institución", icono: "🏛️", tono: "dorado" },
   otro: { nombre: "Otro", icono: "📌", tono: "gris" },
 };
 
