@@ -132,5 +132,5 @@ favicon, ver [`assets-src/README.md`](assets-src/README.md).
 ---
 
 <p align="center">
-  <sub>Hecho con cariño para Venialbo</sub>
+  <sub>Hecho con cariño por y para Venialbo</sub>
 </p>

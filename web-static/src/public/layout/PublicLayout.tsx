@@ -162,7 +162,7 @@ export function PublicLayout() {
           </Link>
         </div>
         <Typography.Text style={{ color: colors.marronSuave, fontSize: 13 }}>
-          Hecho con cariño para Venialbo · {new Date().getFullYear()}
+          Hecho con cariño por y para Venialbo · {new Date().getFullYear()}
         </Typography.Text>
       </Footer>
     </Layout>
