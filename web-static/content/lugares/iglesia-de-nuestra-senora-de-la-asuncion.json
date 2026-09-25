@@ -1,0 +1,11 @@
+{
+  "nombre": "Iglesia de Nuestra Señora de la Asunción",
+  "tipo": "religioso",
+  "activo": true,
+  "imagen_url": "/media/imagenes/iglesia01.jpg",
+  "contenido": "Principalmente del siglo XV aunque con orígenes y vestigios románicos. De la época de su construcción solo se conservan los sillares.\n\nConsta de una nave rectangular, con cabecera poligonal y dos capillas laterales que marcan el crucero. Su torre es de estilo románico hasta su parte alta, de reciente construcción.\n\nCabe destacar su retablo mayor, de Lorenzo de Ávila.\n\nSi quieres más información puedes acceder a la página de [Románico Digital.](https://www.romanicodigital.com/sites/default/files/pdfs/files/zamora_VENIALBO.pdf)",
+  "direccion": "Plaza del Caño 1",
+  "coordenadas": "41.389344, -5.538841",
+  "visitable": "cita",
+  "accesible": true
+}
