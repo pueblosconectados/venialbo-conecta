@@ -1,0 +1,17 @@
+{
+  "nombre": "Los Caños",
+  "tipo": "popular",
+  "activo": true,
+  "resumen": "Fuente Los Caños",
+  "imagen_url": "/media/imagenes/los-canos.jpeg",
+  "contenido": "Fuente de piedra y ladrillo construida en 1888. Tiene dos caños por los que, en la actualidad, apenas pasa agua, pero muy caudalosos en su día. A su izquierda tiene dos pilones de retención que antiguamente se empleaban como abrevadero para los animales.\n\nEn 2013, la Asociación Cultural Villa de Venialbo, a través de donativos de los vecinos recogidas en la semana cultural, promovió junto con el Ayuntamiento su restauración.",
+  "galeria": [
+    {},
+    {}
+  ],
+  "direccion": "Calle Tajada, 49153 Venialbo - Zamora",
+  "coordenadas": "41.388234, -5.536555",
+  "visitable": "abierto",
+  "como_visitar": "Si subes a lo largo de la carretera, te la encontrarás a mitad de la travesía, a mano derecha.",
+  "accesible": false
+}
