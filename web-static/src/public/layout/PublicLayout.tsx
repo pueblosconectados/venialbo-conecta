@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { Outlet, Link, useLocation } from "react-router";
 import { Layout, Menu, Button, Drawer, Grid, Typography } from "antd";
-import { MenuOutlined, EnvironmentFilled } from "@ant-design/icons";
+import { MenuOutlined } from "@ant-design/icons";
 import { FORMULARIOS } from "../../config";
 import { colors, fonts } from "../../theme";
 import { BannerAvisos } from "../components/BannerAvisos";
@@ -72,7 +72,8 @@ export function PublicLayout() {
         }}
       >
         <Link to="/" style={logoStyle}>
-          <EnvironmentFilled style={{ color: colors.terracota, fontSize: 24 }} />
+          {/* El puente del logo, recortado por assets-src/generar-assets.py */}
+          <img src="/puente.webp" alt="" width={60} height={28} style={{ display: "block" }} />
           <span>Venialbo<span style={{ color: colors.terracota }}>Conecta</span></span>
         </Link>
 

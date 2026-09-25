@@ -5,6 +5,7 @@ Quita el fondo blanco de los originales y produce:
     favicon.png           32x32, transparente, solo el icono de Venialbo
     apple-touch-icon.png  180x180, opaco (iOS ignora el alfa)
     venialbo-conecta.webp logo de la portada, resolucion completa
+    puente.webp           solo el puente, para la cabecera
 
 Y, fuera de public/, en tally/:
 
@@ -35,6 +36,11 @@ BBOX_LOGO = (49, 79, 1210, 1197)  # Venialbo_Conecta.jpeg, 1254x1254
 # sin "VENIALBO CONECTA". El texto empieza en y=825, y entre medias hay una
 # franja en blanco de 22 filas que marca el corte.
 BBOX_LOGO_ICONO = (155, 79, 1107, 803)
+# Solo el puente, para la cabecera de la web. En el recorte asoman la esquina de
+# la casa (arriba a la izquierda) y el borde del punto del wifi (arriba); se
+# quitan con quitar_conectado() desde un punto de cada uno, relativo al recorte.
+BBOX_PUENTE = (475, 511, 1106, 805)
+SEMILLAS_SOBRANTES = ((10, 9), (144, 0))
 # Logo_Pueblos_conectados.jpeg (1254x1254) se usa de dos formas: el lockup
 # entero en su pagina y solo el icono en la tarjeta de portada y el menu.
 BBOX_CONECTADOS = (244, 127, 1022, 1065)
@@ -149,6 +155,27 @@ def rellenar_interior(rgba):
     return rgba
 
 
+def quitar_conectado(rgba, semillas):
+    """Vuelve transparentes las manchas opacas que contienen las semillas.
+
+    El recorte del puente arrastra un trozo de la casa y otro del punto del
+    wifi. Ninguno toca un trazo del puente, asi que basta con borrar todo lo que
+    este unido a un punto de cada uno.
+    """
+    ancho, alto = rgba.size
+    px = rgba.load()
+    cola = deque(semillas)
+    visto = set(semillas)
+    while cola:
+        x, y = cola.popleft()
+        px[x, y] = (0, 0, 0, 0)
+        for n in ((x + 1, y), (x - 1, y), (x, y + 1), (x, y - 1)):
+            if 0 <= n[0] < ancho and 0 <= n[1] < alto and n not in visto and px[n][3]:
+                visto.add(n)
+                cola.append(n)
+    return rgba
+
+
 def medir_bbox(ruta):
     """Ayuda para recalcular el BBOX si se sustituye un original."""
     from PIL import ImageChops
@@ -199,6 +226,16 @@ def main():
             tally / "logo-venialbo-conecta-circulo.png", optimize=True
         )
 
+    # El puente solo, al lado de "VenialboConecta" en la cabecera. Se ve a 28 px
+    # de alto; se genera al triple para pantallas de alta densidad. Va calado: la
+    # cabecera es blanca y no se nota.
+    puente = quitar_conectado(
+        sin_fondo(AQUI / "Venialbo_Conecta.jpeg", BBOX_PUENTE), SEMILLAS_SOBRANTES
+    )
+    alto = 84
+    puente = puente.resize((round(puente.width * alto / puente.height), alto), Image.LANCZOS)
+    puente.save(PUB / "puente.webp", "WEBP", quality=90, method=6)
+
     # Pueblos Conectados: el icono suelto para la tarjeta de la portada (se ve
     # a ~96px, 300 basta de sobra) y el lockup entero para su propia pagina.
     icono_pc = cuadrar(
@@ -215,6 +252,7 @@ def main():
     print(f"venialbo-conecta.webp {logo.width}x{logo.height}")
     if (AQUI.parent / "tally").is_dir():
         print("tally/logo-venialbo-conecta.png 600 px y logo-...-circulo.png 800x800")
+    print(f"puente.webp {puente.width}x{puente.height}")
     print(f"pueblos-conectados-icono.webp {icono_pc.width}x{icono_pc.height}")
     print(f"pueblos-conectados.webp {lockup.width}x{lockup.height}")
 
