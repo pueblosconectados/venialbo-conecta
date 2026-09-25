@@ -1,0 +1,19 @@
+{
+  "nombre": "Poza del Bodonal",
+  "tipo": "popular",
+  "activo": true,
+  "resumen": "La Poza del Bodonal (o simplemente los antiguos lavaderos) es un lugar histórico y de tradición popular situado en Venialbo, un municipio de la comarca de la Tierra del Vino en la provincia de Zamora",
+  "imagen_url": "/media/imagenes/20170615213704.jpg",
+  "contenido": "Poza del Bodonal",
+  "galeria": [
+    {
+      "imagen": "/media/imagenes/dsc1519-1.jpg",
+      "pie": "Foto del 2017 en que las mujeres de Venialbo, decidieron rememorar las antiguas Redes Sociales yendo a lavar"
+    }
+  ],
+  "direccion": "49153 Venialbo, Zamora",
+  "coordenadas": "41.386072, -5.539531",
+  "visitable": "abierto",
+  "como_visitar": "Dando un paseíto desde cualquier parte del pueblo. Entrando en la calle Alamedas, a 300 metros nos la encontramos",
+  "accesible": false
+}
