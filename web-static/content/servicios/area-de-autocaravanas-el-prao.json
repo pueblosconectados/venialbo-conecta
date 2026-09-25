@@ -1,0 +1,9 @@
+{
+  "nombre": "Área de Autocaravanas El Prao",
+  "tipo": "otro",
+  "descripcion": "Espacio municipal gratuito con capacidad para unas 80 plazas, abierto los 365 días del año",
+  "logo_url": "/media/imagenes/caravanas.jpg",
+  "direccion": "El Prao",
+  "telefono": "980 573 054",
+  "activo": true
+}
