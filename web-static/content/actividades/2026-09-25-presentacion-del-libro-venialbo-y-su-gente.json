@@ -1,0 +1,16 @@
+{
+  "titulo": "Presentacion del libro \"Venialbo y su gente\"",
+  "fecha": "2026-08-06",
+  "categoria": "cultura",
+  "organiza": "web-static/content/servicios/asociacion-venialbense-para-las-artes-escenicas-avae.json",
+  "destacada": false,
+  "activa": true,
+  "resumen": "La Asociación Venialbense para las Artes Escénicas AVAE, presentó el libro de fotos antiguas \"Venialbo y su gente\"",
+  "imagen_url": "/media/imagenes/presentacion-libro.jpg",
+  "contenido": "Se proyectaron algunas de las fotografías, se habló de como se hizo y de las dificultades que se presentaron. Sale a la venta al precio de 15€ para socios y 20€ para no socios. ",
+  "galeria": [
+    {
+      "imagen": "/media/imagenes/presentacion-libro-1.jpg"
+    }
+  ]
+}
