@@ -5,7 +5,8 @@ originales y el script que los produce, para poder rehacerlos sin partir de cero
 
 | Original | Genera en `web-static/public/` |
 |---|---|
-| `Venialbo_Conecta.jpeg` (1254×1254) | `venialbo-conecta.webp` (logo de la portada), `favicon.png` y `apple-touch-icon.png` (solo el icono: la casa, el wifi y el puente, sin las letras) y `puente.webp` (solo el puente, al lado del nombre en la cabecera) |
+| `Venialbo_Conecta.jpeg` (1254×1254) | `venialbo-conecta.webp` (logo de la portada), `favicon.png` y `apple-touch-icon.png` (solo el icono: la casa, el wifi y el puente, sin las letras) |
+| `Puente.png` (639×298, ya transparente) | `puente.webp` (al lado del nombre en la cabecera) |
 | `Logo_Pueblos.jpeg` (827×827) | nada. Era el favicon hasta que se cambió por el icono de Venialbo; se guarda por si hace falta volver |
 | `Logo_Pueblos_conectados.jpeg` (1254×1254) | `pueblos-conectados.webp` (lockup entero, cabecera de su página) y `pueblos-conectados-icono.webp` (solo el icono, tarjeta de la portada) |
 
