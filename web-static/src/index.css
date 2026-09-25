@@ -79,25 +79,14 @@ a:hover {
 /* El !important gana a los estados hover/focus de Ant Design, que llevan
    selectores mas especificos que estos. */
 .vc-filtro .ant-select-selector {
-  background: #edf2e9 !important;
-  border-color: #7fa066 !important;
+  background: #487824 !important;
+  border-color: #487824 !important;
   font-weight: 500;
 }
 
 .vc-filtro .ant-select-selection-item,
 .vc-filtro .ant-select-prefix,
 .vc-filtro .ant-select-arrow {
-  color: #416c20;
-}
-
-.vc-filtro-activo .ant-select-selector {
-  background: #487824 !important;
-  border-color: #487824 !important;
-}
-
-.vc-filtro-activo .ant-select-selection-item,
-.vc-filtro-activo .ant-select-prefix,
-.vc-filtro-activo .ant-select-arrow {
   color: #ffffff;
 }
 

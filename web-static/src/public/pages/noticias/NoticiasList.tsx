@@ -83,7 +83,7 @@ export function NoticiasList() {
         prefix={<FilterOutlined />}
         // Blanco sobre crema no se veia: los vecinos que lo probaron no lo
         // encontraban. Va en verde, y en verde lleno cuando hay un filtro puesto.
-        className={categoria ? "vc-filtro vc-filtro-activo" : "vc-filtro"}
+        className="vc-filtro"
         onChange={(valor) => {
           setCategoria(valor);
           setPage(1);

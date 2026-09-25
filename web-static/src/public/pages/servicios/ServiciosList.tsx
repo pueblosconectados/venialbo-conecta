@@ -77,7 +77,7 @@ export function ServiciosList() {
           value={tipo}
           size="large"
           prefix={<FilterOutlined />}
-          className={tipo ? "vc-filtro vc-filtro-activo" : "vc-filtro"}
+          className="vc-filtro"
           onChange={(valor) => {
             setTipo(valor);
             setPage(1);

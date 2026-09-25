@@ -170,7 +170,7 @@ function CabeceraBloque(props: {
           value={props.valor}
           size="large"
           prefix={<FilterOutlined />}
-          className={props.valor ? "vc-filtro vc-filtro-activo" : "vc-filtro"}
+          className="vc-filtro"
           onChange={props.onChange}
           options={[{ value: "", label: props.todas }, ...props.opciones]}
           aria-label={props.etiqueta}

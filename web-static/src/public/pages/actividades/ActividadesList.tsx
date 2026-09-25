@@ -71,7 +71,7 @@ export function ActividadesList() {
           value={categoria}
           size="large"
           prefix={<FilterOutlined />}
-          className={categoria ? "vc-filtro vc-filtro-activo" : "vc-filtro"}
+          className="vc-filtro"
           onChange={(valor) => {
             setCategoria(valor);
             setPage(1);
