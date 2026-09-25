@@ -1,0 +1,11 @@
+{
+  "nombre": "Farmacia",
+  "tipo": "otro",
+  "descripcion": "Nuria Alfageme Coca",
+  "logo_url": "/media/imagenes/farmacia.png",
+  "direccion": "Calle Caño (números 9-11), 49153 Venialbo - Zamora",
+  "telefono": "980 57 31 82",
+  "horario": "Lunes a viernes: 10:00 - 14:00 y 17:00 - 19:00. Sábados: 10:00",
+  "informacion_adicional": "Los turnos de guardia fuera de este horario o durante la noche pueden ser cubiertos por esta farmacia o rotar con otras localidades de la zona farmacéutica de Zamora Sur",
+  "activo": true
+}
