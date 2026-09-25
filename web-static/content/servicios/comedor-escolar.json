@@ -2,6 +2,8 @@
   "nombre": "Comedor social",
   "tipo": "comedor",
   "descripcion": "Servicio de comedor social",
+  "logo_url": "/media/imagenes/comdor-social.png",
+  "direccion": "Centro Municipal Integrado \"San Benito\", Calle Escuelas",
   "horario": "De 13:00 a 15:00",
   "informacion_adicional": "Comedor para personas mayores de 65 años, pensionistas de jubilación e invalidez absoluta, pensionistas de viudedad o de otras pensiones a partir de 60 años, los que no siendo jubilados, se hallen en una situación social desfavorable que evidencia su inserción como beneficiarios, los cónyuges o relación de análoga naturaleza de los anteriores beneficiarios, aquellos que no reuniendo los requisitos anteriores se encuentren en una situación de carácter especial, así considerada por el ayuntamiento y explique su inclusión como beneficiario.",
   "activo": true
