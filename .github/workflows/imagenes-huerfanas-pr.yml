@@ -71,18 +71,21 @@ jobs:
             "$(cat informe.txt)" \
             "Revisa la lista antes de aceptar: una imagen recién subida cuya noticia todavía no se ha guardado también aparece aquí. Si algo no cuadra, cierra la PR y no pasa nada.")
 
-          if gh pr view "$RAMA" --json number --jq .number >/dev/null 2>&1; then
-            gh pr edit "$RAMA" --body "$cuerpo"
+          # Solo vale una PR abierta: `gh pr view <rama>` también encuentra las ya
+          # aceptadas o cerradas, y entonces se editaba la vieja y no se abría ninguna
+          abierta=$(gh pr list --head "$RAMA" --state open --json url --jq '.[0].url // empty')
+          if [ -n "$abierta" ]; then
+            gh pr edit "$abierta" --body "$cuerpo"
             echo "Actualizada la PR existente" >> "$GITHUB_STEP_SUMMARY"
+            url=$abierta
           else
-            gh pr create \
+            url=$(gh pr create \
               --base main \
               --head "$RAMA" \
               --title "Borrar imágenes sin usar" \
-              --body "$cuerpo"
+              --body "$cuerpo")
           fi
 
-          url=$(gh pr view "$RAMA" --json url --jq .url)
           {
             echo "## Propuesta lista para revisar"
             echo
