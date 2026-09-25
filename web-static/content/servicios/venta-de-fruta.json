@@ -2,6 +2,7 @@
   "nombre": "Venta de fruta",
   "tipo": "venta_ambulante",
   "descripcion": "Puestos de venta de fruta en la plaza de la Iglesia",
+  "logo_url": "/media/imagenes/fruta-01.jpg",
   "horario": "Miércoles por la mañana",
   "activo": true
 }
