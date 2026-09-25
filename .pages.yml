@@ -687,18 +687,20 @@ content:
         required: true
         options:
           values:
-            - name: medico
-              label: Médico
-            - name: comedor
-              label: Comedor
-            - name: bibliobus
-              label: Bibliobús
-            - name: venta_ambulante
-              label: Venta ambulante
-            - name: asociacion
-              label: Asociación
             - name: institucion
               label: Institución
+            - name: salud
+              label: Salud
+            - name: social
+              label: Servicios sociales
+            - name: cultura
+              label: Cultura y formación
+            - name: asociacion
+              label: Asociación
+            - name: transporte
+              label: Transporte
+            - name: venta_reparto
+              label: Venta y reparto
             - name: otro
               label: Otro
       - name: descripcion

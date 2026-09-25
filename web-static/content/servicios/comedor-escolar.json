@@ -1,6 +1,6 @@
 {
   "nombre": "Comedor social",
-  "tipo": "comedor",
+  "tipo": "social",
   "descripcion": "Servicio de comedor social",
   "logo_url": "/media/imagenes/comdor-social.png",
   "direccion": "Centro Municipal Integrado \"San Benito\", Calle Escuelas",

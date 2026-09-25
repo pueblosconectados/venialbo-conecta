@@ -5,16 +5,19 @@ import {
   Alert,
   Card,
   Col,
+  Empty,
   Pagination,
   Row,
+  Select,
   Spin,
   Tag,
   Typography,
 } from "antd";
-import { PhoneOutlined } from "@ant-design/icons";
+import { FilterOutlined, PhoneOutlined } from "@ant-design/icons";
 import { Imagen } from "../../components/Imagen";
-import { colors, softTagStyle, type TagTone } from "../../../theme";
+import { colors, softTagStyle } from "../../../theme";
 import { textoPlano } from "../../../markdown";
+import { TIPOS_SERVICIO, tipoServicio } from "./tipos";
 
 type Servicio = {
   id: string;
@@ -27,51 +30,93 @@ type Servicio = {
   activo: boolean;
 };
 
-const TIPO_LABEL: Record<string, string> = {
-  medico: "Médico",
-  comedor: "Comedor",
-  bibliobus: "Bibliobús",
-  venta_ambulante: "Venta ambulante",
-  asociacion: "Asociación",
-  institucion: "Institución",
-  otro: "Otro",
-};
-
-const TIPO_TONE: Record<string, TagTone> = {
-  medico: "rojo",
-  comedor: "terracota",
-  bibliobus: "azul",
-  venta_ambulante: "musgo",
-  asociacion: "lila",
-  institucion: "dorado",
-  otro: "gris",
-};
-
 const PAGE_SIZE = 20;
+
+const ORDEN = Object.keys(TIPOS_SERVICIO);
+// Un tipo que no esté en TIPOS_SERVICIO va al final
+const posicion = (tipo: string) =>
+  ORDEN.includes(tipo) ? ORDEN.indexOf(tipo) : ORDEN.length;
 
 export function ServiciosList() {
   const [page, setPage] = useState(1);
+  const [tipo, setTipo] = useState("");
 
+  // Se trae la lista entera y se trocea aquí: así el filtro puede ofrecer solo los
+  // tipos que tienen algún servicio, en vez de opciones que no llevan a nada.
   const { result, query } = useList<Servicio>({
     resource: "servicios",
-    pagination: { currentPage: page, pageSize: PAGE_SIZE, mode: "server" },
+    pagination: { mode: "off" },
   });
 
+  // build-content los agrupa por la clave del tipo, que va por orden alfabético; aquí
+  // se reordenan como el desplegable. sort es estable: dentro de cada tipo sigue el nombre.
+  const todos = [...(result?.data ?? [])].sort((a, b) => posicion(a.tipo) - posicion(b.tipo));
+  const filtrados = tipo ? todos.filter((s) => s.tipo === tipo) : todos;
+  const items = filtrados.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
+  const total = filtrados.length;
+
+  // En el orden de TIPOS_SERVICIO, no en el de aparición
+  const presentes = new Set(todos.map((s) => s.tipo));
+  const opciones = [
+    { value: "", label: "Todos los tipos" },
+    ...Object.entries(TIPOS_SERVICIO)
+      .filter(([clave]) => presentes.has(clave))
+      .map(([clave, t]) => ({ value: clave, label: `${t.icono}  ${t.nombre}` })),
+  ];
+
+  // La cabecera se pinta siempre, también mientras carga: si desapareciera al
+  // cambiar de opción, el desplegable daría un salto justo al usarlo.
+  const cabecera = (
+    <div className="vc-cabecera-lista">
+      <Typography.Title level={2} style={{ margin: 0 }}>
+        Servicios e instituciones
+      </Typography.Title>
+      {/* Con un solo tipo (o ninguno) el filtro no filtraría nada */}
+      {opciones.length > 2 && (
+        <Select
+          value={tipo}
+          size="large"
+          prefix={<FilterOutlined />}
+          className={tipo ? "vc-filtro vc-filtro-activo" : "vc-filtro"}
+          onChange={(valor) => {
+            setTipo(valor);
+            setPage(1);
+          }}
+          options={opciones}
+          aria-label="Filtrar servicios por tipo"
+        />
+      )}
+    </div>
+  );
+
   if (query.isLoading)
-    return <Spin style={{ display: "block", margin: "60px auto" }} />;
+    return (
+      <div>
+        {cabecera}
+        <Spin style={{ display: "block", margin: "60px auto" }} />
+      </div>
+    );
   if (query.isError)
     return (
-      <Alert type="error" message="No se pudieron cargar los servicios" />
+      <div>
+        {cabecera}
+        <Alert type="error" message="No se pudieron cargar los servicios" />
+      </div>
     );
-
-  const items = result?.data ?? [];
-  const total = result?.total ?? 0;
 
   return (
     <div>
-      <Typography.Title level={2} style={{ marginBottom: 24 }}>
-        Servicios e instituciones
-      </Typography.Title>
+      {cabecera}
+      {items.length === 0 && (
+        <Empty
+          description={
+            todos.length === 0
+              ? "Todavía no hay servicios publicados"
+              : "No hay servicios de este tipo"
+          }
+          style={{ margin: "48px 0" }}
+        />
+      )}
       <Row gutter={[16, 16]}>
         {items.map((s) => (
           <Col key={s.id} xs={24} sm={12} lg={8}>
@@ -95,8 +140,8 @@ export function ServiciosList() {
                 }
                 styles={{ body: { padding: 16 } }}
               >
-                <Tag style={{ ...softTagStyle(TIPO_TONE[s.tipo] ?? "gris"), marginBottom: 8 }}>
-                  {TIPO_LABEL[s.tipo] ?? s.tipo}
+                <Tag style={{ ...softTagStyle(tipoServicio(s.tipo).tono), marginBottom: 8 }}>
+                  {tipoServicio(s.tipo).nombre}
                 </Tag>
                 <Typography.Text
                   strong

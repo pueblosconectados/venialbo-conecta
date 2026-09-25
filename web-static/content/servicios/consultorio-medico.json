@@ -1,6 +1,6 @@
 {
   "nombre": "Consultorio médico",
-  "tipo": "medico",
+  "tipo": "salud",
   "descripcion": "Médico de atención primaria",
   "logo_url": "/media/imagenes/ambulatorio.png",
   "direccion": "Carretera del Piñero 1, 49153 Venialbo - Zamora",

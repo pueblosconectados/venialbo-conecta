@@ -1,6 +1,6 @@
 {
   "nombre": "Horario de Autobús",
-  "tipo": "otro",
+  "tipo": "transporte",
   "descripcion": "Líneas **Tamame-bus**  de Lunes a Viernes a no ser que se indique en su tabla lo contrario. (Días Festivos y fines de semana no disponen de líneas).",
   "logo_url": "/media/imagenes/tamame-bus-1.jpg",
   "telefono": "980532046",

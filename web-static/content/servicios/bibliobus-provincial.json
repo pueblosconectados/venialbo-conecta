@@ -1,6 +1,6 @@
 {
   "nombre": "Bibliobús provincial",
-  "tipo": "bibliobus",
+  "tipo": "cultura",
   "descripcion": "Ruta 21. Parada en Venialbo: Colegio y Plaza\n\nPeriodicidad: Cinco paradas al año (febrero, abril, junio, septiembre y noviembre)\n\nHora de llegada: 10:45\n\nHora de salida: 12:15\n\nParadas: \n\nColegio (10:45-11:40)\n\nPlaza de la Iglesia (11:45-12:15)\n\n",
   "logo_url": "/media/imagenes/bibliobus.png",
   "web_url": "https://bibliotecas.jcyl.es/web/jcyl/BibliotecaZamora/es/Plantilla100Detalle/1284798686847/PuntoServicioMovil/1204553467725/Biblioteca",

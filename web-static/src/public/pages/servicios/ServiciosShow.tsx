@@ -19,11 +19,12 @@ import {
   YoutubeOutlined,
 } from "@ant-design/icons";
 import { imgUrl } from "../../../config";
-import { colors, softTagStyle, type TagTone } from "../../../theme";
+import { colors, softTagStyle } from "../../../theme";
 import { CabeceraFicha } from "../../components/CabeceraFicha";
 import { ContenidoRico } from "../../components/ContenidoRico";
 import { ImagenAmpliable } from "../../components/ImagenAmpliable";
 import { juegoDeMiniaturas } from "../../../miniaturas";
+import { tipoServicio } from "./tipos";
 
 type Servicio = {
   id: string;
@@ -39,26 +40,6 @@ type Servicio = {
   horario?: string;
   informacion_adicional?: string;
   activo: boolean;
-};
-
-const TIPO_LABEL: Record<string, string> = {
-  medico: "Médico",
-  comedor: "Comedor",
-  bibliobus: "Bibliobús",
-  venta_ambulante: "Venta ambulante",
-  asociacion: "Asociación",
-  institucion: "Institución",
-  otro: "Otro",
-};
-
-const TIPO_TONE: Record<string, TagTone> = {
-  medico: "rojo",
-  comedor: "terracota",
-  bibliobus: "azul",
-  venta_ambulante: "musgo",
-  asociacion: "lila",
-  institucion: "dorado",
-  otro: "gris",
 };
 
 export function ServiciosShow() {
@@ -102,8 +83,8 @@ export function ServiciosShow() {
           />
         </div>
       )}
-      <Tag style={{ ...softTagStyle(TIPO_TONE[s.tipo] ?? "gris"), marginBottom: 12 }}>
-        {TIPO_LABEL[s.tipo] ?? s.tipo}
+      <Tag style={{ ...softTagStyle(tipoServicio(s.tipo).tono), marginBottom: 12 }}>
+        {tipoServicio(s.tipo).nombre}
       </Tag>
       <Typography.Title level={2} style={{ marginTop: 4 }}>{s.nombre}</Typography.Title>
       <ContenidoRico texto={s.descripcion} style={{ fontSize: 15 }} />
