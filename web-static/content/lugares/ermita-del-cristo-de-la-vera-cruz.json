@@ -1,0 +1,19 @@
+{
+  "nombre": "Ermita del Cristo de la Vera Cruz",
+  "tipo": "religioso",
+  "activo": true,
+  "imagen_url": "/media/imagenes/20260926154207-grande-2.jpg",
+  "contenido": "Es la única que se conserva de las cuatro que posiblemente existieron. Se levantó a las afueras del pueblo donde se encontraba el cementerio municipal. En 1902 se construyó el nuevo cementerio lo que disminuyó la actividad de la ermita. Actualmente no es utilizada para el culto.  \nEl 27 de diciembre, El Baile del Niño sube por la carretera, hasta sus puertas donde da la vuelta para volver a bajar por el mismo sitio.",
+  "galeria": [
+    {
+      "imagen": "/media/imagenes/20260926154141-grande-1.jpg"
+    },
+    {
+      "imagen": "/media/imagenes/20260926154224-grande.jpg"
+    }
+  ],
+  "direccion": "Carretera de Toro 2",
+  "coordenadas": "41.388270, -5.534473",
+  "visitable": "fuera",
+  "accesible": false
+}
