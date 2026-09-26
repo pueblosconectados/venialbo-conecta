@@ -6,8 +6,13 @@
   "imagen_url": "/media/imagenes/canos.jpg",
   "contenido": "Fuente de piedra y ladrillo construida en 1888. Tiene dos caños por los que, en la actualidad, apenas pasa agua, pero muy caudalosos en su día. A su izquierda tiene dos pilones de retención que antiguamente se empleaban como abrevadero para los animales.\n\nEn 2013, la Asociación Cultural Villa de Venialbo, a través de donativos de los vecinos recogidas en la semana cultural, promovió junto con el Ayuntamiento su restauración.",
   "galeria": [
-    {},
-    {}
+    {
+      "imagen": "/media/imagenes/20260926154525-grande.jpg"
+    },
+    {
+      "imagen": "/media/imagenes/20260926154446.jpg",
+      "pie": "Abrevadero para animales"
+    }
   ],
   "direccion": "Calle Tajada, 49153 Venialbo - Zamora",
   "coordenadas": "41.388234, -5.536555",
