@@ -1,0 +1,13 @@
+{
+  "nombre": "Poza Las Floras",
+  "tipo": "popular",
+  "activo": true,
+  "resumen": "Subiendo toda la cuesta de la calle que está ",
+  "imagen_url": "/media/imagenes/20260926120559-grande-1.jpg",
+  "contenido": "Subiendo toda la cuesta de la calle que está a la izquierda del Ayuntamiento, llegamos a la Poza de Las Floras. Es una subida poco empinada que tiene escaleras de paso tendido al final.\n\nAntiguamente lavaban en esta poza las mujeres que vivían cerca y las que no podían subir a la de arriba, la limpiaban ellas mismas y con hojas de hiedra lograban que el agua saliera mejor de las ranuras de las piedras para llenar los botijos, que dejaban recogiendo el agua y los volvían a buscar pasado un rato.",
+  "direccion": "Calle Cuesta",
+  "coordenadas": "41.390832, -5.542592",
+  "visitable": "abierto",
+  "como_visitar": "Subiendo recto por la calle que está a la izquierda del Ayuntamiento hasta el final, que giraremos a la derecha",
+  "accesible": false
+}
