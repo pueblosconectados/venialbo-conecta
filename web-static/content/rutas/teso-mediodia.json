@@ -1,15 +1,15 @@
 {
-  "nombre": "Teso Mediodía",
+  "nombre": "Teso La Lucera",
   "modalidad": "pie",
   "activa": true,
-  "resumen": "Subida al Teso Mediodía desde donde se puede observar una bonita panorámica de Venialbo.",
-  "distancia_km": 2.3,
-  "duracion": "33 min",
-  "desnivel_m": 53,
+  "resumen": "Subida al Teso La Lucera desde donde se puede observar una bonita panorámica de Venialbo.",
+  "distancia_km": 2.4,
+  "duracion": "36",
+  "desnivel_m": 71,
   "dificultad": "facil",
   "recorrido": "ida-vuelta",
-  "salida": "Escuelas",
-  "coordenadas_salida": "41.4009636, -5.5245124",
-  "gpx": "/media/documentos/teso-mediodia.gpx",
+  "salida": "Camino Villalazán, al finalizar las casas",
+  "coordenadas_salida": "41.394664, -5.537198",
+  "gpx": "/media/documentos/teso-la-lucera.gpx",
   "imagen_url": "/media/imagenes/03.jpg"
 }
