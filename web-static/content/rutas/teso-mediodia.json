@@ -11,6 +11,25 @@
   "salida": "Camino Villalazán, al finalizar las casas",
   "coordenadas_salida": "41.394664, -5.537198",
   "gpx": "/media/documentos/teso-la-lucera.gpx",
-  "imagen_url": "/media/imagenes/03.jpg",
-  "recomendaciones": "No hay sombras hasta que llegas al teso por lo que es preferible hacerlo en época de poco calor o a horas que no caliente. Se puede subir perfectamente con niños. "
+  "imagen_url": "/media/imagenes/20260926124533-grande.jpg",
+  "contenido": "Ruta muy sencilla, con subidas suaves excepto el tramo final. Hay que pasar por un paso canadiense por lo que si se va con perros hay que tener cuidado. Nada más pasarlo y girar a la derecha, podemos ver las ruinas de un viejo molino situado junto al arroyo.",
+  "recomendaciones": "No hay sombras hasta que llegas al teso por lo que es preferible hacerlo en época de poco calor o a horas que no caliente. Se puede subir perfectamente con niños. ",
+  "galeria": [
+    {
+      "imagen": "/media/imagenes/20260926124548-grande.jpg",
+      "pie": "Inicio de la ruta"
+    },
+    {
+      "imagen": "/media/imagenes/20260926125012-grande.jpg",
+      "pie": "Paso canadiense"
+    },
+    {
+      "imagen": "/media/imagenes/20260926125145-grande.jpg",
+      "pie": "Antiguo molino"
+    },
+    {
+      "imagen": "/media/imagenes/20260926125940-grande.jpg",
+      "pie": "Vista desde el Teso La Lucera"
+    }
+  ]
 }
