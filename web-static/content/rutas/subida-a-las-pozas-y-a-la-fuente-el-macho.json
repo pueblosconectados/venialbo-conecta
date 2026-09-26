@@ -1,0 +1,36 @@
+{
+  "nombre": "Subida a las pozas y a la fuente El Macho",
+  "modalidad": "pie",
+  "activa": true,
+  "resumen": "Subida desde el Ayuntamiento a la POZA LAS FLORAS, FUENTE EL MACHO y POZA DE ARRIBA",
+  "distancia_km": 1.16,
+  "duracion": "30 min",
+  "desnivel_m": 42,
+  "dificultad": "facil",
+  "recorrido": "circular",
+  "salida": "Ayuntamiento",
+  "coordenadas_salida": "41.389929, -5.540741",
+  "wikiloc_url": "https://es.wikiloc.com/rutas-senderismo/venialboconecta-288033788",
+  "gpx": "/media/documentos/subida-a-las-pozas-y-fuente-el-macho.gpx",
+  "imagen_url": "/media/imagenes/20260926120000-grande.jpg",
+  "contenido": "Ruta corta pero con subidas empinadas y resbaladizas mediante escalones de piedra, escarbados en el suelo y troncos. En ella podremos ver la poza de Las Floras, sin salir del pueblo, la fuente El Macho y subiendo por las escaleras que están a la izquierda de la fuente y durante el trayecto, veremos un charaiz y un par de miradores desde donde contemplar Venialbo. Siguiendo el camino que bordea el teso, llegaremos a una gran higuera desde donde empezamos a bajar hasta llegar a la Poza de Arriba. ",
+  "recomendaciones": "Buen calzado para no resbalar. En Verano hace calor aunque hay sol y sombra. Se puede ir con niños pero no llevar carrito. ",
+  "galeria": [
+    {
+      "imagen": "/media/imagenes/20260926120559-grande.jpg",
+      "pie": "Poza Las Floras"
+    },
+    {
+      "imagen": "/media/imagenes/20260926120932-grande.jpg",
+      "pie": "Fuente El Macho"
+    },
+    {
+      "imagen": "/media/imagenes/20260926122026-grande-1.jpg",
+      "pie": "Mirador"
+    },
+    {
+      "imagen": "/media/imagenes/20260926122312-grande.jpg",
+      "pie": "Poza de arriba"
+    }
+  ]
+}
