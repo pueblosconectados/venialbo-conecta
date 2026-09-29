@@ -1,5 +1,6 @@
 import { useParams, Link } from "react-router";
-import { useOne } from "../../../datos";
+import { esNuevo, useOne } from "../../../datos";
+import { EtiquetaNuevo } from "../../components/EtiquetaNuevo";
 import {
   Alert,
   Button,
@@ -27,6 +28,7 @@ import { juegoDeMiniaturas } from "../../../miniaturas";
 import { tipoServicio } from "./tipos";
 
 type Servicio = {
+  novedad_hasta?: string | null;
   id: string;
   nombre: string;
   tipo: string;
@@ -83,9 +85,12 @@ export function ServiciosShow() {
           />
         </div>
       )}
-      <Tag style={{ ...softTagStyle(tipoServicio(s.tipo).tono), marginBottom: 12 }}>
-        {tipoServicio(s.tipo).nombre}
-      </Tag>
+      <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginBottom: 12 }}>
+        {esNuevo(s) && <EtiquetaNuevo />}
+        <Tag style={softTagStyle(tipoServicio(s.tipo).tono)}>
+          {tipoServicio(s.tipo).nombre}
+        </Tag>
+      </div>
       <Typography.Title level={2} style={{ marginTop: 4 }}>{s.nombre}</Typography.Title>
       <ContenidoRico texto={s.descripcion} style={{ fontSize: 15 }} />
       <Divider style={{ borderColor: colors.borde }} />

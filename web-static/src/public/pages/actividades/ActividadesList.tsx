@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link } from "react-router";
-import { useList } from "../../../datos";
+import { esNuevo, useList } from "../../../datos";
 import {
   Alert,
   Card,
@@ -21,9 +21,11 @@ import {
   categoriaActividad,
   formatFechasActividad,
 } from "./categorias";
+import { EtiquetaNuevo } from "../../components/EtiquetaNuevo";
 
 type ActividadList = {
   id: string;
+  novedad_hasta?: string | null;
   titulo: string;
   fecha: string;
   fecha_fin?: string | null;
@@ -142,6 +144,7 @@ export function ActividadesList() {
                   }
                   styles={{ body: { padding: 16 } }}
                 >
+                  {esNuevo(a) && <EtiquetaNuevo posicion="esquina" />}
                   <div style={{ display: "flex", gap: 6, flexWrap: "wrap", marginBottom: 6 }}>
                     <Tag style={softTagStyle(cat.tono)}>{cat.nombre}</Tag>
                     {a.destacada && (

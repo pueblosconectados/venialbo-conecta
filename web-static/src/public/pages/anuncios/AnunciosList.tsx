@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link } from "react-router";
-import { useList } from "../../../datos";
+import { esNuevo, useList } from "../../../datos";
 import {
   Alert,
   Button,
@@ -17,6 +17,7 @@ import { FORMULARIOS, formatFecha } from "../../../config";
 import { colors, softTagStyle, type TagTone } from "../../../theme";
 import { Imagen } from "../../components/Imagen";
 import { textoPlano } from "../../../markdown";
+import { EtiquetaNuevo } from "../../components/EtiquetaNuevo";
 
 type Anuncio = {
   id: string;
@@ -95,6 +96,7 @@ export function AnunciosList() {
                 }
                 styles={{ body: { padding: 12 } }}
               >
+                {esNuevo(a) && <EtiquetaNuevo posicion="esquina" />}
                 <Tag style={{ ...softTagStyle(TIPO_TONE[a.tipo] ?? "gris"), marginBottom: 6 }}>
                   {TIPO_LABEL[a.tipo] ?? a.tipo}
                 </Tag>

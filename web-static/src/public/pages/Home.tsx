@@ -1,6 +1,6 @@
 import { Link } from "react-router";
 import { Card, Col, Row, Typography } from "antd";
-import type { ReactNode } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import {
   BankOutlined,
   CameraOutlined,
@@ -10,6 +10,8 @@ import {
   ReadOutlined,
 } from "@ant-design/icons";
 import { colors } from "../../theme";
+import { esNuevo, listar, type ConNovedad } from "../../datos";
+import { EtiquetaNuevo } from "../components/EtiquetaNuevo";
 
 type Seccion = {
   icon: ReactNode;
@@ -18,6 +20,8 @@ type Seccion = {
   to: string;
   color: string;
   bg: string;
+  // De dónde sale el «¡Nuevo!» de la tarjeta: si alguno de estos tiene algo nuevo
+  recursos: string[];
 };
 
 // Arriba lo que cambia y se consulta a menudo; abajo, lo que es más de directorio.
@@ -27,6 +31,7 @@ const SECCIONES: Seccion[] = [
     title: "Noticias",
     desc: "Lo último que pasa en el pueblo",
     to: "/noticias",
+    recursos: ["noticias"],
     color: colors.musgo,
     bg: colors.musgoFondo,
   },
@@ -35,6 +40,7 @@ const SECCIONES: Seccion[] = [
     title: "Actividades",
     desc: "Lo que se ha hecho, con fotos",
     to: "/actividades",
+    recursos: ["actividades"],
     color: "#3d6691",
     bg: "#e0eaf2",
   },
@@ -43,6 +49,7 @@ const SECCIONES: Seccion[] = [
     title: "Tablón",
     desc: "Anuncios entre vecinos",
     to: "/tablon",
+    recursos: ["anuncios"],
     color: colors.dorado,
     bg: "#fbf3e0",
   },
@@ -51,6 +58,7 @@ const SECCIONES: Seccion[] = [
     title: "Descubre Venialbo",
     desc: "Qué ver y rutas",
     to: "/descubre",
+    recursos: ["lugares", "rutas"],
     color: colors.terracotaOscuro,
     bg: "#f9eae2",
   },
@@ -63,6 +71,7 @@ const DIRECTORIO: Seccion[] = [
     title: "Negocios",
     desc: "Directorio del comercio local",
     to: "/negocios",
+    recursos: ["negocios"],
     color: colors.terracota,
     bg: "#f9eae2",
   },
@@ -71,6 +80,7 @@ const DIRECTORIO: Seccion[] = [
     title: "Servicios e instituciones",
     desc: "Médico, comedor, instituciones",
     to: "/servicios",
+    recursos: ["servicios"],
     color: "#8b6db5",
     bg: "#efe8f7",
   },
@@ -181,13 +191,36 @@ export function Home() {
   );
 }
 
+// ¿Hay algo nuevo en la sección? Los listados son JSON pequeños y quedan en caché, así
+// que al entrar luego en la sección ya están cargados. Si falla, simplemente no sale.
+function useHayNovedad(recursos: string[]): boolean {
+  const [hay, setHay] = useState(false);
+  const clave = recursos.join(",");
+  useEffect(() => {
+    let vigente = true;
+    Promise.all(
+      clave.split(",").map((r) => listar<ConNovedad>(r, { pagination: { mode: "off" } })),
+    )
+      .then((listas) => {
+        if (vigente) setHay(listas.some((l) => l.data.some(esNuevo)));
+      })
+      .catch(() => {});
+    return () => {
+      vigente = false;
+    };
+  }, [clave]);
+  return hay;
+}
+
 function TarjetaSeccion({ seccion: s }: { seccion: Seccion }) {
+  const nuevo = useHayNovedad(s.recursos);
   return (
     <Link to={s.to} className="vc-card-link">
       <Card
         styles={{ body: { padding: 24, textAlign: "center" } }}
         style={{ border: `1px solid ${colors.borde}` }}
       >
+        {nuevo && <EtiquetaNuevo posicion="pestana" />}
         <div
           style={{
             width: 60,

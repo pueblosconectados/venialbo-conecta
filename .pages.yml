@@ -241,6 +241,14 @@ content:
         description: Desmárcala para ocultar la actividad sin borrarla.
         type: boolean
         default: true
+      - name: novedad_hasta
+        label: «¡Nuevo!» hasta
+        description: >-
+          Opcional. Hasta este día (incluido) la tarjeta y la ficha llevan el distintivo
+          «¡Nuevo!». Por ejemplo, pasado mañana. Vacío, no sale.
+        type: date
+        options:
+          format: yyyy-MM-dd
       - name: resumen
         label: Resumen
         description: Opcional. Una línea para la tarjeta del listado.
@@ -364,6 +372,14 @@ content:
         description: Desmárcalo para ocultar el lugar sin borrarlo.
         type: boolean
         default: true
+      - name: novedad_hasta
+        label: «¡Nuevo!» hasta
+        description: >-
+          Opcional. Hasta este día (incluido) la tarjeta y la ficha llevan el distintivo
+          «¡Nuevo!». Por ejemplo, pasado mañana. Vacío, no sale.
+        type: date
+        options:
+          format: yyyy-MM-dd
       - name: resumen
         label: Resumen
         description: Opcional. Una línea para la tarjeta del listado.
@@ -480,6 +496,14 @@ content:
         description: Desmárcala para ocultar la ruta sin borrarla.
         type: boolean
         default: true
+      - name: novedad_hasta
+        label: «¡Nuevo!» hasta
+        description: >-
+          Opcional. Hasta este día (incluido) la tarjeta y la ficha llevan el distintivo
+          «¡Nuevo!». Por ejemplo, pasado mañana. Vacío, no sale.
+        type: date
+        options:
+          format: yyyy-MM-dd
       - name: resumen
         label: Resumen
         description: Opcional. Una línea para la tarjeta del listado.
@@ -660,6 +684,14 @@ content:
         label: Visible en la web
         type: boolean
         default: true
+      - name: novedad_hasta
+        label: «¡Nuevo!» hasta
+        description: >-
+          Opcional. Hasta este día (incluido) la tarjeta y la ficha llevan el distintivo
+          «¡Nuevo!». Por ejemplo, pasado mañana. Vacío, no sale.
+        type: date
+        options:
+          format: yyyy-MM-dd
 
   - name: servicios
     label: Servicios e instituciones
@@ -750,6 +782,14 @@ content:
         label: Visible en la web
         type: boolean
         default: true
+      - name: novedad_hasta
+        label: «¡Nuevo!» hasta
+        description: >-
+          Opcional. Hasta este día (incluido) la tarjeta y la ficha llevan el distintivo
+          «¡Nuevo!». Por ejemplo, pasado mañana. Vacío, no sale.
+        type: date
+        options:
+          format: yyyy-MM-dd
 
   - name: anuncios
     label: Tablón de anuncios

@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link } from "react-router";
-import { useList } from "../../../datos";
+import { esNuevo, useList } from "../../../datos";
 import {
   Alert,
   Card,
@@ -17,6 +17,7 @@ import { FilterOutlined, StarFilled } from "@ant-design/icons";
 import { formatFecha } from "../../../config";
 import { Imagen } from "../../components/Imagen";
 import { colors, softTagStyle, softTagStyleFromHex } from "../../../theme";
+import { EtiquetaNuevo } from "../../components/EtiquetaNuevo";
 
 type Categoria = {
   id: string;
@@ -146,6 +147,7 @@ export function NoticiasList() {
                 }
                 styles={{ body: { padding: 16 } }}
               >
+                {esNuevo(n) && <EtiquetaNuevo posicion="esquina" />}
                 <div
                   style={{
                     display: "flex",

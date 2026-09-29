@@ -1,5 +1,6 @@
 import { useParams, Link } from "react-router";
-import { useOne } from "../../../datos";
+import { esNuevo, useOne } from "../../../datos";
+import { EtiquetaNuevo } from "../../components/EtiquetaNuevo";
 import { Alert, Button, Divider, Spin, Tag, Typography } from "antd";
 import { DownloadOutlined, EnvironmentOutlined, ExportOutlined } from "@ant-design/icons";
 import { imgUrl } from "../../../config";
@@ -13,6 +14,7 @@ import { colors, softTagStyle } from "../../../theme";
 import { datosRuta, dificultadRuta, modalidadRuta, type DatosRuta } from "./rutas";
 
 type RutaDetail = DatosRuta & {
+  novedad_hasta?: string | null;
   id: string;
   nombre: string;
   modalidad: string;
@@ -73,6 +75,7 @@ export function RutasShow() {
         />
       )}
       <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginBottom: 12 }}>
+        {esNuevo(r) && <EtiquetaNuevo />}
         <Tag style={softTagStyle(modalidad.tono)}>
           {modalidad.icono} {modalidad.nombre}
         </Tag>

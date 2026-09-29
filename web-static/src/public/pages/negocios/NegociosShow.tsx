@@ -1,5 +1,6 @@
 import { useParams, Link } from "react-router";
-import { useOne } from "../../../datos";
+import { esNuevo, useOne } from "../../../datos";
+import { EtiquetaNuevo } from "../../components/EtiquetaNuevo";
 import {
   Alert,
   Button,
@@ -27,6 +28,7 @@ import { ImagenAmpliable } from "../../components/ImagenAmpliable";
 import { juegoDeMiniaturas } from "../../../miniaturas";
 
 type Negocio = {
+  novedad_hasta?: string | null;
   id: string;
   nombre: string;
   descripcion?: string;
@@ -84,6 +86,7 @@ export function NegociosShow() {
         </div>
       )}
       <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginBottom: 8 }}>
+        {esNuevo(n) && <EtiquetaNuevo />}
         {n.categoria_negocio && (
           <Tag style={softTagStyle("terracota")}>{n.categoria_negocio}</Tag>
         )}

@@ -1,6 +1,6 @@
 import { useState, type ReactNode } from "react";
 import { Link } from "react-router";
-import { useList } from "../../../datos";
+import { esNuevo, useList } from "../../../datos";
 import { Alert, Card, Col, Empty, Row, Select, Spin, Tag, Typography } from "antd";
 import { EnvironmentOutlined, FilterOutlined } from "@ant-design/icons";
 import { Imagen } from "../../components/Imagen";
@@ -13,9 +13,11 @@ import {
   modalidadRuta,
   type DatosRuta,
 } from "./rutas";
+import { EtiquetaNuevo } from "../../components/EtiquetaNuevo";
 
 type LugarList = {
   id: string;
+  novedad_hasta?: string | null;
   nombre: string;
   tipo: string;
   resumen?: string | null;
@@ -25,6 +27,7 @@ type LugarList = {
 
 type RutaList = DatosRuta & {
   id: string;
+  novedad_hasta?: string | null;
   nombre: string;
   modalidad: string;
   dificultad?: string | null;
@@ -82,6 +85,7 @@ function QueVer() {
               <Tarjeta
                 key={l.id}
                 a={`/descubre/lugares/${l.id}`}
+                nuevo={esNuevo(l)}
                 imagen={l.imagen_url}
                 nombre={l.nombre}
                 etiquetas={[{ texto: t.nombre, tono: t.tono }]}
@@ -126,6 +130,7 @@ function Rutas() {
             <Tarjeta
               key={r.id}
               a={`/descubre/rutas/${r.id}`}
+              nuevo={esNuevo(r)}
               imagen={r.imagen_url}
               nombre={r.nombre}
               etiquetas={[
@@ -182,6 +187,7 @@ function CabeceraBloque(props: {
 
 function Tarjeta(props: {
   a: string;
+  nuevo: boolean;
   imagen?: string | null;
   nombre: string;
   etiquetas: { texto: string; tono: TagTone }[];
@@ -208,6 +214,7 @@ function Tarjeta(props: {
           }
           styles={{ body: { padding: 16 } }}
         >
+          {props.nuevo && <EtiquetaNuevo posicion="esquina" />}
           <div style={{ display: "flex", gap: 6, flexWrap: "wrap", marginBottom: 6 }}>
             {props.etiquetas.map((e) => (
               <Tag key={e.texto} style={softTagStyle(e.tono)}>{e.texto}</Tag>

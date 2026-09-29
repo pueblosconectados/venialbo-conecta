@@ -1,5 +1,6 @@
 import { useParams, Link } from "react-router";
-import { useOne } from "../../../datos";
+import { esNuevo, useOne } from "../../../datos";
+import { EtiquetaNuevo } from "../../components/EtiquetaNuevo";
 import { Alert, Button, Divider, Spin, Tag, Typography } from "antd";
 import { PictureOutlined, ReadOutlined, StarFilled, TeamOutlined } from "@ant-design/icons";
 import { imgUrl } from "../../../config";
@@ -14,6 +15,7 @@ import { colors, softTagStyle } from "../../../theme";
 import { categoriaActividad, formatFechasActividad } from "./categorias";
 
 type ActividadDetail = {
+  novedad_hasta?: string | null;
   id: string;
   titulo: string;
   fecha: string;
@@ -70,6 +72,7 @@ export function ActividadesShow() {
         />
       )}
       <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginBottom: 12 }}>
+        {esNuevo(a) && <EtiquetaNuevo />}
         <Tag style={softTagStyle(cat.tono)}>{cat.nombre}</Tag>
         {a.destacada && (
           <Tag icon={<StarFilled />} style={softTagStyle("dorado")}>

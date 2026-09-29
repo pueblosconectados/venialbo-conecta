@@ -1,5 +1,6 @@
 import { useParams, Link } from "react-router";
-import { useOne } from "../../../datos";
+import { esNuevo, useOne } from "../../../datos";
+import { EtiquetaNuevo } from "../../components/EtiquetaNuevo";
 import {
   Alert,
   Divider,
@@ -65,6 +66,7 @@ export function NoticiasShow() {
         />
       )}
       <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginBottom: 12 }}>
+        {esNuevo(n) && <EtiquetaNuevo />}
         <Tag style={softTagStyleFromHex(n.categoria.color ?? "#487824")}>{n.categoria.nombre}</Tag>
         {n.destacada && (
           <Tag icon={<StarFilled />} style={softTagStyle("dorado")}>

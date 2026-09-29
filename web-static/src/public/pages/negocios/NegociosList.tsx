@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link } from "react-router";
-import { useList } from "../../../datos";
+import { esNuevo, useList } from "../../../datos";
 import {
   Alert,
   Button,
@@ -16,9 +16,11 @@ import { MobileOutlined, PhoneOutlined, PlusOutlined, ShopOutlined } from "@ant-
 import { FORMULARIOS } from "../../../config";
 import { Imagen } from "../../components/Imagen";
 import { colors, softTagStyle } from "../../../theme";
+import { EtiquetaNuevo } from "../../components/EtiquetaNuevo";
 
 type Negocio = {
   id: string;
+  novedad_hasta?: string | null;
   nombre: string;
   descripcion?: string;
   telefono?: string;
@@ -100,6 +102,7 @@ export function NegociosList() {
                 }
                 styles={{ body: { padding: 16 } }}
               >
+                {esNuevo(n) && <EtiquetaNuevo posicion="esquina" />}
                 {n.categoria_negocio && (
                   <Tag style={{ ...softTagStyle("terracota"), marginBottom: 8 }}>
                     {n.categoria_negocio}

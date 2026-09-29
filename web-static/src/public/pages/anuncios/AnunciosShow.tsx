@@ -1,6 +1,7 @@
 import type { ReactNode } from "react";
 import { useParams, Link } from "react-router";
-import { useOne } from "../../../datos";
+import { esNuevo, useOne } from "../../../datos";
+import { EtiquetaNuevo } from "../../components/EtiquetaNuevo";
 import {
   Button,
   Divider,
@@ -125,6 +126,7 @@ export function AnunciosShow() {
         />
       )}
       <div style={{ display: "flex", gap: 8, marginBottom: 12 }}>
+        {esNuevo(a) && <EtiquetaNuevo />}
         <Tag style={softTagStyle(TIPO_TONE[a.tipo] ?? "gris")}>
           {TIPO_LABEL[a.tipo] ?? a.tipo}
         </Tag>

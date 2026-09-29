@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link } from "react-router";
-import { useList } from "../../../datos";
+import { esNuevo, useList } from "../../../datos";
 import {
   Alert,
   Card,
@@ -18,9 +18,11 @@ import { Imagen } from "../../components/Imagen";
 import { colors, softTagStyle } from "../../../theme";
 import { textoPlano } from "../../../markdown";
 import { TIPOS_SERVICIO, tipoServicio } from "./tipos";
+import { EtiquetaNuevo } from "../../components/EtiquetaNuevo";
 
 type Servicio = {
   id: string;
+  novedad_hasta?: string | null;
   nombre: string;
   tipo: string;
   descripcion?: string;
@@ -140,6 +142,7 @@ export function ServiciosList() {
                 }
                 styles={{ body: { padding: 16 } }}
               >
+                {esNuevo(s) && <EtiquetaNuevo posicion="esquina" />}
                 <Tag style={{ ...softTagStyle(tipoServicio(s.tipo).tono), marginBottom: 8 }}>
                   {tipoServicio(s.tipo).nombre}
                 </Tag>

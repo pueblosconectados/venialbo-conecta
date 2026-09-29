@@ -68,6 +68,38 @@ export const haCaducado = (fecha?: string | null): boolean => {
   return new Date(local).getTime() <= Date.now();
 };
 
+// «¡Nuevo!» en tarjetas y fichas. Noticias y anuncios son nuevos durante 48 horas sin
+// que nadie marque nada. Lo demás no tiene fecha de publicación, así que en el CMS se
+// pone a mano hasta qué día se marca («¡Nuevo!» hasta), incluido ese día. Como la
+// caducidad, se calcula al visitar: se quita solo sin volver a publicar la web.
+//
+// En noticias y anuncios no basta con fecha_publicacion: a veces se pone la del
+// documento original (una noticia subida hoy con fecha de hace un año). Por eso cuenta
+// también el día de creación, que Pages CMS pone al principio del nombre del fichero
+// (el id: "2026-09-29-uso-contenedor-deportivo"), y vale la más reciente de las dos.
+const HORAS_DE_NOVEDAD = 48;
+
+export type ConNovedad = {
+  id?: string;
+  fecha_publicacion?: string | null;
+  novedad_hasta?: string | null;
+};
+
+const instante = (fecha?: string | null): number =>
+  fecha ? new Date(fecha).getTime() || 0 : 0;
+
+export const esNuevo = (fila: ConNovedad): boolean => {
+  if (fila.novedad_hasta) return !haCaducado(fila.novedad_hasta);
+  if (!fila.fecha_publicacion) return false;
+  // "2026-09-29" suelto lo lee el navegador como medianoche UTC; con la hora, local
+  const creada = fila.id?.match(/^(\d{4}-\d{2}-\d{2})-/)?.[1];
+  const desde = Math.max(
+    instante(fila.fecha_publicacion),
+    instante(creada && `${creada}T00:00`),
+  );
+  return desde > 0 && Date.now() - desde < HORAS_DE_NOVEDAD * 3600 * 1000;
+};
+
 const noCaducado = (fila: Fila): boolean =>
   !haCaducado(typeof fila.fecha_caducidad === "string" ? fila.fecha_caducidad : null);
 
