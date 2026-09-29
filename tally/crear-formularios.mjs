@@ -158,6 +158,20 @@ const cuerpoDe = (slug, definicion, tema = {}) => {
     });
   }
 
+  // Campos ocultos: no se ven, se rellenan desde el enlace (?anuncio=…) y llegan con la
+  // respuesta. Es lo único que Tally deja rellenar por la URL sin más.
+  if (definicion.ocultos?.length) {
+    bloques.push({
+      uuid: uuidEstable(slug, "ocultos"),
+      type: "HIDDEN_FIELDS",
+      groupUuid: uuidEstable(slug, "grupo-ocultos"),
+      groupType: "HIDDEN_FIELDS",
+      payload: {
+        hiddenFields: definicion.ocultos.map((name) => ({ uuid: uuidEstable(slug, "oculto", name), name })),
+      },
+    });
+  }
+
   for (const campo of definicion.campos) bloques.push(...bloquesDeCampo(slug, campo));
 
   // Aviso de privacidad, al final: enlaza a /privacidad de la web.

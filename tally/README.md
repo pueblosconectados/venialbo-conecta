@@ -174,6 +174,17 @@ Cada formulario acaba con dos bloques que salen de la definición y no de `campo
 En las respuestas, esa casilla es la única pregunta sin título, y los importadores la
 saltan: no va a ninguna ficha.
 
+## Campos ocultos
+
+`ocultos` en la definición (hoy solo en contacto: `["anuncio"]`) crea un bloque
+`HIDDEN_FIELDS`. No se ve en el formulario; se rellena desde el enlace
+(`https://tally.so/r/obJXzX?anuncio=…`) y llega con la respuesta. Es lo único que Tally
+deja rellenar por la URL sin más: para que salga escrito en una pregunta visible habría
+que usar el `defaultAnswer` que apunta a otro campo, que la API no documenta del todo.
+
+La ficha de cada anuncio enlaza así al contacto («Pide que lo quitemos del tablón»),
+con el título y el id del anuncio, para saber cuál es sin preguntar.
+
 ## Campos
 
 Cada definición es una lista de campos con un tipo nuestro, que el script traduce al

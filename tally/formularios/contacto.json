@@ -3,6 +3,7 @@
   "intro": "Escríbenos lo que quieras contarnos y te contestamos. Los datos solo se usan para responderte.",
   "nota": "Cómo tratamos tus datos lo explicamos en <a href=\"https://venialboconecta.es/privacidad\">venialboconecta.es/privacidad</a>.",
   "aceptar": "He leído y acepto la política de privacidad",
+  "ocultos": ["anuncio"],
   "campos": [
     {
       "clave": "nombre",

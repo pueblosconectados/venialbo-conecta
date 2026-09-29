@@ -11,7 +11,7 @@ import {
   Typography,
 } from "antd";
 import { ClockCircleOutlined, FileSearchOutlined } from "@ant-design/icons";
-import { formatFecha, imgUrl } from "../../../config";
+import { FORMULARIOS, formatFecha, imgUrl } from "../../../config";
 import { haCaducado } from "../../../datos";
 import { colors, softTagStyle, type TagTone } from "../../../theme";
 import { CabeceraFicha } from "../../components/CabeceraFicha";
@@ -160,6 +160,20 @@ export function AnunciosShow() {
           <Typography.Text>{a.contacto}</Typography.Text>
         </div>
       )}
+      {/* Quien publicó el anuncio no puede quitarlo (no hay cuentas): lo pide por el
+          formulario de contacto, que lleva el anuncio en el campo oculto "anuncio" para
+          que en el correo se sepa cuál es. Lo retira a mano quien lleve el CMS. */}
+      <Typography.Paragraph style={{ marginTop: 24, marginBottom: 0, color: colors.marronSuave }}>
+        ¿Ya no hace falta este anuncio?{" "}
+        <a
+          href={`${FORMULARIOS.contacto}?anuncio=${encodeURIComponent(`${a.titulo} (${a.id})`)}`}
+          target="_blank"
+          rel="noopener noreferrer"
+          style={{ color: colors.musgo, fontWeight: 500 }}
+        >
+          Pide que lo quitemos del tablón
+        </a>
+      </Typography.Paragraph>
       <div style={{ marginTop: 24 }}>
         <Link to="/tablon" style={{ color: colors.musgo, fontWeight: 500 }}>
           ← Volver al tablón
