@@ -117,6 +117,9 @@ const main = async () => {
     const valores = new Map();
     for (const r of envio.responses) {
       const etiqueta = preguntas.get(r.questionId);
+      // La casilla de aceptar la privacidad es la única pregunta sin título, y no
+      // va a la ficha: Tally ya no deja enviar sin marcarla.
+      if (!etiqueta) continue;
       const campo = porEtiqueta.get(etiqueta);
       if (!campo) {
         console.warn(`  ⚠ pregunta sin sitio en la ficha: ${etiqueta} — se ignora`);

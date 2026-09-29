@@ -161,6 +161,19 @@ La diferencia entre los dos es la piedra del puente: en el normal queda calada y
 el fondo a través, que es lo que conviene sobre el crema del tema; el `-relleno` la
 lleva en blanco opaco, para un fondo oscuro o de color.
 
+## La privacidad
+
+Cada formulario acaba con dos bloques que salen de la definición y no de `campos`:
+
+- `nota`: un texto con el enlace a `venialboconecta.es/privacidad`.
+- `aceptar`: una **casilla obligatoria** («He leído y acepto la política de
+  privacidad»). Sin marcarla, Tally no deja enviar. Es un grupo de casillas con una
+  sola opción y sin título de pregunta; el texto de una casilla no admite enlaces, por
+  eso el enlace va en la nota de encima.
+
+En las respuestas, esa casilla es la única pregunta sin título, y los importadores la
+saltan: no va a ninguna ficha.
+
 ## Campos
 
 Cada definición es una lista de campos con un tipo nuestro, que el script traduce al
@@ -194,6 +207,5 @@ la ligera: cambiarla equivale a borrar la pregunta y crear otra.
 
 ## Lo que esto no resuelve
 
-- El **aviso de privacidad** enlazado desde los formularios sigue pendiente.
 - El flujo sigue siendo *vecino envía → lo publicamos nosotros en el CMS*. Tally tiene
   webhooks, pero para recibirlos hace falta algo que escuche y la web es estática.

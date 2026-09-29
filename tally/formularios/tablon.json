@@ -1,7 +1,8 @@
 {
   "titulo": "Publicar un anuncio en el tablón",
   "intro": "Rellena esto y nosotros lo publicamos en el tablón de la web. Si es una mascota perdida, cuanto antes mejor.",
-  "nota": "Al enviar este formulario aceptas cómo tratamos tus datos. Lo explicamos en <a href=\"https://venialboconecta.es/privacidad\">venialboconecta.es/privacidad</a>.",
+  "nota": "Cómo tratamos tus datos lo explicamos en <a href=\"https://venialboconecta.es/privacidad\">venialboconecta.es/privacidad</a>.",
+  "aceptar": "He leído y acepto la política de privacidad",
   "campos": [
     {
       "clave": "titulo",

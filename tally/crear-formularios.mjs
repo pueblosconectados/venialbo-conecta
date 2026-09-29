@@ -171,6 +171,20 @@ const cuerpoDe = (slug, definicion, tema = {}) => {
     });
   }
 
+  // La casilla de "He leído y acepto", obligatoria: sin marcarla Tally no deja enviar.
+  // Es un grupo de casillas con una sola opción y sin título de pregunta, porque la nota
+  // de encima ya explica de qué va. El texto de una casilla no admite enlaces; el
+  // enlace a /privacidad lo lleva la nota.
+  if (definicion.aceptar) {
+    bloques.push({
+      uuid: uuidEstable(slug, "aceptar"),
+      type: "CHECKBOX",
+      groupUuid: uuidEstable(slug, "grupo-aceptar"),
+      groupType: "CHECKBOXES",
+      payload: { index: 0, isFirst: true, isLast: true, text: definicion.aceptar, isRequired: true },
+    });
+  }
+
   const cuerpo = { status: PUBLICAR ? "PUBLISHED" : "DRAFT", blocks: bloques };
   const settings = {};
   if (tema.styles) settings.styles = tema.styles;

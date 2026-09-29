@@ -1,7 +1,8 @@
 {
   "titulo": "Contacto — VenialboConecta",
   "intro": "Escríbenos lo que quieras contarnos y te contestamos. Los datos solo se usan para responderte.",
-  "nota": "Al enviar este formulario aceptas cómo tratamos tus datos. Lo explicamos en <a href=\"https://venialboconecta.es/privacidad\">venialboconecta.es/privacidad</a>.",
+  "nota": "Cómo tratamos tus datos lo explicamos en <a href=\"https://venialboconecta.es/privacidad\">venialboconecta.es/privacidad</a>.",
+  "aceptar": "He leído y acepto la política de privacidad",
   "campos": [
     {
       "clave": "nombre",
