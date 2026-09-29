@@ -39,8 +39,41 @@ const enlacePorDefecto =
   md.renderer.rules.link_open ??
   ((tokens, idx, options, _env, self) => self.renderToken(tokens, idx, options));
 
+// Un enlace a otra parte de la web puede llegar de tres formas: relativo
+// (/descubre/rutas/...), completo (https://venialboconecta.es/descubre/...) o, si se
+// copió la dirección con la ficha abierta en el CMS, a la pantalla de edición de
+// Pages CMS (https://app.pagescms.org/.../collection/rutas/edit/web-static%2F...json),
+// que el visitante no puede abrir. Los dos últimos se pasan al primero.
+const RUTA_DE_COLECCION: Record<string, string> = {
+  noticias: "/noticias/",
+  actividades: "/actividades/",
+  lugares: "/descubre/lugares/",
+  rutas: "/descubre/rutas/",
+  negocios: "/negocios/",
+  servicios: "/servicios/",
+  anuncios: "/tablon/",
+};
+
+const aRutaInterna = (href: string): string => {
+  const propia = href.match(/^https?:\/\/(?:www\.)?venialboconecta\.es(\/[^#?]*)?([?#].*)?$/i);
+  if (propia) return (propia[1] || "/") + (propia[2] ?? "");
+
+  const cms = href.match(/^https?:\/\/app\.pagescms\.org\/.*\/collection\/([^/]+)\/edit\/([^/?#]+)/i);
+  if (cms && RUTA_DE_COLECCION[cms[1]]) {
+    try {
+      const fichero = decodeURIComponent(cms[2]).split("/").pop() ?? "";
+      const id = fichero.replace(/\.json$/i, "");
+      if (id) return RUTA_DE_COLECCION[cms[1]] + id;
+    } catch {
+      // Un %xx mal formado: se deja el enlace como venía
+    }
+  }
+  return href;
+};
+
 md.renderer.rules.link_open = (tokens, idx, options, env, self) => {
-  const href = atributo(tokens[idx].attrGet("href"));
+  const href = aRutaInterna(atributo(tokens[idx].attrGet("href")));
+  tokens[idx].attrSet("href", href);
   if (/^https?:\/\//i.test(href)) {
     // Los enlaces externos salen fuera del sitio: pestaña nueva y sin dar
     // acceso al window de origen.
