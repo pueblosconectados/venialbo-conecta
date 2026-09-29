@@ -272,5 +272,11 @@ await escribir("avisos", avisos, avisos);
 // Anuncios — los caducados se ocultan en el navegador (staticDataProvider)
 const anuncios = (await leerColeccion("anuncios"))
   .filter((a) => a.activo !== false)
+  .map((a) => ({ ...a, galeria: (a.galeria ?? []).filter((g) => g?.imagen) }))
   .sort(porFechaDesc);
-await escribir("anuncios", anuncios, anuncios);
+// El tablón solo enseña la foto principal
+await escribir(
+  "anuncios",
+  anuncios.map((a) => quitar(a, "galeria")),
+  anuncios,
+);

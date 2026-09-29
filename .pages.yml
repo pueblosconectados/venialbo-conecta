@@ -795,11 +795,32 @@ content:
         description: Teléfono, email o cómo localizar a quien publica.
         type: string
       - name: imagen_url
-        label: Imagen
-        description: 'Si al subirla da error 413, pesa más de unos 3 MB: redúcela antes (por ejemplo, mándatela por WhatsApp y guarda la que llega).'
+        label: Foto principal
+        description: 'La que sale en el tablón y arriba en el anuncio. Si al subirla da error 413, pesa más de unos 3 MB: redúcela antes (por ejemplo, mándatela por WhatsApp y guarda la que llega).'
         type: image
         options:
           media: imagenes
+      - name: galeria
+        label: Más fotos
+        description: >-
+          Hasta 3 más, para lo que no se ve con una sola (una casa, un mueble…). Salen
+          debajo de la descripción. Cada foto que se sube aquí se queda en el
+          repositorio para siempre.
+        type: object
+        list:
+          max: 3
+        fields:
+          - name: imagen
+            label: Foto
+            description: 'Si al subirla da error 413, pesa más de unos 3 MB: redúcela antes (por ejemplo, mándatela por WhatsApp y guarda la que llega).'
+            type: image
+            required: true
+            options:
+              media: imagenes
+          - name: pie
+            label: Pie de foto
+            description: Opcional. Lo que se lee al ampliarla.
+            type: string
       - name: fecha_publicacion
         label: Fecha de publicación
         type: date

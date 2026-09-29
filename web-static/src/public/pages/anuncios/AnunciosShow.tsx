@@ -16,6 +16,7 @@ import { colors, softTagStyle, type TagTone } from "../../../theme";
 import { CabeceraFicha } from "../../components/CabeceraFicha";
 import { ContenidoRico } from "../../components/ContenidoRico";
 import { ImagenAmpliable } from "../../components/ImagenAmpliable";
+import { Galeria, type Foto } from "../../components/Galeria";
 import { juegoDeMiniaturas } from "../../../miniaturas";
 
 type Anuncio = {
@@ -25,6 +26,7 @@ type Anuncio = {
   descripcion?: string;
   contacto?: string;
   imagen_url?: string;
+  galeria?: Foto[];
   fecha_publicacion: string;
   activo: boolean;
   fecha_caducidad: string;
@@ -134,6 +136,14 @@ export function AnunciosShow() {
       </Typography.Text>
       <Divider style={{ borderColor: colors.borde }} />
       <ContenidoRico texto={a.descripcion} style={{ lineHeight: 1.7, marginBottom: 16 }} />
+      {a.galeria && a.galeria.length > 0 && (
+        <>
+          <Typography.Title level={4} style={{ margin: "28px 0 12px" }}>
+            Más fotos
+          </Typography.Title>
+          <Galeria fotos={a.galeria} titulo={a.titulo} />
+        </>
+      )}
       {a.contacto && (
         <div
           style={{
