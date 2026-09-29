@@ -1,0 +1,15 @@
+{
+  "nombre": "Ruta en bici larga Titán Matacucos 2026",
+  "modalidad": "bici",
+  "activa": true,
+  "distancia_km": 61,
+  "duracion": "3 h 20 min",
+  "desnivel_m": 141,
+  "dificultad": "media",
+  "recorrido": "circular",
+  "salida": "Iglesia de Nuestra Señora de la Asunción",
+  "coordenadas_salida": "41.389508, -5.539367",
+  "wikiloc_url": "https://loc.wiki/t/281996609?wa=sc",
+  "gpx": "/media/documentos/matacucos-bici-60.gpx",
+  "imagen_url": "/media/imagenes/matacubos-bici-2026-61-km.png"
+}
