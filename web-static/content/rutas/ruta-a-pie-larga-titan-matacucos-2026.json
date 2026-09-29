@@ -1,0 +1,13 @@
+{
+  "nombre": "Ruta a pie larga Titan Matacucos 2026",
+  "modalidad": "pie",
+  "activa": true,
+  "distancia_km": 15,
+  "desnivel_m": 184,
+  "recorrido": "circular",
+  "salida": "Calle Bodegas",
+  "coordenadas_salida": "https://loc.wiki/t/282159915?wa=sc",
+  "wikiloc_url": "https://loc.wiki/t/282159915?wa=sc",
+  "gpx": "/media/documentos/matacucos-senderismo-15.gpx",
+  "imagen_url": "/media/imagenes/matacubos-senderismo-2026-15-km.png"
+}
