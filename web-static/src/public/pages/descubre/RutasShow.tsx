@@ -134,18 +134,34 @@ export function RutasShow() {
               <EnvironmentOutlined /> {r.salida}
             </Typography.Paragraph>
           )}
-          {hayMapa && <Mapa latitud={r.latitud!} longitud={r.longitud!} nombre={`salida de ${r.nombre}`} />}
+          {hayMapa && (
+            <>
+              {/* El botón abre Google Maps con la salida como destino, que es lo que hace
+                  falta para ir hasta ella, pero allí sale marcada como punto de llegada y
+                  confundía: se dice aquí qué es cada cosa. */}
+              <Typography.Paragraph style={{ color: colors.marronSuave }}>
+                El marcador es donde empieza la ruta. «Cómo llegar a la salida» te lleva
+                hasta allí desde donde estés.
+              </Typography.Paragraph>
+              <Mapa
+                latitud={r.latitud!}
+                longitud={r.longitud!}
+                nombre={`salida de ${r.nombre}`}
+                textoComoLlegar="Cómo llegar a la salida"
+              />
+            </>
+          )}
         </>
       )}
 
       {(r.wikiloc_url || r.gpx) && (
         <>
           {tituloSeccion("El trazado")}
-          <Typography.Paragraph style={{ color: colors.marronSuave }}>
-            {r.wikiloc_url
-              ? "En Wikiloc se ve el recorrido entero sobre el mapa y se puede seguir desde el móvil."
-              : "Para seguir la ruta con el GPS o con una aplicación de mapas del móvil."}
-          </Typography.Paragraph>
+          {r.wikiloc_url && (
+            <Typography.Paragraph style={{ color: colors.marronSuave }}>
+              En Wikiloc se ve el recorrido entero sobre el mapa y se puede seguir desde el móvil.
+            </Typography.Paragraph>
+          )}
           <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
             {r.wikiloc_url && (
               <Button
@@ -164,6 +180,13 @@ export function RutasShow() {
               </Button>
             )}
           </div>
+          {r.gpx && (
+            <Typography.Paragraph style={{ color: colors.marronSuave, fontSize: 13, marginTop: 12 }}>
+              El GPX es el archivo con el recorrido. Para seguirlo en el móvil sin Wikiloc
+              hace falta una aplicación de mapas que lo abra, por ejemplo Organic Maps u
+              OsmAnd, que son gratuitas: descarga el archivo y ábrelo con ella.
+            </Typography.Paragraph>
+          )}
         </>
       )}
 

@@ -7,6 +7,8 @@ type Props = {
   longitud: number;
   /** Para el título del iframe, que es lo que lee un lector de pantalla. */
   nombre: string;
+  /** El texto del botón de Google Maps. En una ruta, "Cómo llegar a la salida". */
+  textoComoLlegar?: string;
 };
 
 // Mapa de un punto: el <iframe> de OpenStreetMap con un marcador, y debajo "Cómo
@@ -18,7 +20,7 @@ type Props = {
 //
 // El mapa lleva una capa encima que hay que tocar para usarlo. Sin ella, en el móvil el
 // dedo que baja por la ficha se queda arrastrando el mapa y la página no avanza.
-export const Mapa = ({ latitud, longitud, nombre }: Props) => {
+export const Mapa = ({ latitud, longitud, nombre, textoComoLlegar = "Cómo llegar" }: Props) => {
   const [activo, setActivo] = useState(false);
 
   // Un recuadro de unos 700 × 550 m alrededor del punto: se ve la calle y lo de al lado
@@ -43,7 +45,7 @@ export const Mapa = ({ latitud, longitud, nombre }: Props) => {
       </div>
       <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginTop: 12 }}>
         <Button type="primary" icon={<EnvironmentOutlined />} href={comoLlegar} target="_blank" rel="noopener noreferrer">
-          Cómo llegar
+          {textoComoLlegar}
         </Button>
         <Button icon={<ExpandOutlined />} href={grande} target="_blank" rel="noopener noreferrer">
           Ver mapa grande
