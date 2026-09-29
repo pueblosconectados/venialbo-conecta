@@ -20,15 +20,20 @@ const TIPO: Record<string, "error" | "warning" | "success"> = {
 
 const CLAVE = "vc-avisos-cerrados";
 
-// Se guardan los ids cerrados, no un simple "ya los vio": asi un aviso nuevo vuelve
-// a aparecer aunque el vecino cerrara el anterior.
+// Se guardan los ids cerrados, no un simple "ya los vio": asi un aviso nuevo sale
+// aunque el vecino cerrara el anterior.
+//
+// En sessionStorage, no en localStorage: el cierre dura lo que dura la visita (la
+// pestaña abierta, aunque se navegue por la web o se recargue). Al volver otro dia, el
+// aviso sale otra vez mientras siga vigente. Antes se guardaba en localStorage y un
+// aviso cerrado no volvia nunca, aunque durase semanas.
 //
 // Todo va entre try/catch porque en navegacion privada, o con las cookies de sitio
-// bloqueadas, leer o escribir localStorage lanza. Si falla, el aviso simplemente se
-// vuelve a ver: es el fallo menos grave posible.
+// bloqueadas, leer o escribir el almacenamiento puede lanzar. Si falla, el aviso
+// simplemente se vuelve a ver: es el fallo menos grave posible.
 const leerCerrados = (): string[] => {
   try {
-    const guardado = localStorage.getItem(CLAVE);
+    const guardado = sessionStorage.getItem(CLAVE);
     const ids: unknown = guardado ? JSON.parse(guardado) : [];
     return Array.isArray(ids) ? ids.filter((id) => typeof id === "string") : [];
   } catch {
@@ -38,11 +43,18 @@ const leerCerrados = (): string[] => {
 
 const guardarCerrados = (ids: string[]) => {
   try {
-    localStorage.setItem(CLAVE, JSON.stringify(ids));
+    sessionStorage.setItem(CLAVE, JSON.stringify(ids));
   } catch {
-    // Sin memoria: el aviso volvera a salir en la proxima visita
+    // Sin memoria: el aviso volvera a salir en la proxima pagina
   }
 };
+
+// Lo que quedara de la version anterior en localStorage ya no se usa: se borra
+try {
+  localStorage.removeItem(CLAVE);
+} catch {
+  // Nada que borrar, o no se puede: da igual
+}
 
 // La banda de avisos que sale en todas las paginas, bajo la cabecera. Los caducados
 // los descarta ya el staticDataProvider, asi que aqui solo llegan los vigentes.

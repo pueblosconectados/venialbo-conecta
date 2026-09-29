@@ -87,8 +87,8 @@ export function Privacidad() {
         <p>
           Esta web no lleva analítica, ni rastreadores, ni cookies de publicidad. Lo único
           que guarda tu navegador es qué avisos de la banda superior has cerrado, para no
-          volver a enseñártelos; eso se queda en tu móvil o tu ordenador y no llega a
-          nosotros. Los vídeos de YouTube no se cargan hasta que pulsas para verlos, y a
+          volver a enseñártelos mientras sigas en la web; se borra al cerrar la pestaña, se
+          queda en tu móvil o tu ordenador y no llega a nosotros. Los vídeos de YouTube no se cargan hasta que pulsas para verlos, y a
           partir de ahí se rigen por las normas de Google. Los mapas de los lugares son de
           OpenStreetMap: al abrir uno, tu navegador le pide el mapa a sus servidores,
           como con cualquier imagen. Los formularios de Tally, al
