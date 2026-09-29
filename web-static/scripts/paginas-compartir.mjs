@@ -233,6 +233,27 @@ for (const f of FICHAS) {
   }
 }
 
+// Direcciones que cambiaron (una ficha renombrada): redirecciones.json dice de dónde
+// a dónde. GitHub Pages no sabe redirigir, así que en la dirección vieja se deja una
+// copia de la página nueva —con su vista previa, para que un enlace ya compartido por
+// WhatsApp se siga viendo bien— que manda al navegador a la nueva nada más cargar.
+// No van al sitemap.
+const redirecciones = JSON.parse(
+  await readFile(join(ROOT, "redirecciones.json"), "utf8").catch(() => "{}"),
+);
+for (const [vieja, nueva] of Object.entries(redirecciones)) {
+  const html = await readFile(join(DIST, `${nueva}.html`), "utf8").catch(() => null);
+  if (!html) {
+    console.warn(`  ⚠ redirección ${vieja} → ${nueva}: la ficha nueva no existe, se omite`);
+    continue;
+  }
+  const destino = escapar(`${BASE}${nueva}`);
+  const salto =
+    `<meta http-equiv="refresh" content="0; url=${destino}" />\n` +
+    `    <script>location.replace(${JSON.stringify(`${BASE}${nueva}`)} + location.search + location.hash)</script>`;
+  await escribir(`${vieja}.html`, html.replace("<head>", `<head>\n    ${salto}`));
+}
+
 // Sin <lastmod>: el contenido no guarda cuándo se cambió cada ficha, y Google deja de
 // hacer caso a las fechas de un sitemap si ve que no cuadran con los cambios reales
 await escribir(
@@ -245,4 +266,4 @@ ${enSitemap.map((ruta) => `  <url><loc>${escapar(`${SITIO}${ruta}`)}</loc></url>
 );
 await escribir("robots.txt", `User-agent: *\nAllow: /\n\nSitemap: ${SITIO}sitemap.xml\n`);
 
-console.log(`páginas para compartir: ${SECCIONES.length} secciones y ${total} fichas, ${hechas.size} fotos; ${enSitemap.length} direcciones en el sitemap`);
+console.log(`páginas para compartir: ${SECCIONES.length} secciones y ${total} fichas, ${hechas.size} fotos; ${enSitemap.length} direcciones en el sitemap; ${Object.keys(redirecciones).length} redirecciones`);
