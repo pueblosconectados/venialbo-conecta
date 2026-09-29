@@ -1,0 +1,15 @@
+{
+  "titulo": "Uso contenedor deportivo",
+  "fecha_publicacion": "2025-11-27T11:31",
+  "categoria": "web-static/content/categorias/ayuntamiento.json",
+  "destacada": true,
+  "activa": true,
+  "imagen_url": "/media/imagenes/instalacion-deportiva-portatil-venialbo.jpg",
+  "contenido": "Contenido sacado de la [Sede Electrónica](https://venialbo.sedelectronica.es/preview-document/9c834620-d3b3-4608-9a9a-f8476b1ab21f/) de Venialbo",
+  "documentos": [
+    {
+      "archivo": "/media/documentos/instalacion-deportiva-portatil-venialbo.pdf",
+      "titulo": "Documento de uso del espacio deportivo y fitness al aire libre"
+    }
+  ]
+}
