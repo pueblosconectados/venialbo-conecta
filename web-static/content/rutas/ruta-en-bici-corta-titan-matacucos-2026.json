@@ -1,0 +1,13 @@
+{
+  "nombre": "Ruta en bici corta Titán Matacucos 2026",
+  "modalidad": "bici",
+  "activa": true,
+  "distancia_km": 40,
+  "desnivel_m": 130,
+  "recorrido": "circular",
+  "salida": "Iglesia de Nuestra Señora de la Asunción",
+  "coordenadas_salida": "41.389508, -5.539367",
+  "wikiloc_url": "https://loc.wiki/t/276857275?wa=sc",
+  "gpx": "/media/documentos/matacucos-bici-40.gpx",
+  "imagen_url": "/media/imagenes/matacubos-bici-2026-40-km.png"
+}
