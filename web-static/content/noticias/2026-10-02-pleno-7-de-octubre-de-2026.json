@@ -1,0 +1,19 @@
+{
+  "titulo": "Pleno 7 de octubre de 2026",
+  "fecha_publicacion": "2026-10-02T10:30",
+  "categoria": "web-static/content/categorias/ayuntamiento.json",
+  "destacada": true,
+  "activa": true,
+  "imagen_url": "/media/imagenes/acuerdos-pleno-3-julio-2026.jpg",
+  "contenido": "Convocatoria al pleno del 7 de octubre de 2026 y acuerdos adoptados en el pleno del 3 de julio de 2026.",
+  "documentos": [
+    {
+      "archivo": "/media/documentos/acuerdos-pleno-3-julio-2026-1.pdf",
+      "titulo": "Relación de acuerdos pleno 3 de julio de 2026"
+    },
+    {
+      "archivo": "/media/documentos/convocatoria-pleno-7-octubre-2026.pdf",
+      "titulo": "Convocatoria al pleno 7 de octubre de 2026"
+    }
+  ]
+}
