@@ -4,14 +4,15 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "dev": "node scripts/build-content.mjs && node scripts/miniaturas.mjs && vite",
+    "dev": "node scripts/avatares.mjs && node scripts/build-content.mjs && node scripts/miniaturas.mjs && vite",
     "build-content": "node scripts/build-content.mjs",
-    "build": "node scripts/build-content.mjs && node scripts/miniaturas.mjs && tsc -b && vite build && node scripts/paginas-compartir.mjs && node -e \"require('fs').copyFileSync('dist/index.html','dist/404.html')\"",
+    "build": "node scripts/avatares.mjs && node scripts/build-content.mjs && node scripts/miniaturas.mjs && tsc -b && vite build && node scripts/paginas-compartir.mjs && node -e \"require('fs').copyFileSync('dist/index.html','dist/404.html')\"",
     "lint": "eslint .",
     "preview": "vite preview",
     "imagenes-huerfanas": "node scripts/imagenes-huerfanas.mjs",
     "normaliza-imagenes": "node scripts/normaliza-imagenes.mjs",
-    "miniaturas": "node scripts/miniaturas.mjs"
+    "miniaturas": "node scripts/miniaturas.mjs",
+    "avatares": "node scripts/avatares.mjs"
   },
   "dependencies": {
     "@ant-design/icons": "^6.2.2",

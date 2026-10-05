@@ -63,6 +63,15 @@ jobs:
           git pull --rebase origin main
           git push origin HEAD:main
 
+      # Las fotos de perfil de los enlaces de interés no se commitean. Se guardan de un
+      # despliegue a otro para no pedirlas cada vez y para no perderlas si un día la red
+      # no contesta (Facebook a veces bloquea a los servidores de GitHub).
+      - uses: actions/cache@v4
+        with:
+          path: web-static/public/avatares
+          key: avatares-${{ github.run_id }}
+          restore-keys: avatares-
+
       - run: npm run build
 
       - uses: actions/upload-pages-artifact@v5

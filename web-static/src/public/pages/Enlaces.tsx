@@ -11,6 +11,7 @@ import {
   YoutubeFilled,
 } from "@ant-design/icons";
 import { useList } from "../../datos";
+import { Imagen } from "../components/Imagen";
 import { colors } from "../../theme";
 
 type Enlace = {
@@ -19,6 +20,7 @@ type Enlace = {
   url: string;
   descripcion?: string | null;
   grupo: string;
+  avatar?: string | null;
 };
 
 // En el orden en que salen. Las claves son las del select «Grupo» de .pages.yml:
@@ -63,17 +65,51 @@ const direccionCorta = (url: string) => {
   return usuario ? `${servidor(url)}/${usuario}` : servidor(url);
 };
 
-function Icono({ url }: { url: string }) {
+function Icono({ url, avatar }: { url: string; avatar?: string | null }) {
   const red = REDES.find((r) => r.dominio.test(servidor(url)));
-  const estilo = { fontSize: 28, color: red?.color ?? colors.musgo, flexShrink: 0 };
-  return red ? <red.Icono style={estilo} /> : <GlobalOutlined style={estilo} />;
+  if (!avatar) {
+    const estilo = { fontSize: 28, color: red?.color ?? colors.musgo, flexShrink: 0 };
+    return red ? <red.Icono style={estilo} /> : <GlobalOutlined style={estilo} />;
+  }
+  // Con foto: redonda, y el icono de la red pequeño en la esquina para que se sepa
+  // de un vistazo adónde lleva
+  return (
+    <div style={{ position: "relative", width: 56, height: 56, flexShrink: 0 }}>
+      <Imagen
+        src={avatar}
+        alt=""
+        sizes="56px"
+        style={{
+          width: 56,
+          height: 56,
+          borderRadius: "50%",
+          objectFit: "cover",
+          border: `1px solid ${colors.borde}`,
+        }}
+      />
+      {red && (
+        <red.Icono
+          style={{
+            position: "absolute",
+            right: -4,
+            bottom: -4,
+            fontSize: 18,
+            color: red.color,
+            background: colors.blanco,
+            borderRadius: 4,
+            padding: 1,
+          }}
+        />
+      )}
+    </div>
+  );
 }
 
 function Tarjeta({ enlace }: { enlace: Enlace }) {
   return (
     <a href={enlace.url} target="_blank" rel="noopener noreferrer" className="vc-card-link">
       <Card styles={{ body: { padding: 16, display: "flex", gap: 14, alignItems: "flex-start" } }}>
-        <Icono url={enlace.url} />
+        <Icono url={enlace.url} avatar={enlace.avatar} />
         <div style={{ minWidth: 0 }}>
           <Typography.Text strong style={{ display: "block", color: colors.marronTexto }}>
             {enlace.nombre}

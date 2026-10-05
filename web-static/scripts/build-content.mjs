@@ -6,7 +6,7 @@
 // El id de cada entrada es el nombre del fichero sin extensión. La forma de los datos
 // imita la antigua API del backend para que las páginas no tengan que cambiar.
 
-import { mkdir, readdir, readFile, rm, stat, writeFile } from "node:fs/promises";
+import { access, mkdir, readdir, readFile, rm, stat, writeFile } from "node:fs/promises";
 import { basename, dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -289,10 +289,23 @@ const avisos = (await leerColeccion("avisos"))
 await escribir("avisos", avisos, avisos);
 
 // Enlaces de interés — una sola página, sin fichas: no hay detalle que escribir.
-const enlaces = (await leerColeccion("enlaces"))
-  .filter((e) => e.activo !== false)
-  .map((e) => ({ ...e, url: leerDireccion(e.url, `enlace ${e.id}`) }))
-  .sort((a, b) => (a.nombre ?? "").localeCompare(b.nombre ?? "", "es"));
+// La foto de la tarjeta: la que se suba a mano en el CMS o, si no hay, la que
+// scripts/avatares.mjs haya bajado de la red social. Si no hay ninguna, sale el icono.
+const avatarBajado = async (id) => {
+  const ruta = `/avatares/${id}.webp`;
+  return access(join(PUBLIC_DIR, ruta)).then(() => ruta, () => null);
+};
+const enlaces = (
+  await Promise.all(
+    (await leerColeccion("enlaces"))
+      .filter((e) => e.activo !== false)
+      .map(async (e) => ({
+        ...quitar(e, "imagen"),
+        url: leerDireccion(e.url, `enlace ${e.id}`),
+        avatar: e.imagen ?? (await avatarBajado(e.id)),
+      })),
+  )
+).sort((a, b) => (a.nombre ?? "").localeCompare(b.nombre ?? "", "es"));
 await escribir("enlaces", enlaces, []);
 
 // Anuncios — los caducados se ocultan en el navegador (staticDataProvider)

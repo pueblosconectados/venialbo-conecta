@@ -974,6 +974,14 @@ content:
         label: Descripción corta
         description: Opcional. Una línea que diga qué se encuentra ahí.
         type: string
+      - name: imagen
+        label: Imagen
+        description: >-
+          Opcional. En YouTube, Facebook e Instagram la foto del perfil se pone sola; súbela
+          aquí solo si no sale o si quieres otra. Mejor cuadrada.
+        type: image
+        options:
+          media: imagenes
       # Las etiquetas y el orden de los grupos están en src/public/pages/Enlaces.tsx:
       # si se añade uno aquí, añadirlo también allí.
       - name: grupo

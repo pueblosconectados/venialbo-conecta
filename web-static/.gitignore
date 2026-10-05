@@ -26,3 +26,5 @@ dist-ssr
 
 # Generado desde content/ por scripts/build-content.mjs
 public/data
+# Fotos de perfil de los enlaces, las baja scripts/avatares.mjs en cada build
+public/avatares
