@@ -48,8 +48,8 @@ El del tablón tiene tres cosas propias:
 - **La fecha de publicación va en hora de Madrid**, no en UTC, que es la que devuelve la
   API. Un anuncio mandado a las 00:30 llevaría si no la fecha del día anterior.
 
-El formulario admite hasta 4 fotos y el anuncio solo tiene hueco para una, así que el
-script las lista y quien repasa elige.
+El formulario admite hasta 4 fotos, las mismas que caben en el anuncio (la «Foto
+principal» y tres en «Más fotos»). El script las lista y quien repasa las sube.
 
 La ficha se escribe **con `"activo": false`**, así que no sale en la web hasta que
 alguien la repase en el CMS y marque *Visible en la web*. Esa revisión es el punto de

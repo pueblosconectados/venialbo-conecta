@@ -51,7 +51,7 @@
     {
       "clave": "foto",
       "tipo": "archivo",
-      "etiqueta": "Foto (opcional)",
+      "etiqueta": "Fotos (opcional, hasta 4)",
       "restricciones": {
         "allowedFiles": {
           "image/*": [

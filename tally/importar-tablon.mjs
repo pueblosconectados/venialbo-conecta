@@ -183,12 +183,12 @@ const main = async () => {
 
     const fotos = valores.get("foto") ?? [];
     if (fotos.length) {
-      // El anuncio solo tiene hueco para una imagen, aunque el formulario admita cuatro.
+      // Caben las cuatro: una como «Foto principal» y el resto en «Más fotos».
       const cuantas = fotos.length === 1 ? "una foto" : `${fotos.length} fotos`;
       if (DISCRETO) {
-        console.log(`  lleva ${cuantas}: míralas en Tally y sube la que valga → ${urlEnTally}`);
+        console.log(`  lleva ${cuantas}: míralas en Tally y sube las que valgan → ${urlEnTally}`);
       } else {
-        console.log(`  lleva ${cuantas} (la ficha admite una; elige):`);
+        console.log(`  lleva ${cuantas} (una de foto principal, el resto en «Más fotos»):`);
         for (const foto of fotos) console.log(`    ${foto.url}`);
       }
     }
