@@ -759,6 +759,25 @@ content:
         label: Página web
         description: Dirección completa, empezando por https://
         type: string
+      - name: enlaces
+        label: Más enlaces
+        description: >-
+          Opcional. Otras páginas útiles, cada una con su botón en la ficha: la sede
+          electrónica, un horario, un catálogo… El texto es lo que pone el botón.
+        type: object
+        list:
+          max: 5
+        fields:
+          - name: texto
+            label: Texto del botón
+            description: Corto, por ejemplo «Sede electrónica».
+            type: string
+            required: true
+          - name: url
+            label: Dirección
+            description: Copiada de la barra del navegador, empezando por https://
+            type: string
+            required: true
       - name: redes_sociales
         label: Redes sociales
         type: object

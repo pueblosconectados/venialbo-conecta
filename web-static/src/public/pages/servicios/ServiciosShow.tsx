@@ -15,6 +15,7 @@ import {
   FacebookOutlined,
   GlobalOutlined,
   InstagramOutlined,
+  LinkOutlined,
   MailOutlined,
   PhoneOutlined,
   YoutubeOutlined,
@@ -38,6 +39,8 @@ type Servicio = {
   telefono?: string;
   email?: string;
   web_url?: string;
+  // «Más enlaces» del CMS: la sede electrónica, un horario… (build-content los limpia)
+  enlaces?: { texto: string; url: string }[];
   redes_sociales?: Record<string, string>;
   horario?: string;
   informacion_adicional?: string;
@@ -137,6 +140,17 @@ export function ServiciosShow() {
             Web
           </Button>
         )}
+        {s.enlaces?.map((e) => (
+          <Button
+            key={e.url}
+            icon={<LinkOutlined />}
+            href={e.url}
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            {e.texto}
+          </Button>
+        ))}
         {redes.facebook && (
           <Button
             icon={<FacebookOutlined />}

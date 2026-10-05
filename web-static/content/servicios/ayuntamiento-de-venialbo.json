@@ -6,6 +6,12 @@
   "telefono": "+34 980 573 054",
   "email": "info@venialbo.es",
   "web_url": "http://www.venialbo.es/",
+  "enlaces": [
+    {
+      "texto": "Sede electrónica",
+      "url": "https://venialbo.sedelectronica.es/"
+    }
+  ],
   "redes_sociales": {
     "facebook": "https://www.facebook.com/profile.php?id=100064525009202"
   },

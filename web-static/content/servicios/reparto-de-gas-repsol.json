@@ -3,6 +3,11 @@
   "tipo": "venta_reparto",
   "descripcion": "El reparto en Venialbo aparece en la ruta de los LUNES",
   "logo_url": "/media/imagenes/repsol-gas.png",
-  "web_url": "https://gas-olmar.es/zonas-de-reparto-zamora/",
+  "enlaces": [
+    {
+      "texto": "Zonas de reparto",
+      "url": "https://gas-olmar.es/zonas-de-reparto-zamora/"
+    }
+  ],
   "activo": true
 }

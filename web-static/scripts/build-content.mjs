@@ -66,8 +66,8 @@ const porFechaDesc = (a, b) => (b.fecha_publicacion ?? "").localeCompare(a.fecha
 const quitar = (obj, ...campos) =>
   Object.fromEntries(Object.entries(obj).filter(([k]) => !campos.includes(k)));
 
-// Direcciones que se pegan a mano en el CMS, que no las comprueba (enlaces de
-// interés). Lo que viene sin https:// se completa; lo que ni así
+// Direcciones que se pegan a mano en el CMS, que no las comprueba (enlaces de interés,
+// «Más enlaces» de los servicios). Lo que viene sin https:// se completa; lo que ni así
 // es una dirección (una frase, como pasó con el enlace de la Fuente el Macho) para el
 // build, para que no salga un enlace roto.
 const leerDireccion = (texto, quien) => {
@@ -149,6 +149,16 @@ await escribir("negocios", negocios, negocios);
 // Servicios
 const servicios = (await leerColeccion("servicios"))
   .filter((s) => s.activo !== false)
+  // «Más enlaces»: sin las filas vacías y con la dirección comprobada
+  .map((s) => ({
+    ...s,
+    enlaces: (s.enlaces ?? [])
+      .filter((e) => e?.url)
+      .map((e) => ({
+        texto: e.texto || new URL(leerDireccion(e.url, `servicio ${s.id}`)).hostname,
+        url: leerDireccion(e.url, `servicio ${s.id}`),
+      })),
+  }))
   .sort((a, b) => porTexto("tipo")(a, b) || porTexto("nombre")(a, b));
 await escribir("servicios", servicios, servicios);
 
