@@ -1,10 +1,8 @@
 import { useState } from "react";
-import { Link } from "react-router";
 import { esNuevo, useList } from "../../../datos";
 import {
   Alert,
   Button,
-  Card,
   Col,
   Pagination,
   Row,
@@ -14,7 +12,7 @@ import {
 } from "antd";
 import { MobileOutlined, PhoneOutlined, PlusOutlined, ShopOutlined } from "@ant-design/icons";
 import { FORMULARIOS } from "../../../config";
-import { Imagen } from "../../components/Imagen";
+import { TarjetaFila } from "../../components/TarjetaFila";
 import { colors, softTagStyle } from "../../../theme";
 import { EtiquetaNuevo } from "../../components/EtiquetaNuevo";
 
@@ -68,70 +66,35 @@ export function NegociosList() {
       </div>
       <Row gutter={[16, 16]}>
         {items.map((n) => (
-          <Col key={n.id} xs={24} sm={12} lg={8}>
-            <Link to={`/negocios/${n.id}`} className="vc-card-link">
-              <Card
-                cover={
-                  n.logo_url ? (
-                    <Imagen
-                      src={n.logo_url}
-                      alt={n.nombre}
-                      sizes="(max-width: 575px) 100vw, (max-width: 991px) 50vw, 33vw"
-                      style={{
-                        height: 180,
-                        objectFit: "contain",
-                        padding: 16,
-                        background: colors.crema,
-                        borderBottom: `1px solid ${colors.borde}`,
-                      }}
-                    />
-                  ) : (
-                    <div
-                      style={{
-                        height: 180,
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                        background: colors.musgoFondo,
-                        borderBottom: `1px solid ${colors.borde}`,
-                      }}
-                    >
-                      <ShopOutlined style={{ fontSize: 40, color: colors.musgoClaro }} />
-                    </div>
-                  )
-                }
-                styles={{ body: { padding: 16 } }}
-              >
-                {esNuevo(n) && <EtiquetaNuevo posicion="esquina" />}
-                {n.categoria_negocio && (
-                  <Tag style={{ ...softTagStyle("terracota"), marginBottom: 8 }}>
-                    {n.categoria_negocio}
-                  </Tag>
-                )}
-                <Typography.Text
-                  strong
-                  style={{ display: "block", marginBottom: 4 }}
-                >
-                  {n.nombre}
+          <Col key={n.id} xs={24} md={12}>
+            <TarjetaFila
+              to={`/negocios/${n.id}`}
+              imagen={n.logo_url}
+              alt={n.nombre}
+              sinImagen={<ShopOutlined style={{ fontSize: 32, color: colors.musgoClaro }} />}
+            >
+              {(esNuevo(n) || n.categoria_negocio) && (
+                <div style={{ marginBottom: 6 }}>
+                  {esNuevo(n) && <EtiquetaNuevo />}{esNuevo(n) && " "}
+                  {n.categoria_negocio && (
+                    <Tag style={softTagStyle("terracota")}>{n.categoria_negocio}</Tag>
+                  )}
+                </div>
+              )}
+              <Typography.Text strong style={{ display: "block", marginBottom: 4 }}>
+                {n.nombre}
+              </Typography.Text>
+              {n.telefono && (
+                <Typography.Text type="secondary" style={{ fontSize: 13, display: "block" }}>
+                  <PhoneOutlined /> {n.telefono}
                 </Typography.Text>
-                {n.telefono && (
-                  <Typography.Text
-                    type="secondary"
-                    style={{ fontSize: 12, display: "block" }}
-                  >
-                    <PhoneOutlined /> {n.telefono}
-                  </Typography.Text>
-                )}
-                {n.telefono_movil && (
-                  <Typography.Text
-                    type="secondary"
-                    style={{ fontSize: 12, display: "block" }}
-                  >
-                    <MobileOutlined /> {n.telefono_movil}
-                  </Typography.Text>
-                )}
-              </Card>
-            </Link>
+              )}
+              {n.telefono_movil && (
+                <Typography.Text type="secondary" style={{ fontSize: 13, display: "block" }}>
+                  <MobileOutlined /> {n.telefono_movil}
+                </Typography.Text>
+              )}
+            </TarjetaFila>
           </Col>
         ))}
       </Row>
