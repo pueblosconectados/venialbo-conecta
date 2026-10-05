@@ -9,12 +9,13 @@
   "enlaces": [
     {
       "texto": "Sede electrónica",
-      "url": "https://venialbo.sedelectronica.es/"
+      "url": "https://venialbo.sedelectronica.es/info.0"
     }
   ],
   "redes_sociales": {
     "facebook": "https://www.facebook.com/profile.php?id=100064525009202"
   },
   "horario": "De 09:00 a 14:00",
-  "activo": true
+  "activo": true,
+  "novedad_hasta": "2026-10-05"
 }
