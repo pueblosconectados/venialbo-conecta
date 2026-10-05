@@ -196,29 +196,6 @@ a:hover {
   padding: 0;
 }
 
-/* Pueblos Conectados, en la segunda fila de la portada: media fila en escritorio y
-   la fila entera en móvil. Siempre en horizontal; en móvil, con el logo más pequeño. */
-.vc-banda {
-  display: flex;
-  align-items: center;
-  gap: 24px;
-}
-
-.vc-banda img {
-  width: 96px;
-  height: auto;
-  flex-shrink: 0;
-}
-
-@media (max-width: 767px) {
-  .vc-banda {
-    gap: 16px;
-  }
-
-  .vc-banda img {
-    width: 64px;
-  }
-}
 
 .vc-card-link {
   display: block;

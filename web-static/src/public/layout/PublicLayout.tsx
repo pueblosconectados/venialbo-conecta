@@ -16,6 +16,7 @@ const NAV_ITEMS = [
   { key: "/negocios", label: "Negocios" },
   { key: "/servicios", label: "Servicios e instituciones" },
   { key: "/tablon", label: "Tablón" },
+  { key: "/enlaces", label: "Enlaces" },
   { key: "/pueblos-conectados", label: "Pueblos Conectados" },
 ];
 

@@ -66,6 +66,25 @@ const porFechaDesc = (a, b) => (b.fecha_publicacion ?? "").localeCompare(a.fecha
 const quitar = (obj, ...campos) =>
   Object.fromEntries(Object.entries(obj).filter(([k]) => !campos.includes(k)));
 
+// Direcciones que se pegan a mano en el CMS, que no las comprueba (enlaces de
+// interés). Lo que viene sin https:// se completa; lo que ni así
+// es una dirección (una frase, como pasó con el enlace de la Fuente el Macho) para el
+// build, para que no salga un enlace roto.
+const leerDireccion = (texto, quien) => {
+  const limpia = String(texto ?? "").trim();
+  const completa = /^https?:\/\//i.test(limpia) ? limpia : `https://${limpia}`;
+  let url;
+  try {
+    url = new URL(completa);
+  } catch {
+    url = null;
+  }
+  if (!limpia || /\s/.test(limpia) || !url?.hostname.includes(".")) {
+    throw new Error(`${quien}: "${texto}" no es una dirección. Tiene que ser como https://www.facebook.com/...`);
+  }
+  return url.href;
+};
+
 const mb = (bytes) => `${(bytes / 1024 / 1024).toFixed(1)} MB`;
 
 // Comprueba los PDF de una noticia o una actividad y les añade el tamaño, para poder
@@ -268,6 +287,13 @@ const avisos = (await leerColeccion("avisos"))
   .map((a) => ({ ...a, noticia: a.noticia ? idDe(a.noticia) : null }))
   .sort((a, b) => nivelDe(a) - nivelDe(b) || (b.id ?? "").localeCompare(a.id ?? ""));
 await escribir("avisos", avisos, avisos);
+
+// Enlaces de interés — una sola página, sin fichas: no hay detalle que escribir.
+const enlaces = (await leerColeccion("enlaces"))
+  .filter((e) => e.activo !== false)
+  .map((e) => ({ ...e, url: leerDireccion(e.url, `enlace ${e.id}`) }))
+  .sort((a, b) => (a.nombre ?? "").localeCompare(b.nombre ?? "", "es"));
+await escribir("enlaces", enlaces, []);
 
 // Anuncios — los caducados se ocultan en el navegador (staticDataProvider)
 const anuncios = (await leerColeccion("anuncios"))

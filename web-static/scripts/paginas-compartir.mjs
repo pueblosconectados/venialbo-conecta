@@ -177,6 +177,7 @@ const SECCIONES = [
   { ruta: "servicios", titulo: "Servicios e instituciones", descripcion: "Médico, comedor, bibliobús, asociaciones e instituciones de Venialbo." },
   { ruta: "tablon", titulo: "Tablón", descripcion: "Anuncios entre vecinos de Venialbo." },
   { ruta: "pueblos-conectados", titulo: "Pueblos Conectados", descripcion: "Un proyecto colaborativo entre Venialbo (Zamora) y Aldearrubia (Salamanca).", imagen: "/pueblos-conectados.webp" },
+  { ruta: "enlaces", titulo: "Enlaces de interés", descripcion: "Otras páginas donde se habla de Venialbo: sus canales y páginas en las redes, y más." },
   { ruta: "privacidad", titulo: "Privacidad", descripcion: "Qué pasa con tus datos en VenialboConecta." },
 ];
 const descripcionDe = Object.fromEntries(SECCIONES.map((s) => [s.ruta, s.descripcion]));

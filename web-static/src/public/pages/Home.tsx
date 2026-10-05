@@ -5,6 +5,7 @@ import {
   BankOutlined,
   CameraOutlined,
   CompassOutlined,
+  LinkOutlined,
   MedicineBoxOutlined,
   NotificationOutlined,
   ReadOutlined,
@@ -14,14 +15,16 @@ import { esNuevo, listar, type ConNovedad } from "../../datos";
 import { EtiquetaNuevo } from "../components/EtiquetaNuevo";
 
 type Seccion = {
-  icon: ReactNode;
+  // Un icono dentro del círculo de color, o una imagen que lo sustituye
+  icon?: ReactNode;
+  imagen?: string;
   title: string;
   desc: string;
   to: string;
   color: string;
   bg: string;
   // De dónde sale el «¡Nuevo!» de la tarjeta: si alguno de estos tiene algo nuevo
-  recursos: string[];
+  recursos?: string[];
 };
 
 // Arriba lo que cambia y se consulta a menudo; abajo, lo que es más de directorio.
@@ -64,7 +67,7 @@ const SECCIONES: Seccion[] = [
   },
 ];
 
-// Abajo, junto a Pueblos Conectados
+// Abajo, lo que es más de directorio y lo que lleva fuera del pueblo
 const DIRECTORIO: Seccion[] = [
   {
     icon: <BankOutlined />,
@@ -83,6 +86,22 @@ const DIRECTORIO: Seccion[] = [
     recursos: ["servicios"],
     color: "#8b6db5",
     bg: "#efe8f7",
+  },
+  {
+    icon: <LinkOutlined />,
+    title: "Enlaces de interés",
+    desc: "El pueblo en las redes y más",
+    to: "/enlaces",
+    color: "#2f7d78",
+    bg: "#e0f0ee",
+  },
+  {
+    imagen: "pueblos-conectados-icono.webp",
+    title: "Pueblos Conectados",
+    desc: "Venialbo y Aldearrubia, conectados",
+    to: "/pueblos-conectados",
+    color: colors.musgo,
+    bg: colors.musgoFondo,
   },
 ];
 
@@ -141,51 +160,14 @@ export function Home() {
         ))}
       </Row>
 
-      {/* Segunda fila: Negocios y Servicios del mismo tamaño que las de arriba, y
-          Pueblos Conectados en la mitad que queda. En móvil, Pueblos Conectados baja
-          sola a una fila entera. */}
+      {/* Segunda fila, del mismo tamaño que la primera: cuatro en escritorio, dos y
+          dos en móvil. */}
       <Row gutter={[20, 20]} style={{ marginTop: 20 }}>
         {DIRECTORIO.map((s) => (
           <Col key={s.to} xs={12} sm={12} md={6}>
             <TarjetaSeccion seccion={s} />
           </Col>
         ))}
-        <Col xs={24} sm={24} md={12}>
-          <Link to="/pueblos-conectados" className="vc-card-link">
-            <Card
-              styles={{ body: { padding: 24 } }}
-              style={{ border: `1px solid ${colors.borde}` }}
-            >
-              <div className="vc-banda">
-                <img
-                  src={`${import.meta.env.BASE_URL}pueblos-conectados-icono.webp`}
-                  alt=""
-                  width={300}
-                  height={300}
-                  loading="lazy"
-                  decoding="async"
-                />
-                <div>
-                  <Typography.Title
-                    level={3}
-                    style={{
-                      margin: 0,
-                      marginBottom: 4,
-                      fontSize: 18,
-                      color: colors.marronTexto,
-                    }}
-                  >
-                    Pueblos Conectados
-                  </Typography.Title>
-                  <Typography.Text style={{ fontSize: 14, color: colors.marronSuave }}>
-                    Un proyecto colaborativo entre las localidades de Venialbo
-                    (Zamora) y Aldearrubia (Salamanca).
-                  </Typography.Text>
-                </div>
-              </div>
-            </Card>
-          </Link>
-        </Col>
       </Row>
     </div>
   );
@@ -193,10 +175,11 @@ export function Home() {
 
 // ¿Hay algo nuevo en la sección? Los listados son JSON pequeños y quedan en caché, así
 // que al entrar luego en la sección ya están cargados. Si falla, simplemente no sale.
-function useHayNovedad(recursos: string[]): boolean {
+function useHayNovedad(recursos: string[] = []): boolean {
   const [hay, setHay] = useState(false);
   const clave = recursos.join(",");
   useEffect(() => {
+    if (!clave) return;
     let vigente = true;
     Promise.all(
       clave.split(",").map((r) => listar<ConNovedad>(r, { pagination: { mode: "off" } })),
@@ -221,22 +204,34 @@ function TarjetaSeccion({ seccion: s }: { seccion: Seccion }) {
         style={{ border: `1px solid ${colors.borde}` }}
       >
         {nuevo && <EtiquetaNuevo posicion="pestana" />}
-        <div
-          style={{
-            width: 60,
-            height: 60,
-            borderRadius: "50%",
-            background: s.bg,
-            color: s.color,
-            fontSize: 28,
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            margin: "0 auto 14px",
-          }}
-        >
-          {s.icon}
-        </div>
+        {s.imagen ? (
+          <img
+            src={`${import.meta.env.BASE_URL}${s.imagen}`}
+            alt=""
+            width={60}
+            height={60}
+            loading="lazy"
+            decoding="async"
+            style={{ display: "block", margin: "0 auto 14px" }}
+          />
+        ) : (
+          <div
+            style={{
+              width: 60,
+              height: 60,
+              borderRadius: "50%",
+              background: s.bg,
+              color: s.color,
+              fontSize: 28,
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              margin: "0 auto 14px",
+            }}
+          >
+            {s.icon}
+          </div>
+        )}
         <Typography.Title
           level={4}
           style={{

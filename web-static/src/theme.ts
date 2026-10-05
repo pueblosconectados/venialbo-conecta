@@ -103,6 +103,9 @@ export const venialboTheme: ThemeConfig = {
       horizontalItemSelectedColor: colors.musgo,
       horizontalItemHoverColor: colors.musgo,
       horizontalItemBorderRadius: 6,
+      // Menos aire entre apartados que el de Ant Design, para que los ocho quepan a
+      // 1280 px sin que el último se esconda en «…»
+      itemPaddingInline: 8,
     },
     Card: {
       borderRadiusLG: 14,

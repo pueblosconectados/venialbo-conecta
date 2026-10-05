@@ -7,7 +7,7 @@ import { colors } from "../../theme";
 // tarde en tarde y conviene que quede en el repositorio, con su historial de cambios.
 // Si se cambia algo de cómo se tratan los datos (otro servicio de formularios, otro
 // plazo), hay que actualizar también este texto y la fecha de abajo.
-const ACTUALIZADO = "24 de septiembre de 2026";
+const ACTUALIZADO = "5 de octubre de 2026";
 
 export function Privacidad() {
   return (
@@ -101,6 +101,14 @@ export function Privacidad() {
             su propia política
           </a>
           .
+        </p>
+
+        <h3>Enlaces a otras páginas</h3>
+        <p>
+          Algunas páginas de esta web, como{" "}
+          <Link to="/enlaces">Enlaces de interés</Link>, llevan a webs que no son nuestras
+          (Facebook, YouTube, Wikipedia…). Al abrirlas, lo que hagan con
+          tus datos se rige por sus propias normas, no por estas.
         </p>
       </div>
 

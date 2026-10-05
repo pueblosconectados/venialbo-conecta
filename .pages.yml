@@ -939,6 +939,60 @@ content:
         type: boolean
         default: true
 
+  - name: enlaces
+    label: Enlaces de interés
+    description: >-
+      La página «Enlaces de interés», con su tarjeta en la portada. Para lo que no tiene
+      ficha propia: los negocios, servicios e instituciones ya llevan su web y sus redes
+      en la suya.
+    type: collection
+    path: web-static/content/enlaces
+    subfolders: false
+    format: json
+    filename: "{primary}.json"
+    view:
+      primary: nombre
+      fields: [nombre, grupo, activo]
+      sort: [nombre, grupo]
+      default:
+        sort: nombre
+        order: asc
+    fields:
+      - name: nombre
+        label: Nombre
+        description: Como se llama la página, tal cual (por ejemplo, «Por Venialbo»).
+        type: string
+        required: true
+      - name: url
+        label: Dirección
+        description: >-
+          Copiada de la barra del navegador, empezando por https://. El icono sale solo
+          según la dirección (Facebook, Instagram, YouTube…).
+        type: string
+        required: true
+      - name: descripcion
+        label: Descripción corta
+        description: Opcional. Una línea que diga qué se encuentra ahí.
+        type: string
+      # Las etiquetas y el orden de los grupos están en src/public/pages/Enlaces.tsx:
+      # si se añade uno aquí, añadirlo también allí.
+      - name: grupo
+        label: Grupo
+        type: select
+        required: true
+        default: redes
+        options:
+          values:
+            - name: redes
+              label: El pueblo en las redes
+            - name: otros
+              label: Más sobre Venialbo
+      - name: activo
+        label: Visible en la web
+        description: Desmárcalo para quitar el enlace sin borrarlo.
+        type: boolean
+        default: true
+
   - name: categorias
     label: Categorías de noticias
     type: collection
