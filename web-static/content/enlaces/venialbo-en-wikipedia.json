@@ -2,6 +2,7 @@
   "nombre": "Venialbo en Wikipedia",
   "url": "https://es.wikipedia.org/wiki/Venialbo",
   "descripcion": "Historia, monumentos y datos del municipio.",
+  "imagen": "/media/imagenes/venialbowikipedia.jpg",
   "grupo": "otros",
   "activo": true
 }
