@@ -1,9 +1,10 @@
 {
-  "titulo": "Casa ",
-  "tipo": "otro",
+  "titulo": "Se vende Casa ",
+  "tipo": "compra_venta",
   "descripcion": "40.000€",
   "contacto": "+34653485289",
+  "imagen_url": "/media/imagenes/casa-40000-1.jpg",
   "fecha_publicacion": "2026-10-07T12:06",
   "fecha_caducidad": "2026-11-06",
-  "activo": false
+  "activo": true
 }
