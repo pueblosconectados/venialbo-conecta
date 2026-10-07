@@ -3,6 +3,7 @@
   "tipo": "venta_reparto",
   "descripcion": "Puestos de venta de fruta en la plaza de la Iglesia",
   "logo_url": "/media/imagenes/fruta-01.jpg",
-  "horario": "Miércoles por la mañana",
-  "activo": true
+  "horario": "Miércoles por la mañana de 10:00 a 12:00",
+  "activo": true,
+  "novedad_hasta": "2026-10-07"
 }
