@@ -1,0 +1,9 @@
+{
+  "titulo": "Vendo",
+  "tipo": "mascota_perdida",
+  "descripcion": "Esto es una prueba ",
+  "contacto": "234567887",
+  "fecha_publicacion": "2026-10-05T19:58",
+  "fecha_caducidad": "2026-11-04",
+  "activo": false
+}

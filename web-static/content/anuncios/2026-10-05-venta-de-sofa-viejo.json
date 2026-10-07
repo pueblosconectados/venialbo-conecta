@@ -1,0 +1,9 @@
+{
+  "titulo": "Venta de sofa viejo",
+  "tipo": "compra_venta",
+  "descripcion": "Sofá viejo es una prueba",
+  "contacto": "Panaderia",
+  "fecha_publicacion": "2026-10-05T19:57",
+  "fecha_caducidad": "2026-11-04",
+  "activo": false
+}
