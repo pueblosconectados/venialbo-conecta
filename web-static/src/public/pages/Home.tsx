@@ -13,6 +13,7 @@ import {
 import { colors } from "../../theme";
 import { esNuevo, listar, type ConNovedad } from "../../datos";
 import { EtiquetaNuevo } from "../components/EtiquetaNuevo";
+import { ElTiempo } from "../components/ElTiempo";
 
 type Seccion = {
   // Un icono dentro del círculo de color, o una imagen que lo sustituye
@@ -113,7 +114,7 @@ export function Home() {
         style={{
           background: colors.blanco,
           borderRadius: 20,
-          marginBottom: 40,
+          marginBottom: 20,
           border: `1px solid ${colors.borde}`,
         }}
       >
@@ -151,6 +152,8 @@ export function Home() {
           </Typography.Text>
         </div>
       </section>
+
+      <ElTiempo />
 
       <Row gutter={[20, 20]}>
         {SECCIONES.map((s) => (

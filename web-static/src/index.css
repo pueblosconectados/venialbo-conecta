@@ -58,6 +58,34 @@ a:hover {
   }
 }
 
+/* El tiempo en la portada: lo de ahora a la izquierda y los próximos días a la
+   derecha; en móvil, uno debajo del otro */
+.vc-tiempo {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px 32px;
+}
+
+.vc-tiempo-ahora {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.vc-tiempo-dias {
+  display: flex;
+  gap: 12px;
+}
+
+@media (max-width: 640px) {
+  .vc-tiempo-dias {
+    width: 100%;
+    justify-content: space-around;
+  }
+}
+
 /* Contenido de noticias, renderizado desde Markdown (ver src/markdown.ts).
    Los encabezados ya cogen la serif de la regla global de arriba. */
 /* Cabecera de un listado: titulo a la izquierda y su control a la derecha. En
