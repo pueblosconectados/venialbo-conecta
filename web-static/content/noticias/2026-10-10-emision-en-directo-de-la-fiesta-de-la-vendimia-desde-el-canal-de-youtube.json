@@ -2,7 +2,7 @@
   "titulo": "Emisión en directo de la fiesta de la vendimia desde el canal de YouTube",
   "fecha_publicacion": "2026-10-10T09:32",
   "categoria": "web-static/content/categorias/fiestas.json",
-  "destacada": true,
+  "destacada": false,
   "activa": true,
   "imagen_url": "/media/imagenes/directo-fiesta-vendimia.jpg",
   "contenido": "**Aún está en pruebas** y como el canal es muy nuevo, **no es seguro que nos deje hacer directos**, pero lo vamos a intentan. Para verlo, entra en el **[enlace](https://www.youtube.com/@VenialboCONECTA/streams)** o directamente en los directos del canal VenialboCONECTA"
