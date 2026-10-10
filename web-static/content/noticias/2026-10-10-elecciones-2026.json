@@ -1,0 +1,23 @@
+{
+  "titulo": "Elecciones 2026",
+  "fecha_publicacion": "2026-10-10T09:22",
+  "categoria": "web-static/content/categorias/ayuntamiento.json",
+  "destacada": false,
+  "activa": true,
+  "imagen_url": "/media/imagenes/20261009otrosbando-mesas-y-localesconsulta-censo-electoral-elecciones-a-cortes-generales-2026.jpg",
+  "contenido": "Descarga la documentación publicada en la [Sede Electrónica](https://venialbo.sedelectronica.es/info.6) del Ayuntamiento en los documentos adjuntos",
+  "documentos": [
+    {
+      "archivo": "/media/documentos/20261009otroslista-de-mesas-electorales-elecciones-generales-29-noviembre-2026.pdf",
+      "titulo": "Mesas electorales"
+    },
+    {
+      "archivo": "/media/documentos/20261009otroslista-provisional-de-candidatos-a-jurado-hoja-1-sorteo-16-de-septiembre-2026.pdf",
+      "titulo": "Candidatos a Jurado"
+    },
+    {
+      "archivo": "/media/documentos/20261009otrosanuncio-no-de-electores-en-el-municipio-de-venialbo-a-fecha-01-09-2026-oficina-del-censo-electoral.pdf",
+      "titulo": "Nº electores a fecha 1-9-2026"
+    }
+  ]
+}
