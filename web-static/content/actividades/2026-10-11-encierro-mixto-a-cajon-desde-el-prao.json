@@ -1,0 +1,13 @@
+{
+  "titulo": "Encierro mixto a cajón desde \"el prao\"",
+  "fecha": "2026-10-11",
+  "fecha_fin": "2026-10-11",
+  "categoria": "fiestas",
+  "organiza": "web-static/content/servicios/ayuntamiento-de-venialbo.json",
+  "noticia": "web-static/content/noticias/2026-10-04-encierro-mixto-11-de-octubre.json",
+  "destacada": false,
+  "activa": true,
+  "novedad_hasta": "2026-10-13",
+  "imagen_url": "/media/imagenes/snapshot3.jpg",
+  "video_url": "https://youtu.be/h91lqQ5t-Zk"
+}
