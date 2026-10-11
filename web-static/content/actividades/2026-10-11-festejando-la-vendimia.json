@@ -1,0 +1,33 @@
+{
+  "titulo": "Festejando la vendimia",
+  "fecha": "2026-10-10",
+  "fecha_fin": "2026-10-10",
+  "categoria": "fiestas",
+  "organiza": "web-static/content/servicios/ayuntamiento-de-venialbo.json",
+  "noticia": "web-static/content/noticias/2026-10-05-fiesta-de-la-vendimia.json",
+  "destacada": true,
+  "activa": true,
+  "novedad_hasta": "2026-10-13",
+  "imagen_url": "/media/imagenes/fiesta-vendimia-1.jpg",
+  "contenido": "No pudo ser en directo pero aquí va un video con un pequeño resumen. Patatas para comer, tardeo con Miguel y Cacia y pisada de uvas por los quintos... así discurrió la jornada festiva del 10 de octubre.",
+  "galeria": [
+    {
+      "imagen": "/media/imagenes/fiesta-vendimia1.jpg",
+      "pie": "Actuación del grupo Miguel y Cacia"
+    },
+    {
+      "imagen": "/media/imagenes/dsc6574.jpg",
+      "pie": "Uvas para pisar"
+    },
+    {
+      "imagen": "/media/imagenes/dsc6796.jpg",
+      "pie": "Pisando las uvas"
+    }
+  ],
+  "video_url": "https://youtu.be/pGUkXQolbek",
+  "album_externo": "https://www.facebook.com/media/set/?vanity=maria.j.camba&set=a.10244863181094742",
+  "documentos": [
+    {},
+    {}
+  ]
+}
