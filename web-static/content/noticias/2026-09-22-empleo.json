@@ -3,7 +3,7 @@
   "fecha_publicacion": "2026-09-22T08:59",
   "categoria": "web-static/content/categorias/ayuntamiento.json",
   "destacada": true,
-  "activa": true,
+  "activa": false,
   "imagen_url": "/media/imagenes/20260914otrospemcyl-2026-cartel-anuncio-zamora.png",
   "contenido": "Publicado en la **[Sede Electrónica](https://venialbo.sedelectronica.es/info.3)** del Ayuntamiento de Venialbo"
 }
