@@ -1,0 +1,14 @@
+{
+  "titulo": "Celebración de la fiesta nacional y el día del Pilar",
+  "fecha": "2026-10-12",
+  "fecha_fin": "2026-10-12",
+  "categoria": "fiestas",
+  "organiza": "web-static/content/servicios/ayuntamiento-de-venialbo.json",
+  "noticia": "web-static/content/noticias/2026-10-05-dia-de-la-hispanidad.json",
+  "destacada": false,
+  "activa": true,
+  "novedad_hasta": "2026-10-14",
+  "imagen_url": "/media/imagenes/snapshot4.jpg",
+  "contenido": "Santa Misa, izada de bandera y vino español han sido los actos celebrados el 12 de octubre para festejar la Fiesta Nacional y el día del Pilar",
+  "video_url": "https://youtu.be/wP8bR1WBbbk"
+}
