@@ -5,7 +5,7 @@
   "categoria": "fiestas",
   "organiza": "web-static/content/servicios/ayuntamiento-de-venialbo.json",
   "noticia": "web-static/content/noticias/2026-10-05-dia-de-la-hispanidad.json",
-  "destacada": false,
+  "destacada": true,
   "activa": true,
   "novedad_hasta": "2026-10-14",
   "imagen_url": "/media/imagenes/snapshot4.jpg",
