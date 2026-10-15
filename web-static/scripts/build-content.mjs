@@ -318,13 +318,27 @@ const enlaces = (
 ).sort((a, b) => (a.nombre ?? "").localeCompare(b.nombre ?? "", "es"));
 await escribir("enlaces", enlaces, []);
 
-// Anuncios — los caducados se ocultan en el navegador (staticDataProvider)
+// Anuncios — los caducados se ocultan en el navegador (staticDataProvider). La
+// caducidad no es obligatoria en el CMS: Información sin fecha no caduca nunca, pero
+// un anuncio de vecinos sin fecha caduca a los DIAS_ANUNCIO de publicarse, como los
+// que llegan por el formulario, para que no se quede en el tablón por un descuido.
+const DIAS_ANUNCIO = 30;
+const caducidadDe = (a) => {
+  if (a.fecha_caducidad || a.tipo === "informacion") return a.fecha_caducidad || null;
+  const fecha = new Date(`${(a.fecha_publicacion ?? "").slice(0, 10)}T12:00:00Z`);
+  if (Number.isNaN(fecha.getTime())) return null;
+  fecha.setUTCDate(fecha.getUTCDate() + DIAS_ANUNCIO);
+  const caduca = fecha.toISOString().slice(0, 10);
+  console.warn(`  ⚠ anuncio ${a.id}: sin fecha de caducidad, caduca el ${caduca}`);
+  return caduca;
+};
 const anuncios = (
   await Promise.all(
     (await leerColeccion("anuncios"))
       .filter((a) => a.activo !== false)
       .map(async (a) => ({
         ...a,
+        fecha_caducidad: caducidadDe(a),
         galeria: (a.galeria ?? []).filter((g) => g?.imagen),
         documentos: await revisarDocumentos(`anuncio ${a.id}`, a),
       })),

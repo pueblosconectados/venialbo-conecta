@@ -33,7 +33,7 @@ type Anuncio = {
   documentos?: Documento[];
   fecha_publicacion: string;
   activo: boolean;
-  fecha_caducidad: string;
+  fecha_caducidad?: string | null;
 };
 
 // Un anuncio caducado se quita del tablón, pero el enlace puede seguir circulando por
@@ -83,7 +83,8 @@ export function AnunciosShow() {
 
   const a = result;
 
-  if (haCaducado(a.fecha_caducidad))
+  // Sin fecha (Información que no caduca) no hay nada que comprobar
+  if (a.fecha_caducidad && haCaducado(a.fecha_caducidad))
     return (
       <NoDisponible
         icono={<ClockCircleOutlined style={{ color: colors.dorado }} />}

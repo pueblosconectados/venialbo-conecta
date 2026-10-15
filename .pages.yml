@@ -916,11 +916,15 @@ content:
         options:
           time: true
           format: yyyy-MM-dd'T'HH:mm
+      # No es obligatoria porque Información no caduca si no se pone; a un anuncio de
+      # vecinos sin fecha, build-content.mjs le pone 30 días desde su publicación.
       - name: fecha_caducidad
         label: Visible hasta (incluido)
-        description: Pasado este día el anuncio desaparece solo de la web.
+        description: >-
+          Pasado este día desaparece solo de la web. En Información, déjala vacía para
+          que no caduque nunca. En los anuncios de vecinos, si se deja vacía, caduca a
+          los 30 días de publicarse.
         type: date
-        required: true
         options:
           format: yyyy-MM-dd
       - name: activo
