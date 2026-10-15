@@ -207,6 +207,84 @@ await escribir(
   actividades,
 );
 
+// Y la agenda como calendario (.ics) para suscribirse desde Google Calendar, el del
+// iPhone o Outlook: se queda en el calendario del móvil y se actualiza solo cada vez
+// que la aplicación vuelve a mirarlo. No hay hora ni lugar en el CMS, así que son
+// eventos de día completo; DTEND es el día siguiente al último, que no se incluye.
+const SITIO = (process.env.SITIO_URL ?? "https://venialboconecta.es").replace(/\/$/, "");
+const DOMINIO = new URL(SITIO).hostname;
+const diaIcs = (iso, sumar = 0) => {
+  const d = new Date(`${iso.slice(0, 10)}T12:00:00Z`);
+  d.setUTCDate(d.getUTCDate() + sumar);
+  return d.toISOString().slice(0, 10).replaceAll("-", "");
+};
+const textoIcs = (s) =>
+  s.replace(/\\/g, "\\\\").replace(/;/g, "\\;").replace(/,/g, "\\,").replace(/\r?\n/g, "\\n");
+// Las líneas de un .ics no pueden pasar de 75 bytes: se parten y la continuación
+// empieza por un espacio. Se cuenta en bytes y sin partir una letra con tilde.
+const plegar = (linea) => {
+  const trozos = [];
+  let actual = "";
+  for (const letra of linea) {
+    const limite = trozos.length ? 74 : 75;
+    if (Buffer.byteLength(actual + letra) > limite) {
+      trozos.push(actual);
+      actual = "";
+    }
+    actual += letra;
+  }
+  trozos.push(actual);
+  return trozos.join("\r\n ");
+};
+// El contenido es Markdown: para la descripción basta el texto, sin marcas
+const sinMarkdown = (md) =>
+  md
+    .replace(/!\[[^\]]*\]\([^)]*\)/g, "")
+    .replace(/\[([^\]]*)\]\([^)]*\)/g, "$1")
+    .replace(/[*_#>`]/g, "")
+    .replace(/\n{3,}/g, "\n\n")
+    .trim();
+const descripcionIcs = (a) => {
+  const texto = a.resumen?.trim() || sinMarkdown(a.contenido ?? "");
+  const corto = texto.length > 500 ? `${texto.slice(0, 500).replace(/\s+\S*$/, "")}…` : texto;
+  return [corto, `Más información: ${SITIO}/actividades/${a.id}`].filter(Boolean).join("\n\n");
+};
+const sello = new Date().toISOString().replace(/[-:]/g, "").replace(/\.\d+/, "");
+const eventos = actividades
+  .filter((a) => a.fecha)
+  .map((a) => {
+    const fin = a.fecha_fin && a.fecha_fin.slice(0, 10) > a.fecha.slice(0, 10) ? a.fecha_fin : a.fecha;
+    return [
+      "BEGIN:VEVENT",
+      `UID:actividad-${a.id}@${DOMINIO}`,
+      `DTSTAMP:${sello}`,
+      `DTSTART;VALUE=DATE:${diaIcs(a.fecha)}`,
+      `DTEND;VALUE=DATE:${diaIcs(fin, 1)}`,
+      `SUMMARY:${textoIcs(a.titulo)}`,
+      `DESCRIPTION:${textoIcs(descripcionIcs(a))}`,
+      `URL:${SITIO}/actividades/${a.id}`,
+      "LOCATION:Venialbo (Zamora)",
+      "TRANSP:TRANSPARENT",
+      "END:VEVENT",
+    ];
+  });
+const ics = [
+  "BEGIN:VCALENDAR",
+  "VERSION:2.0",
+  "PRODID:-//VenialboConecta//Actividades//ES",
+  "CALSCALE:GREGORIAN",
+  "METHOD:PUBLISH",
+  "X-WR-CALNAME:Actividades de Venialbo",
+  "X-WR-CALDESC:Cursos\\, talleres\\, excursiones y fiestas de Venialbo. venialboconecta.es",
+  "X-WR-TIMEZONE:Europe/Madrid",
+  // Cada cuánto debe volver a mirarlo la aplicación (no todas hacen caso)
+  "REFRESH-INTERVAL;VALUE=DURATION:PT6H",
+  "X-PUBLISHED-TTL:PT6H",
+  ...eventos.flat(),
+  "END:VCALENDAR",
+];
+await writeFile(join(DATA_DIR, "actividades.ics"), `${ics.map(plegar).join("\r\n")}\r\n`);
+
 // Lugares — "Qué ver" de Descubre Venialbo. No caducan.
 //
 // Las coordenadas se escriben en un solo campo, tal cual las da Google Maps

@@ -1,7 +1,17 @@
 import { useMemo, useState } from "react";
 import { Link } from "react-router";
-import { Button, Grid, Tag, Typography } from "antd";
-import { LeftOutlined, RightOutlined } from "@ant-design/icons";
+import { Button, Dropdown, Grid, Tag, Typography } from "antd";
+import {
+  AppleOutlined,
+  CalendarOutlined,
+  CheckOutlined,
+  CopyOutlined,
+  DownOutlined,
+  GoogleOutlined,
+  LeftOutlined,
+  PlusOutlined,
+  RightOutlined,
+} from "@ant-design/icons";
 import { colors, softTagStyle, tagTones } from "../../../theme";
 import { categoriaActividad, formatFechasActividad, yaCelebrada } from "./categorias";
 
@@ -49,6 +59,72 @@ const hoyIso = () => {
   const h = new Date();
   return isoDe(h.getFullYear(), h.getMonth(), h.getDate());
 };
+
+// Suscribirse a la agenda: el .ics lo genera build-content.mjs. webcal:// abre la
+// suscripción en el calendario del iPhone, el Mac y Outlook; Google la recibe en su web
+// (la app de Android no sabe suscribirse desde un enlace, pero lo suscrito en la web
+// sale luego en el móvil).
+const RUTA_ICS = `${import.meta.env.BASE_URL}data/actividades.ics`;
+
+function BotonSuscribirse({ bloque }: { bloque: boolean }) {
+  const [copiado, setCopiado] = useState(false);
+  const https = `${location.origin}${RUTA_ICS}`;
+  const webcal = https.replace(/^https?:/, "webcal:");
+  const copiar = async () => {
+    try {
+      await navigator.clipboard.writeText(https);
+      setCopiado(true);
+      setTimeout(() => setCopiado(false), 2500);
+    } catch {
+      // Sin portapapeles (http, o el navegador no deja): se abre y se copia a mano
+      window.prompt("Copia este enlace:", https);
+    }
+  };
+  return (
+    <Dropdown
+      trigger={["click"]}
+      menu={{
+        items: [
+          {
+            key: "google",
+            icon: <GoogleOutlined />,
+            label: (
+              <a
+                href={`https://calendar.google.com/calendar/r?cid=${encodeURIComponent(webcal)}`}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                Google Calendar
+              </a>
+            ),
+          },
+          {
+            key: "webcal",
+            icon: <AppleOutlined />,
+            label: <a href={webcal}>iPhone, Mac u Outlook</a>,
+          },
+          { type: "divider" },
+          {
+            key: "copiar",
+            icon: copiado ? <CheckOutlined /> : <CopyOutlined />,
+            label: copiado ? "¡Enlace copiado!" : "Copiar el enlace",
+            onClick: copiar,
+          },
+        ],
+      }}
+    >
+      <Button
+        type="primary"
+        icon={<PlusOutlined />}
+        size="large"
+        block={bloque}
+        className="vc-boton-agenda"
+      >
+        Añadir a mi calendario <DownOutlined style={{ fontSize: 12 }} />
+      </Button>
+    </Dropdown>
+  );
+}
 
 export function CalendarioActividades({ actividades }: { actividades: ActividadCalendario[] }) {
   const amplio = !!Grid.useBreakpoint().md;
@@ -190,6 +266,21 @@ export function CalendarioActividades({ actividades }: { actividades: ActividadC
             </div>
           );
         })}
+      </div>
+
+      <div className="vc-cal-suscribirse">
+        <span className="vc-aviso-calendario-icono" aria-hidden>
+          <CalendarOutlined />
+        </span>
+        <span style={{ flex: 1, minWidth: 0 }}>
+          <Typography.Text strong style={{ display: "block", fontSize: 16, color: "inherit" }}>
+            Lleva la agenda en tu móvil
+          </Typography.Text>
+          <Typography.Text style={{ fontSize: 14, color: "inherit", opacity: 0.85 }}>
+            Las actividades del pueblo aparecerán solas en tu calendario.
+          </Typography.Text>
+        </span>
+        <BotonSuscribirse bloque={!amplio} />
       </div>
 
       <div className="vc-cal-pie">

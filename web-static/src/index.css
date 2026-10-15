@@ -745,3 +745,33 @@ a:hover {
     text-align: center;
   }
 }
+
+.vc-cal-suscribirse {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-top: 16px;
+  padding: 16px 20px;
+  background: #e0eaf2;
+  color: #2c4d70;
+  border: 1px solid #c9d9e7;
+  border-radius: 14px;
+}
+
+/* En el azul de Actividades, como el boton de la franja de la portada */
+.vc-boton-agenda.ant-btn-primary {
+  background: #3d6691;
+  font-weight: 600;
+  flex-shrink: 0;
+}
+
+.vc-boton-agenda.ant-btn-primary:not(:disabled):hover {
+  background: #2c4d70;
+}
+
+@media (max-width: 767px) {
+  .vc-cal-suscribirse {
+    flex-wrap: wrap;
+    padding: 14px 16px;
+  }
+}
