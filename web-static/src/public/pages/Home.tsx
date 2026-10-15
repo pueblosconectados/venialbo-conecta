@@ -14,6 +14,7 @@ import { colors } from "../../theme";
 import { esNuevo, listar, type ConNovedad } from "../../datos";
 import { EtiquetaNuevo } from "../components/EtiquetaNuevo";
 import { ElTiempo } from "../components/ElTiempo";
+import { AvisoCalendario } from "../components/AvisoCalendario";
 
 type Seccion = {
   // Un icono dentro del círculo de color, o una imagen que lo sustituye
@@ -154,6 +155,8 @@ export function Home() {
       </section>
 
       <ElTiempo />
+
+      <AvisoCalendario />
 
       <Row gutter={[20, 20]}>
         {SECCIONES.map((s) => (

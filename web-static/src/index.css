@@ -459,3 +459,289 @@ a:hover {
   -webkit-box-orient: vertical;
   overflow: hidden;
 }
+
+/* Calendario de Actividades. En el movil cada dia lleva puntos del color de la
+   categoria y se toca para ver la lista; desde 768 px los titulos caben en la celda y
+   son enlaces a la ficha. */
+.vc-controles-lista {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  align-items: center;
+}
+
+.vc-controles-lista > .ant-select {
+  width: 280px;
+}
+
+@media (max-width: 560px) {
+  .vc-controles-lista {
+    width: 100%;
+  }
+  .vc-controles-lista > .ant-select {
+    width: 100%;
+  }
+}
+
+.vc-cal-cabecera {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.vc-cal {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  background: #ffffff;
+  border: 1px solid #e8e0d0;
+  border-radius: 14px;
+  overflow: hidden;
+}
+
+.vc-cal-semana {
+  padding: 8px 0;
+  text-align: center;
+  font-size: 12px;
+  font-weight: 600;
+  color: #6b5a44;
+  border-bottom: 1px solid #e8e0d0;
+}
+
+.vc-cal-celda {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  min-height: 52px;
+  padding: 6px 2px;
+  border-top: 1px solid #f2ece1;
+  cursor: pointer;
+  min-width: 0;
+}
+
+/* Los 7 primeros hijos son la fila de L a D: la primera semana no lleva raya */
+.vc-cal-celda:nth-child(-n + 14) {
+  border-top: none;
+}
+
+.vc-cal-hueco {
+  cursor: default;
+  background: #fcfaf6;
+}
+
+.vc-cal-numero {
+  width: 30px;
+  height: 30px;
+  border: none;
+  border-radius: 50%;
+  background: none;
+  font: inherit;
+  font-size: 14px;
+  color: inherit;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.vc-cal-pasado .vc-cal-numero {
+  color: #a89a85;
+}
+
+.vc-cal-con .vc-cal-numero {
+  font-weight: 700;
+}
+
+.vc-cal-hoy .vc-cal-numero {
+  box-shadow: inset 0 0 0 2px #487824;
+  color: #487824;
+}
+
+.vc-cal-elegido .vc-cal-numero {
+  background: #487824;
+  color: #ffffff;
+}
+
+.vc-cal-celda:not(.vc-cal-hueco):hover {
+  background: #faf6ef;
+}
+
+.vc-cal-puntos {
+  display: flex;
+  gap: 3px;
+}
+
+.vc-cal-puntos > span {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+}
+
+.vc-cal-pasado .vc-cal-puntos,
+.vc-cal-pasado .vc-cal-evento {
+  opacity: 0.55;
+}
+
+@media (min-width: 768px) {
+  .vc-cal-celda {
+    align-items: stretch;
+    min-height: 104px;
+    padding: 6px;
+  }
+  .vc-cal-numero {
+    align-self: flex-start;
+  }
+}
+
+.vc-cal-evento {
+  display: block;
+  padding: 2px 6px;
+  border-radius: 6px;
+  font-size: 12px;
+  line-height: 1.4;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.vc-cal-evento:hover {
+  filter: brightness(0.95);
+}
+
+.vc-cal-mas {
+  font-size: 12px;
+  color: #6b5a44;
+  padding-left: 6px;
+}
+
+.vc-cal-pie {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  margin: 24px 0 12px;
+}
+
+.vc-cal-lista {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.vc-cal-fila {
+  display: flex;
+  gap: 14px;
+  align-items: flex-start;
+  padding: 12px;
+  background: #ffffff;
+  border: 1px solid #e8e0d0;
+  border-radius: 14px;
+  transition: border-color 0.15s;
+}
+
+.vc-cal-fila:hover {
+  border-color: #7fa066;
+}
+
+.vc-cal-fila-pasada {
+  opacity: 0.7;
+}
+
+.vc-cal-fecha {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 52px;
+  height: 52px;
+  font-size: 12px;
+  line-height: 1.1;
+}
+
+.vc-cal-fecha strong {
+  font-size: 20px;
+}
+
+/* Selector Lista / Calendario: el de antd por defecto es gris sobre beige y casi no
+   se ve. Fondo blanco con borde, y la opcion elegida en verde como el filtro. */
+.vc-vista.ant-segmented {
+  background: #ffffff;
+  border: 1px solid #e8e0d0;
+  padding: 3px;
+}
+
+.vc-vista .ant-segmented-item {
+  color: #6b5a44;
+  font-weight: 500;
+}
+
+.vc-vista .ant-segmented-item-selected,
+.vc-vista .ant-segmented-thumb {
+  background: #487824 !important;
+  color: #ffffff !important;
+}
+
+.vc-vista .ant-segmented-item:not(.ant-segmented-item-selected):hover {
+  color: #487824;
+  background: #edf2e9;
+}
+
+/* Franja de la portada que lleva al calendario, en el azul de la tarjeta de
+   Actividades. ElTiempo deja 40 px debajo: la franja se acerca a el y deja 20 hasta
+   las tarjetas, como entre las dos filas. */
+.vc-aviso-calendario {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin: -20px 0 20px;
+  padding: 16px 20px;
+  background: #e0eaf2;
+  color: #2c4d70;
+  border: 1px solid #c9d9e7;
+  border-radius: 14px;
+  transition: border-color 0.15s, background 0.15s;
+}
+
+.vc-aviso-calendario:hover {
+  color: #2c4d70;
+  background: #d6e3ee;
+  border-color: #3d6691;
+}
+
+.vc-aviso-calendario-icono {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: #ffffff;
+  color: #3d6691;
+  font-size: 24px;
+}
+
+.vc-aviso-calendario-boton {
+  flex-shrink: 0;
+  padding: 8px 16px;
+  border-radius: 10px;
+  background: #3d6691;
+  color: #ffffff;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+/* En el movil el boton baja a su propia linea, a lo ancho */
+@media (max-width: 560px) {
+  .vc-aviso-calendario {
+    flex-wrap: wrap;
+    padding: 14px 16px;
+  }
+  .vc-aviso-calendario-boton {
+    width: 100%;
+    text-align: center;
+  }
+}

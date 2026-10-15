@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { Link } from "react-router";
+import { lazy, Suspense, useState } from "react";
+import { Link, useSearchParams } from "react-router";
 import { esNuevo, useList } from "../../../datos";
 import {
   Alert,
@@ -8,12 +8,19 @@ import {
   Empty,
   Pagination,
   Row,
+  Segmented,
   Select,
   Spin,
   Tag,
   Typography,
 } from "antd";
-import { CameraOutlined, FilterOutlined, StarFilled } from "@ant-design/icons";
+import {
+  CalendarOutlined,
+  CameraOutlined,
+  FilterOutlined,
+  StarFilled,
+  UnorderedListOutlined,
+} from "@ant-design/icons";
 import { Imagen } from "../../components/Imagen";
 import { colors, softTagStyle } from "../../../theme";
 import {
@@ -23,6 +30,24 @@ import {
   yaCelebrada,
 } from "./categorias";
 import { EtiquetaNuevo } from "../../components/EtiquetaNuevo";
+
+// El calendario se carga solo cuando alguien lo abre: la lista sigue siendo lo primero
+const CalendarioActividades = lazy(() =>
+  import("./CalendarioActividades").then((m) => ({ default: m.CalendarioActividades })),
+);
+
+type Vista = "lista" | "calendario";
+// La vista va en la URL (?vista=calendario) para poder compartir el enlace, y se
+// recuerda en el navegador para la próxima visita. Si el almacenamiento falla
+// (navegación privada), se queda en la lista.
+const CLAVE_VISTA = "vc-actividades-vista";
+const vistaGuardada = (): Vista => {
+  try {
+    return localStorage.getItem(CLAVE_VISTA) === "calendario" ? "calendario" : "lista";
+  } catch {
+    return "lista";
+  }
+};
 
 type ActividadList = {
   id: string;
@@ -50,6 +75,24 @@ const tituloSeccion = (texto: string) => (
 export function ActividadesList() {
   const [page, setPage] = useState(1);
   const [categoria, setCategoria] = useState("");
+  const [params, setParams] = useSearchParams();
+  const enUrl = params.get("vista");
+  const vista: Vista =
+    enUrl === "calendario" || enUrl === "lista" ? enUrl : vistaGuardada();
+  const cambiarVista = (v: Vista) => {
+    try {
+      localStorage.setItem(CLAVE_VISTA, v);
+    } catch {
+      // Sin almacenamiento, la vista vale solo para esta visita
+    }
+    setParams(
+      (p) => {
+        p.set("vista", v);
+        return p;
+      },
+      { replace: true },
+    );
+  };
 
   // Se trae la lista entera y se trocea aquí: así el filtro puede ofrecer solo las
   // categorías que tienen alguna actividad, en vez de nueve opciones medio vacías.
@@ -78,28 +121,43 @@ export function ActividadesList() {
   const cabecera = (
     <div className="vc-cabecera-lista">
       <Typography.Title level={2} style={{ margin: 0 }}>Actividades</Typography.Title>
-      {/* Con una sola categoría (o ninguna) el filtro no filtraría nada */}
-      {opciones.length > 2 && (
-        <Select
-          value={categoria}
+      <div className="vc-controles-lista">
+        <Segmented<Vista>
+          className="vc-vista"
+          value={vista}
           size="large"
-          prefix={<FilterOutlined />}
-          className="vc-filtro"
-          onChange={(valor) => {
-            setCategoria(valor);
-            setPage(1);
-          }}
-          options={opciones}
-          aria-label="Filtrar actividades por categoría"
+          onChange={cambiarVista}
+          options={[
+            { value: "lista", label: "Lista", icon: <UnorderedListOutlined /> },
+            { value: "calendario", label: "Calendario", icon: <CalendarOutlined /> },
+          ]}
+          aria-label="Ver como lista o como calendario"
         />
-      )}
+        {/* Con una sola categoría (o ninguna) el filtro no filtraría nada */}
+        {opciones.length > 2 && (
+          <Select
+            value={categoria}
+            size="large"
+            prefix={<FilterOutlined />}
+            className="vc-filtro"
+            onChange={(valor) => {
+              setCategoria(valor);
+              setPage(1);
+            }}
+            options={opciones}
+            aria-label="Filtrar actividades por categoría"
+          />
+        )}
+      </div>
     </div>
   );
 
   const intro = (
     <Typography.Paragraph style={{ color: colors.marronSuave, marginTop: -12, marginBottom: 24 }}>
-      Cursos, talleres, excursiones y fiestas que se preparan en el pueblo. Las que ya
-      se han celebrado quedan más abajo, con sus fotos.
+      Cursos, talleres, excursiones y fiestas que se preparan en el pueblo.{" "}
+      {vista === "calendario"
+        ? "Elige un día para ver lo que hay; desde ahí se llega a cada actividad."
+        : "Las que ya se han celebrado quedan más abajo, con sus fotos."}
     </Typography.Paragraph>
   );
 
@@ -176,6 +234,17 @@ export function ActividadesList() {
       <div>
         {cabecera}
         <Alert type="error" message="No se pudieron cargar las actividades" />
+      </div>
+    );
+
+  if (vista === "calendario")
+    return (
+      <div>
+        {cabecera}
+        {intro}
+        <Suspense fallback={<Spin style={{ display: "block", margin: "60px auto" }} />}>
+          <CalendarioActividades actividades={filtradas} />
+        </Suspense>
       </div>
     );
 
