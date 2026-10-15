@@ -198,6 +198,20 @@ content:
         type: date
         options:
           format: yyyy-MM-dd
+      - name: repeticion
+        label: Se repite
+        description: >-
+          Para cursos y actividades periódicas. Se repite el mismo día de la semana que
+          «Fecha» hasta el día de «Hasta», que hace falta. En la web sale "los lunes, del
+          19 de octubre al 14 de diciembre", y en el calendario del móvil, cada clase.
+          Déjalo vacío si no se repite.
+        type: select
+        options:
+          values:
+            - name: semanal
+              label: Cada semana
+            - name: quincenal
+              label: Cada dos semanas
       - name: hora
         label: Hora
         description: >-

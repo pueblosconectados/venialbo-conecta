@@ -30,18 +30,32 @@ export const categoriaActividad = (clave?: string | null) =>
 // "3 de marzo de 2026", o el intervalo si duró varios días, sin repetir lo que
 // comparten: "del 3 al 24 de marzo de 2026", "del 28 de marzo al 2 de abril de 2026".
 // Con hora (el build la deja como "09:30"): "3 de marzo de 2026, a las 9:30", o
-// "…, de 18:00 a 20:00" si tiene hora de fin.
-export const formatFechasActividad = (
-  fecha: string,
-  fechaFin?: string | null,
-  hora?: string | null,
-  horaFin?: string | null,
-): string => {
-  const dias = formatDias(fecha, fechaFin);
-  if (!hora) return dias;
-  return horaFin
-    ? `${dias}, de ${formatHora(hora)} a ${formatHora(horaFin)}`
-    : `${dias}, a las ${formatHora(hora)}`;
+// "…, de 18:00 a 20:00" si tiene hora de fin. Si se repite: "Los lunes, del 19 de
+// octubre al 14 de diciembre de 2026, de 18:00 a 20:00".
+export type FechasActividad = {
+  fecha: string;
+  fecha_fin?: string | null;
+  hora?: string | null;
+  hora_fin?: string | null;
+  repeticion?: string | null;
+};
+
+// Cada cuántas semanas, según el valor del CMS (el build ya quita lo que no vale)
+export const SEMANAS_REPETICION: Record<string, number> = { semanal: 1, quincenal: 2 };
+const DIAS_PLURAL = ["domingos", "lunes", "martes", "miércoles", "jueves", "viernes", "sábados"];
+
+export const formatFechasActividad = (a: FechasActividad): string => {
+  let dias = formatDias(a.fecha, a.fecha_fin);
+  const semanas = a.repeticion ? SEMANAS_REPETICION[a.repeticion] : undefined;
+  if (semanas) {
+    const dia = DIAS_PLURAL[new Date(`${a.fecha.slice(0, 10)}T12:00:00`).getDay()];
+    const cada = semanas === 1 ? `Los ${dia}` : `Cada dos ${dia}`;
+    dias = `${cada}, ${dias.charAt(0).toLowerCase()}${dias.slice(1)}`;
+  }
+  if (!a.hora) return dias;
+  return a.hora_fin
+    ? `${dias}, de ${formatHora(a.hora)} a ${formatHora(a.hora_fin)}`
+    : `${dias}, a las ${formatHora(a.hora)}`;
 };
 
 // "09:30" → "9:30"

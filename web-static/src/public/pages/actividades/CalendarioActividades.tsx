@@ -13,7 +13,13 @@ import {
   RightOutlined,
 } from "@ant-design/icons";
 import { colors, softTagStyle, tagTones } from "../../../theme";
-import { categoriaActividad, formatFechasActividad, formatHora, yaCelebrada } from "./categorias";
+import {
+  SEMANAS_REPETICION,
+  categoriaActividad,
+  formatFechasActividad,
+  formatHora,
+  yaCelebrada,
+} from "./categorias";
 
 export type ActividadCalendario = {
   id: string;
@@ -22,12 +28,14 @@ export type ActividadCalendario = {
   fecha_fin?: string | null;
   hora?: string | null;
   hora_fin?: string | null;
+  repeticion?: string | null;
   categoria: string;
 };
 
 // Una actividad de pocos días se marca en todos ellos; una larga (una exposición de
 // dos meses, un curso de todo el año) llenaría el mes de puntos, así que solo se marcan
-// el día que empieza y el que acaba. En la lista del mes sale igualmente.
+// el día que empieza y el que acaba. En la lista del mes sale igualmente. La que se
+// repite se marca en cada clase: cada 7 o 14 días desde la primera hasta «Hasta».
 const MAX_DIAS_SEGUIDOS = 14;
 const DIA_MS = 86_400_000;
 const DIAS_SEMANA = ["L", "M", "X", "J", "V", "S", "D"];
@@ -49,9 +57,11 @@ const diasMarcados = (a: ActividadCalendario): string[] => {
   const { inicio, fin } = intervalo(a);
   const desde = msDe(inicio);
   const hasta = msDe(fin);
-  if ((hasta - desde) / DIA_MS >= MAX_DIAS_SEGUIDOS) return [inicio, fin];
+  const semanas = a.repeticion ? SEMANAS_REPETICION[a.repeticion] : undefined;
+  if (!semanas && (hasta - desde) / DIA_MS >= MAX_DIAS_SEGUIDOS) return [inicio, fin];
+  const paso = semanas ? 7 * semanas * DIA_MS : DIA_MS;
   const dias = [];
-  for (let t = desde; t <= hasta; t += DIA_MS) dias.push(isoDeMs(t));
+  for (let t = desde; t <= hasta; t += paso) dias.push(isoDeMs(t));
   return dias;
 };
 
@@ -317,7 +327,12 @@ export function CalendarioActividades({ actividades }: { actividades: ActividadC
         <ul className="vc-cal-lista">
           {lista.map((a) => {
             const cat = categoriaActividad(a.categoria);
-            const f = fechaLocal(a.fecha.slice(0, 10));
+            // La que se repite enseña la clase de ese día o, en el mes, la primera
+            // clase del mes, y no la del primer día del curso
+            const clase = a.repeticion
+              ? (dia ?? diasMarcados(a).find((d) => d >= primero) ?? a.fecha)
+              : a.fecha;
+            const f = fechaLocal(clase.slice(0, 10));
             return (
               <li key={a.id}>
                 <Link
@@ -333,7 +348,7 @@ export function CalendarioActividades({ actividades }: { actividades: ActividadC
                       {a.titulo}
                     </Typography.Text>
                     <Typography.Text type="secondary" style={{ fontSize: 13 }}>
-                      {formatFechasActividad(a.fecha, a.fecha_fin, a.hora, a.hora_fin)}
+                      {formatFechasActividad(a)}
                       {yaCelebrada(a) && " · Ya celebrada"}
                     </Typography.Text>
                     <span style={{ display: "block", marginTop: 4 }}>

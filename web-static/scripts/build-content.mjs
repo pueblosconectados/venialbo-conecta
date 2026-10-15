@@ -203,6 +203,21 @@ const leerHoras = (a, quien) => {
   }
   return { hora, hora_fin };
 };
+// Cada cuántas semanas se repite. Sin «Hasta» no hay hasta cuándo: se ignora con un
+// aviso en vez de llenar el calendario del móvil de clases para siempre.
+const SEMANAS_REPETICION = { semanal: 1, quincenal: 2 };
+const leerRepeticion = (a, quien) => {
+  if (!a.repeticion) return null;
+  if (!SEMANAS_REPETICION[a.repeticion]) {
+    console.warn(`  ⚠ ${quien}: repetición "${a.repeticion}" desconocida, se quita`);
+    return null;
+  }
+  if (!a.fecha_fin || a.fecha_fin.slice(0, 10) <= (a.fecha ?? "").slice(0, 10)) {
+    console.warn(`  ⚠ ${quien}: se repite pero no tiene «Hasta», se quita la repetición`);
+    return null;
+  }
+  return a.repeticion;
+};
 const actividades = (
   await Promise.all(
     (await leerColeccion("actividades"))
@@ -212,6 +227,7 @@ const actividades = (
         return {
           ...a,
           ...leerHoras(a, quien),
+          repeticion: leerRepeticion(a, quien),
           organiza: enlaceA(a.organiza, servicioPorId, "nombre", quien),
           noticia: enlaceA(a.noticia, noticiaPorId, "titulo", quien),
           // Una fila de la galería que se quedó sin foto no pinta nada
@@ -242,10 +258,14 @@ const actividadPorId = new Map(actividades.map((a) => [a.id, a]));
 
 // Y la agenda como calendario (.ics) para suscribirse desde Google Calendar, el del
 // iPhone o Outlook: se queda en el calendario del móvil y se actualiza solo cada vez
-// que la aplicación vuelve a mirarlo. Con hora y de un solo día, el evento va de la
-// hora a la hora de fin, o dura una hora si no la tiene. Sin hora, o de varios días, es de
-// día completo, y la hora va en la descripción; DTEND es entonces el día siguiente al
-// último, que no se incluye.
+// que la aplicación vuelve a mirarlo.
+//
+// - Con hora y de un solo día (o que se repite), el evento va de la hora a la hora de
+//   fin, o dura una hora si no la tiene. La hora va en hora de Madrid (TZID), no en
+//   UTC: así una clase semanal de las 18:00 sigue a las 18:00 tras el cambio de hora.
+// - Sin hora, o de varios días seguidos, es de día completo y la hora va en la
+//   descripción; DTEND es el día siguiente al último, que no se incluye.
+// - La que se repite es un solo evento con RRULE: cada N semanas hasta «Hasta».
 const SITIO = (process.env.SITIO_URL ?? "https://venialboconecta.es").replace(/\/$/, "");
 const DOMINIO = new URL(SITIO).hostname;
 const diaIcs = (iso, sumar = 0) => {
@@ -292,46 +312,68 @@ const descripcionIcs = (a, conHora) => {
     .filter(Boolean)
     .join("\n\n");
 };
-// La hora del CMS es la de Venialbo: se pasa a UTC (la Z del .ics) mirando qué
-// diferencia tiene Madrid ese día, que cambia con el horario de verano.
-const madrid = new Intl.DateTimeFormat("en-US", {
-  timeZone: "Europe/Madrid",
-  hourCycle: "h23",
-  year: "numeric",
-  month: "numeric",
-  day: "numeric",
-  hour: "numeric",
-  minute: "numeric",
-});
-const desfaseMadrid = (ms) => {
-  const p = Object.fromEntries(madrid.formatToParts(ms).map((x) => [x.type, +x.value]));
-  return Date.UTC(p.year, p.month - 1, p.day, p.hour, p.minute) - ms;
-};
-const instanteIcs = (iso, hora, sumarMs = 0) => {
+// La zona horaria de Madrid, que el .ics tiene que describir para usar TZID:
+// horario de verano del último domingo de marzo al último de octubre
+const ZONA = [
+  "BEGIN:VTIMEZONE",
+  "TZID:Europe/Madrid",
+  "BEGIN:DAYLIGHT",
+  "TZOFFSETFROM:+0100",
+  "TZOFFSETTO:+0200",
+  "TZNAME:CEST",
+  "DTSTART:19700329T020000",
+  "RRULE:FREQ=YEARLY;BYMONTH=3;BYDAY=-1SU",
+  "END:DAYLIGHT",
+  "BEGIN:STANDARD",
+  "TZOFFSETFROM:+0200",
+  "TZOFFSETTO:+0100",
+  "TZNAME:CET",
+  "DTSTART:19701025T030000",
+  "RRULE:FREQ=YEARLY;BYMONTH=10;BYDAY=-1SU",
+  "END:STANDARD",
+  "END:VTIMEZONE",
+];
+const horaIcs = (iso, hora, sumarHoras = 0) => {
   const [h, m] = hora.split(":").map(Number);
-  const local = Date.UTC(+iso.slice(0, 4), +iso.slice(5, 7) - 1, +iso.slice(8, 10), h, m);
-  const utc = local - desfaseMadrid(local - desfaseMadrid(local));
-  return new Date(utc + sumarMs).toISOString().replace(/[-:]/g, "").replace(/\.\d+/, "");
+  return `${diaIcs(iso)}T${String(h + sumarHoras).padStart(2, "0")}${String(m).padStart(2, "0")}00`;
 };
 const sello = new Date().toISOString().replace(/[-:]/g, "").replace(/\.\d+/, "");
 const eventos = actividades
   .filter((a) => a.fecha)
   .map((a) => {
     const fin = a.fecha_fin && a.fecha_fin.slice(0, 10) > a.fecha.slice(0, 10) ? a.fecha_fin : a.fecha;
-    const conHora = a.hora && fin === a.fecha;
+    const conHora = a.hora && (fin === a.fecha || a.repeticion);
+    // Con repetición, cada clase es de un día: el intervalo lo pone la RRULE
+    const finEvento = a.repeticion ? a.fecha : fin;
     const cuando = conHora
       ? [
-          `DTSTART:${instanteIcs(a.fecha, a.hora)}`,
-          a.hora_fin
-            ? `DTEND:${instanteIcs(a.fecha, a.hora_fin)}`
-            : `DTEND:${instanteIcs(a.fecha, a.hora, 3_600_000)}`,
+          `DTSTART;TZID=Europe/Madrid:${horaIcs(a.fecha, a.hora)}`,
+          // Sin hora de fin, una hora; a las 23:xx no se puede sumar, así que acaba
+          // a las 23:59
+          `DTEND;TZID=Europe/Madrid:${
+            a.hora_fin
+              ? horaIcs(a.fecha, a.hora_fin)
+              : a.hora < "23:00"
+                ? horaIcs(a.fecha, a.hora, 1)
+                : `${diaIcs(a.fecha)}T235900`
+          }`,
         ]
-      : [`DTSTART;VALUE=DATE:${diaIcs(a.fecha)}`, `DTEND;VALUE=DATE:${diaIcs(fin, 1)}`];
+      : [`DTSTART;VALUE=DATE:${diaIcs(a.fecha)}`, `DTEND;VALUE=DATE:${diaIcs(finEvento, 1)}`];
+    // UNTIL va en UTC si el inicio lleva hora (lo pide el estándar); el final del día
+    // de «Hasta» en UTC no alcanza a la clase de la semana siguiente
+    const repite = a.repeticion
+      ? [
+          `RRULE:FREQ=WEEKLY;INTERVAL=${SEMANAS_REPETICION[a.repeticion]};UNTIL=${
+            conHora ? `${diaIcs(fin)}T235959Z` : diaIcs(fin)
+          }`,
+        ]
+      : [];
     return [
       "BEGIN:VEVENT",
       `UID:actividad-${a.id}@${DOMINIO}`,
       `DTSTAMP:${sello}`,
       ...cuando,
+      ...repite,
       `SUMMARY:${textoIcs(a.titulo)}`,
       `DESCRIPTION:${textoIcs(descripcionIcs(a, a.hora && !conHora))}`,
       `URL:${SITIO}/actividades/${a.id}`,
@@ -353,6 +395,7 @@ const ics = [
   // Cada cuánto debe volver a mirarlo la aplicación (no todas hacen caso)
   "REFRESH-INTERVAL;VALUE=DURATION:PT6H",
   "X-PUBLISHED-TTL:PT6H",
+  ...ZONA,
   ...eventos.flat(),
   "END:VCALENDAR",
 ];

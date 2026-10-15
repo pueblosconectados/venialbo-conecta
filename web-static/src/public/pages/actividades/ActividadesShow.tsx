@@ -22,6 +22,7 @@ type ActividadDetail = {
   fecha_fin?: string | null;
   hora?: string | null;
   hora_fin?: string | null;
+  repeticion?: string | null;
   categoria: string;
   resumen?: string | null;
   imagen_url?: string | null;
@@ -85,7 +86,7 @@ export function ActividadesShow() {
       </div>
       <Typography.Title level={2} style={{ marginTop: 4 }}>{a.titulo}</Typography.Title>
       <Typography.Text style={{ color: colors.marronSuave, display: "block" }}>
-        {formatFechasActividad(a.fecha, a.fecha_fin, a.hora, a.hora_fin)}
+        {formatFechasActividad(a)}
       </Typography.Text>
       {a.organiza && (
         <Typography.Text style={{ color: colors.marronSuave, display: "block", marginTop: 4 }}>
