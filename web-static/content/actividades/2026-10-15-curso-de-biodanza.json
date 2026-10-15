@@ -1,11 +1,11 @@
 {
   "titulo": "Curso de Biodanza",
   "fecha": "2026-10-19",
-  "fecha_fin": "2026-10-15",
+  "fecha_fin": "2026-10-19",
   "categoria": "formacion",
   "destacada": true,
   "activa": true,
-  "novedad_hasta": "2026-10-18",
+  "novedad_hasta": "2026-10-19",
   "resumen": "Comienza el 19 de octubre. Será los lunes de 18:00 a 20:00 en el salón de usos múltiples.",
   "imagen_url": "/media/imagenes/biodanza.jpeg"
 }
