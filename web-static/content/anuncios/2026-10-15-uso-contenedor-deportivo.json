@@ -1,0 +1,14 @@
+{
+  "titulo": "Uso contenedor deportivo",
+  "tipo": "informacion",
+  "imagen_url": "/media/imagenes/instalacion-deportiva-portatil-venialbo-1.jpg",
+  "documentos": [
+    {
+      "archivo": "/media/documentos/instalacion-deportiva-portatil-venialbo-1.pdf",
+      "titulo": "Instalación deportiva portátil Venialbo"
+    }
+  ],
+  "fecha_publicacion": "2025-11-27T12:33",
+  "fecha_caducidad": "2026-12-31",
+  "activo": true
+}
