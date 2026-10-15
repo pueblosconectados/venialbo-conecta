@@ -13,12 +13,14 @@ import {
 import { ClockCircleOutlined, FileSearchOutlined } from "@ant-design/icons";
 import { FORMULARIOS, formatFecha, imgUrl } from "../../../config";
 import { haCaducado } from "../../../datos";
-import { colors, softTagStyle, type TagTone } from "../../../theme";
+import { colors, softTagStyle } from "../../../theme";
 import { CabeceraFicha } from "../../components/CabeceraFicha";
 import { ContenidoRico } from "../../components/ContenidoRico";
 import { ImagenAmpliable } from "../../components/ImagenAmpliable";
 import { Galeria, type Foto } from "../../components/Galeria";
+import { Documentos, type Documento } from "../../components/Documentos";
 import { juegoDeMiniaturas } from "../../../miniaturas";
+import { INFORMACION, TIPO_LABEL, TIPO_TONE } from "./tipos";
 
 type Anuncio = {
   id: string;
@@ -28,23 +30,10 @@ type Anuncio = {
   contacto?: string;
   imagen_url?: string;
   galeria?: Foto[];
+  documentos?: Documento[];
   fecha_publicacion: string;
   activo: boolean;
   fecha_caducidad: string;
-};
-
-const TIPO_LABEL: Record<string, string> = {
-  mascota_perdida: "Mascota perdida",
-  compra_venta: "Compra / Venta",
-  objeto_perdido: "Objeto perdido",
-  otro: "Otro",
-};
-
-const TIPO_TONE: Record<string, TagTone> = {
-  mascota_perdida: "terracota",
-  compra_venta: "musgo",
-  objeto_perdido: "azul",
-  otro: "gris",
 };
 
 // Un anuncio caducado se quita del tablón, pero el enlace puede seguir circulando por
@@ -138,6 +127,7 @@ export function AnunciosShow() {
       </Typography.Text>
       <Divider style={{ borderColor: colors.borde }} />
       <ContenidoRico texto={a.descripcion} style={{ lineHeight: 1.7, marginBottom: 16 }} />
+      <Documentos documentos={a.documentos} />
       {a.galeria && a.galeria.length > 0 && (
         <>
           <Typography.Title level={4} style={{ margin: "28px 0 12px" }}>
@@ -162,18 +152,21 @@ export function AnunciosShow() {
       )}
       {/* Quien publicó el anuncio no puede quitarlo (no hay cuentas): lo pide por el
           formulario de contacto, que lleva el anuncio en el campo oculto "anuncio" para
-          que en el correo se sepa cuál es. Lo retira a mano quien lleve el CMS. */}
-      <Typography.Paragraph style={{ marginTop: 24, marginBottom: 0, color: colors.marronSuave }}>
-        ¿Ya no hace falta este anuncio?{" "}
-        <a
-          href={`${FORMULARIOS.contacto}?anuncio=${encodeURIComponent(`${a.titulo} (${a.id})`)}`}
-          target="_blank"
-          rel="noopener noreferrer"
-          style={{ color: colors.musgo, fontWeight: 500 }}
-        >
-          Pide que lo quitemos del tablón
-        </a>
-      </Typography.Paragraph>
+          que en el correo se sepa cuál es. Lo retira a mano quien lleve el CMS. Los de
+          Información los ponemos nosotros: ahí no hay nadie que tenga que pedirlo. */}
+      {a.tipo !== INFORMACION && (
+        <Typography.Paragraph style={{ marginTop: 24, marginBottom: 0, color: colors.marronSuave }}>
+          ¿Ya no hace falta este anuncio?{" "}
+          <a
+            href={`${FORMULARIOS.contacto}?anuncio=${encodeURIComponent(`${a.titulo} (${a.id})`)}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            style={{ color: colors.musgo, fontWeight: 500 }}
+          >
+            Pide que lo quitemos del tablón
+          </a>
+        </Typography.Paragraph>
+      )}
       <div style={{ marginTop: 24 }}>
         <Link to="/tablon" style={{ color: colors.musgo, fontWeight: 500 }}>
           ← Volver al tablón

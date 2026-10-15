@@ -87,7 +87,7 @@ const leerDireccion = (texto, quien) => {
 
 const mb = (bytes) => `${(bytes / 1024 / 1024).toFixed(1)} MB`;
 
-// Comprueba los PDF de una noticia o una actividad y les añade el tamaño, para poder
+// Comprueba los PDF de una noticia, una actividad o un anuncio y les añade el tamaño, para poder
 // avisar en la web de lo que pesa cada descarga. `quien` es para el mensaje de error.
 const revisarDocumentos = async (quien, entrada) => {
   const docs = (entrada.documentos ?? []).filter((d) => d?.archivo);
@@ -319,13 +319,20 @@ const enlaces = (
 await escribir("enlaces", enlaces, []);
 
 // Anuncios — los caducados se ocultan en el navegador (staticDataProvider)
-const anuncios = (await leerColeccion("anuncios"))
-  .filter((a) => a.activo !== false)
-  .map((a) => ({ ...a, galeria: (a.galeria ?? []).filter((g) => g?.imagen) }))
-  .sort(porFechaDesc);
-// El tablón solo enseña la foto principal
+const anuncios = (
+  await Promise.all(
+    (await leerColeccion("anuncios"))
+      .filter((a) => a.activo !== false)
+      .map(async (a) => ({
+        ...a,
+        galeria: (a.galeria ?? []).filter((g) => g?.imagen),
+        documentos: await revisarDocumentos(`anuncio ${a.id}`, a),
+      })),
+  )
+).sort(porFechaDesc);
+// El tablón solo enseña la foto principal, y de los PDF basta saber si hay (el clip)
 await escribir(
   "anuncios",
-  anuncios.map((a) => quitar(a, "galeria")),
+  anuncios.map((a) => ({ ...quitar(a, "galeria", "documentos"), adjuntos: a.documentos.length })),
   anuncios,
 );

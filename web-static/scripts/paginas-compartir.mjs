@@ -169,13 +169,13 @@ const primeraFoto = (f) => f.imagen_url || f.galeria?.find((g) => g?.imagen)?.im
 
 // Las secciones: título, descripción y, si la tienen, su propia imagen
 const SECCIONES = [
-  { ruta: "", titulo: "VenialboConecta", descripcion: "Todo Venialbo en un sitio: lo que pasa y lo que se ha hecho, qué ver y por dónde pasear, sus negocios y servicios, y un tablón para los vecinos." },
+  { ruta: "", titulo: "VenialboConecta", descripcion: "Todo Venialbo en un sitio: lo que pasa y lo que se ha hecho, qué ver y por dónde pasear, sus negocios y servicios, y un tablón con la información útil del pueblo y los anuncios de los vecinos." },
   { ruta: "noticias", titulo: "Noticias", descripcion: "Lo último que pasa en Venialbo." },
   { ruta: "actividades", titulo: "Actividades", descripcion: "Lo que se ha hecho en Venialbo: cursos, talleres, excursiones, fiestas…, contado y con fotos." },
   { ruta: "descubre", titulo: "Descubre Venialbo", descripcion: "Qué ver en Venialbo y rutas para recorrerlo." },
   { ruta: "negocios", titulo: "Negocios", descripcion: "El directorio del comercio local de Venialbo." },
   { ruta: "servicios", titulo: "Servicios e instituciones", descripcion: "Médico, comedor, bibliobús, asociaciones e instituciones de Venialbo." },
-  { ruta: "tablon", titulo: "Tablón", descripcion: "Anuncios entre vecinos de Venialbo." },
+  { ruta: "tablon", titulo: "Tablón", descripcion: "Horarios, avisos útiles y anuncios entre vecinos de Venialbo." },
   { ruta: "pueblos-conectados", titulo: "Pueblos Conectados", descripcion: "Un proyecto colaborativo entre Venialbo (Zamora) y Aldearrubia (Salamanca).", imagen: "/pueblos-conectados.webp" },
   { ruta: "enlaces", titulo: "Enlaces de interés", descripcion: "Otras páginas donde se habla de Venialbo: sus canales y páginas en las redes, y más." },
   { ruta: "privacidad", titulo: "Privacidad", descripcion: "Qué pasa con tus datos en VenialboConecta." },
@@ -188,15 +188,16 @@ const FICHAS = [
   { recurso: "actividades", ruta: "actividades", titulo: (f) => f.titulo, texto: (f) => f.resumen || f.contenido, foto: primeraFoto },
   { recurso: "negocios", ruta: "negocios", titulo: (f) => f.nombre, texto: (f) => f.descripcion || f.categoria_negocio, foto: (f) => f.logo_url, modo: "logo" },
   { recurso: "servicios", ruta: "servicios", titulo: (f) => f.nombre, texto: (f) => f.descripcion, foto: (f) => f.logo_url, modo: "logo" },
-  { recurso: "anuncios", ruta: "tablon", titulo: (f) => f.titulo, texto: (f) => f.descripcion, foto: (f) => f.imagen_url, fuera: (f) => caducado(f.fecha_caducidad), sinSitemap: true },
+  { recurso: "anuncios", ruta: "tablon", titulo: (f) => f.titulo, texto: (f) => f.descripcion, foto: (f) => f.imagen_url, fuera: (f) => caducado(f.fecha_caducidad), sinSitemap: (f) => f.tipo !== "informacion" },
   { recurso: "lugares", ruta: "descubre/lugares", titulo: (f) => f.nombre, texto: (f) => f.resumen || f.contenido, foto: primeraFoto },
   { recurso: "rutas", ruta: "descubre/rutas", titulo: (f) => f.nombre, texto: (f) => f.resumen || f.contenido, foto: primeraFoto },
 ];
 
 const logo = await fotoOg(LOGO, "logo");
 
-// Las direcciones que van al sitemap. Los anuncios del tablón no: duran unos días y
-// Google los tendría en el índice cuando ya han caducado.
+// Las direcciones que van al sitemap. Los anuncios de vecinos del tablón no: duran unos
+// días y Google los tendría en el índice cuando ya han caducado. Los de Información sí
+// (horarios y demás, que duran y se buscan: «horario misa Venialbo»).
 const enSitemap = [];
 
 for (const s of SECCIONES) {
@@ -229,7 +230,7 @@ for (const f of FICHAS) {
         tipo: "article",
       }),
     );
-    if (!f.sinSitemap) enSitemap.push(`${f.ruta}/${id}`);
+    if (!f.sinSitemap?.(ficha)) enSitemap.push(`${f.ruta}/${id}`);
     total++;
   }
 }

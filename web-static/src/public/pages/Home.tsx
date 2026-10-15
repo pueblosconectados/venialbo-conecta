@@ -51,7 +51,7 @@ const SECCIONES: Seccion[] = [
   {
     icon: <NotificationOutlined />,
     title: "Tablón",
-    desc: "Anuncios entre vecinos",
+    desc: "Información útil y anuncios de vecinos",
     to: "/tablon",
     recursos: ["anuncios"],
     color: colors.dorado,
@@ -147,8 +147,8 @@ export function Home() {
             }}
           >
             Todo Venialbo en un sitio: lo que pasa y lo que se ha hecho, qué ver
-            y por dónde pasear, sus negocios y servicios, y un tablón para los
-            vecinos.
+            y por dónde pasear, sus negocios y servicios, y un tablón con la
+            información útil del pueblo y los anuncios de los vecinos.
           </Typography.Text>
         </div>
       </section>

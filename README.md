@@ -5,8 +5,8 @@
 <h3 align="center">Tu portal vecinal</h3>
 
 <p align="center">
-  Noticias, negocios, servicios y un tablón para compartir<br>
-  lo que pasa en Venialbo (Zamora).
+  Noticias, negocios, servicios y un tablón con lo útil del pueblo<br>
+  y los anuncios de los vecinos de Venialbo (Zamora).
 </p>
 
 <p align="center">
@@ -28,7 +28,7 @@ el bibliobús, sin registrarse ni instalar nada.
 | 📰 | **Noticias** | Lo último que pasa en el pueblo, en 12 categorías: fiestas, obras, avisos urgentes, cultura… |
 | 🏪 | **Negocios** | El directorio del comercio local, con contacto y enlaces a sus redes |
 | 🏥 | **Servicios e instituciones** | Médico, comedor, bibliobús, asociaciones y el Ayuntamiento, con horarios y contacto |
-| 📌 | **Tablón** | Anuncios entre vecinos: mascotas perdidas, compraventa, objetos perdidos |
+| 📌 | **Tablón** | Información útil (horarios de misa, avisos que conviene tener a mano) y anuncios entre vecinos: mascotas perdidas, compraventa, objetos perdidos |
 | 🤝 | **Pueblos Conectados** | El proyecto del que forma parte esta web |
 
 ## Pueblos Conectados

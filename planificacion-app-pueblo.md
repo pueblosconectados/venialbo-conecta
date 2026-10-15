@@ -43,7 +43,7 @@ repositorio; cada guardado en el CMS es un commit que dispara la publicación.
 | **Noticias** | Lo que pasa en el pueblo, por categorías, con imagen y PDF adjuntos | El CMS |
 | **Negocios** | Directorio del comercio local: contacto, horario, redes | El CMS, con altas por formulario |
 | **Servicios e instituciones** | Médico, comedor, bibliobús, asociaciones, Ayuntamiento | El CMS |
-| **Tablón** | Anuncios vecinales, con caducidad | El CMS, con envíos por formulario |
+| **Tablón** | Información útil (horarios, avisos que se consultan) y anuncios vecinales, con caducidad y PDF adjuntos | El CMS; los anuncios, también por formulario |
 | **Avisos de portada** | Una banda arriba para lo urgente, con caducidad obligatoria | El CMS |
 | **Pueblos Conectados** | El proyecto del que forma parte | Fijo en el código |
 | **Privacidad** | Qué datos se recogen y cómo pedir que se borren | Fijo en el código |
@@ -62,7 +62,7 @@ entrada:
 | `noticias` | titulo, fecha_publicacion, categoria, destacada, activa, imagen_url, contenido, documentos |
 | `negocios` | nombre, categoria_negocio, descripcion, logo_url, direccion, telefono, telefono_movil, email, web_url, redes_sociales, horario, activo |
 | `servicios` | nombre, tipo, descripcion, logo_url, direccion, telefono, email, web_url, redes_sociales, horario, informacion_adicional, activo |
-| `anuncios` | titulo, tipo, descripcion, contacto, imagen_url, fecha_publicacion, fecha_caducidad, activo |
+| `anuncios` | titulo, tipo (`informacion` va en su propio apartado), descripcion, contacto, imagen_url, galeria, documentos, fecha_publicacion, fecha_caducidad, activo |
 | `avisos` | titulo, nivel, noticia, fecha_caducidad, activo |
 | `categorias` | nombre, icono, color |
 

@@ -21,7 +21,7 @@ const formatTamano = (bytes?: number) => {
     : `${Math.round(bytes / 1024)} KB`;
 };
 
-// Los PDF adjuntos de una noticia o una actividad, con lo que pesa cada uno.
+// Los PDF adjuntos de una noticia, una actividad o un anuncio del tablón, con lo que pesa cada uno.
 export const Documentos = ({ documentos }: { documentos?: Documento[] }) => {
   if (!documentos?.length) return null;
 

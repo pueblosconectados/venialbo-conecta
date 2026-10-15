@@ -810,8 +810,10 @@ content:
         options:
           format: yyyy-MM-dd
 
+  # Dos apartados en la web: el tipo «Información» (horarios, avisos que se consultan;
+  # lo ponemos nosotros) va arriba, y el resto son los anuncios de los vecinos.
   - name: anuncios
-    label: Tablón de anuncios
+    label: Tablón
     type: collection
     path: web-static/content/anuncios
     subfolders: false
@@ -832,10 +834,15 @@ content:
         required: true
       - name: tipo
         label: Tipo
+        description: >-
+          «Información» sale arriba, en su propio apartado: lo útil que la gente tiene que
+          poder consultar. Los demás tipos son anuncios de vecinos.
         type: select
         required: true
         options:
           values:
+            - name: informacion
+              label: Información (horarios, avisos útiles…)
             - name: mascota_perdida
               label: Mascota perdida
             - name: compra_venta
@@ -855,7 +862,7 @@ content:
         type: string
       - name: imagen_url
         label: Foto principal
-        description: 'La que sale en el tablón y arriba en el anuncio. Si al subirla da error 413, pesa más de unos 3 MB: redúcela antes (por ejemplo, mándatela por WhatsApp y guarda la que llega).'
+        description: 'La que sale en el tablón y arriba en la ficha. Si al subirla da error 413, pesa más de unos 3 MB: redúcela antes (por ejemplo, mándatela por WhatsApp y guarda la que llega).'
         type: image
         options:
           media: imagenes
@@ -880,6 +887,28 @@ content:
             label: Pie de foto
             description: Opcional. Lo que se lee al ampliarla.
             type: string
+      - name: documentos
+        label: Documentos para descargar
+        description: >-
+          Hasta 3 archivos PDF (un horario, un bando…). Desde aquí solo se pueden subir
+          de hasta unos 3 MB (si no, da error 413); uno más grande, hasta 10 MB, hay que
+          subirlo por GitHub a web-static/public/media/documentos y elegirlo después
+          aquí. Si alguno pasa de 10 MB, la web no se publica hasta quitarlo.
+        type: object
+        list:
+          max: 3
+        fields:
+          - name: archivo
+            label: Archivo PDF
+            type: file
+            required: true
+            options:
+              media: documentos
+              extensions: [pdf]
+          - name: titulo
+            label: Título del enlace
+            description: Cómo se leerá en la ficha. Si lo dejas vacío, se usa el nombre del archivo.
+            type: string
       - name: fecha_publicacion
         label: Fecha de publicación
         type: date
@@ -902,8 +931,9 @@ content:
   - name: avisos
     label: Avisos de portada
     description: >-
-      La banda que sale arriba en todas las páginas. Para cosas que caducan: un corte
-      de agua, una carretera cortada, un cambio de fecha. NO es el Tablón de anuncios.
+      La banda que sale arriba en todas las páginas. Para lo urgente y de pocos días: un
+      corte de agua, una carretera cortada, un cambio de fecha. Lo que la gente tiene
+      que poder consultar (horarios, etc.) va en el Tablón, con el tipo Información.
     type: collection
     path: web-static/content/avisos
     subfolders: false
