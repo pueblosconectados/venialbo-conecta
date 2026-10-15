@@ -7,8 +7,9 @@ type Aviso = {
   id: string;
   titulo: string;
   nivel?: "urgente" | "aviso" | "informacion";
-  // Id de la noticia relacionada, o null. El build ya lo deja resuelto.
-  noticia?: string | null;
+  // A dónde lleva «Más información» (una actividad o una noticia), o null. Lo resuelve
+  // el build.
+  enlace?: string | null;
 };
 
 // El color lo pone el nivel que eligio quien publica.
@@ -90,11 +91,11 @@ export const BannerAvisos = () => {
           message={
             <>
               {aviso.titulo}
-              {aviso.noticia && (
+              {aviso.enlace && (
                 <>
                   {" "}
                   <Link
-                    to={`/noticias/${aviso.noticia}`}
+                    to={aviso.enlace}
                     style={{ whiteSpace: "nowrap", fontWeight: 600 }}
                   >
                     Más información

@@ -982,10 +982,23 @@ content:
               label: Información (verde)
       - name: noticia
         label: Noticia relacionada
-        description: Opcional. Si la pones, el aviso lleva un enlace para leer más.
+        description: >-
+          Opcional. Si la pones, el aviso lleva un enlace «Más información» a la noticia.
+          Para enlazar a una actividad, usa el campo de abajo.
         type: reference
         options:
           collection: noticias
+          value: "{path}"
+          label: "{titulo}"
+          search: titulo
+      - name: actividad
+        label: Actividad relacionada
+        description: >-
+          Opcional, en vez de la noticia. Si pones las dos, el enlace lleva a la
+          actividad.
+        type: reference
+        options:
+          collection: actividades
           value: "{path}"
           label: "{titulo}"
           search: titulo

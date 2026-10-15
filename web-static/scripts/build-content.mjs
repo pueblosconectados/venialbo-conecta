@@ -207,6 +207,8 @@ await escribir(
   actividades,
 );
 
+const actividadPorId = new Map(actividades.map((a) => [a.id, a]));
+
 // Y la agenda como calendario (.ics) para suscribirse desde Google Calendar, el del
 // iPhone o Outlook: se queda en el calendario del móvil y se actualiza solo cada vez
 // que la aplicación vuelve a mirarlo. No hay hora ni lugar en el CMS, así que son
@@ -373,7 +375,20 @@ const ORDEN_NIVEL = { urgente: 0, aviso: 1, informacion: 2 };
 const nivelDe = (a) => ORDEN_NIVEL[a.nivel] ?? 9;
 const avisos = (await leerColeccion("avisos"))
   .filter((a) => a.activo !== false)
-  .map((a) => ({ ...a, noticia: a.noticia ? idDe(a.noticia) : null }))
+  // El enlace de «Más información»: a la actividad o, si no hay, a la noticia. Si lo
+  // enlazado está oculto o ya no existe, el aviso sale sin enlace en vez de roto.
+  .map((a) => {
+    const actividad = enlaceA(a.actividad, actividadPorId, "titulo", `aviso ${a.id}`);
+    const noticia = enlaceA(a.noticia, noticiaPorId, "titulo", `aviso ${a.id}`);
+    return {
+      ...quitar(a, "actividad", "noticia"),
+      enlace: actividad
+        ? `/actividades/${actividad.id}`
+        : noticia
+          ? `/noticias/${noticia.id}`
+          : null,
+    };
+  })
   .sort((a, b) => nivelDe(a) - nivelDe(b) || (b.id ?? "").localeCompare(a.id ?? ""));
 await escribir("avisos", avisos, avisos);
 

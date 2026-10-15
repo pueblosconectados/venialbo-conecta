@@ -1,7 +1,7 @@
 {
   "titulo": "¡Apúntate a la Titán Matacucos!",
   "nivel": "aviso",
-  "noticia": "web-static/content/noticias/2026-09-21-ix-btt-titan-matacucos.json",
+  "actividad": "web-static/content/actividades/2026-09-21-ix-btt-titan-matacucos.json",
   "fecha_caducidad": "2026-10-25",
   "activo": true
 }
