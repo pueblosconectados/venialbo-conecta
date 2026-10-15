@@ -20,6 +20,7 @@ import {
   CATEGORIAS_ACTIVIDAD,
   categoriaActividad,
   formatFechasActividad,
+  yaCelebrada,
 } from "./categorias";
 import { EtiquetaNuevo } from "../../components/EtiquetaNuevo";
 
@@ -40,6 +41,12 @@ type ActividadList = {
 
 const POR_PAGINA = 12;
 
+const tituloSeccion = (texto: string) => (
+  <Typography.Title level={3} style={{ margin: "0 0 16px" }}>
+    {texto}
+  </Typography.Title>
+);
+
 export function ActividadesList() {
   const [page, setPage] = useState(1);
   const [categoria, setCategoria] = useState("");
@@ -53,7 +60,11 @@ export function ActividadesList() {
 
   const todas = result?.data ?? [];
   const filtradas = categoria ? todas.filter((a) => a.categoria === categoria) : todas;
-  const items = filtradas.slice((page - 1) * POR_PAGINA, page * POR_PAGINA);
+  // El build las ordena de la más reciente a la más antigua: así quedan las celebradas,
+  // y las próximas se dan la vuelta para que salga primero la que antes llega.
+  const proximas = filtradas.filter((a) => !yaCelebrada(a)).reverse();
+  const celebradas = filtradas.filter(yaCelebrada);
+  const items = celebradas.slice((page - 1) * POR_PAGINA, page * POR_PAGINA);
 
   // En el orden de la lista de categorías, no en el de aparición
   const presentes = new Set(todas.map((a) => a.categoria));
@@ -87,9 +98,70 @@ export function ActividadesList() {
 
   const intro = (
     <Typography.Paragraph style={{ color: colors.marronSuave, marginTop: -12, marginBottom: 24 }}>
-      Lo que se ha hecho en el pueblo: cursos, talleres, excursiones, fiestas… contado
-      y con fotos.
+      Cursos, talleres, excursiones y fiestas que se preparan en el pueblo. Las que ya
+      se han celebrado quedan más abajo, con sus fotos.
     </Typography.Paragraph>
+  );
+
+  const tarjeta = (a: ActividadList) => {
+      const cat = categoriaActividad(a.categoria);
+      return (
+        <Col key={a.id} xs={24} sm={12} lg={8}>
+          <Link to={`/actividades/${a.id}`} className="vc-card-link">
+            <Card
+              cover={
+                a.imagen_url ? (
+                  <Imagen
+                    src={a.imagen_url}
+                    alt={a.titulo}
+                    sizes="(max-width: 575px) 100vw, (max-width: 991px) 50vw, 33vw"
+                    style={{
+                      height: 180,
+                      objectFit: "cover",
+                      borderBottom: `1px solid ${colors.borde}`,
+                    }}
+                  />
+                ) : undefined
+              }
+              styles={{ body: { padding: 16 } }}
+            >
+              {esNuevo(a) && <EtiquetaNuevo posicion="esquina" />}
+              <div style={{ display: "flex", gap: 6, flexWrap: "wrap", marginBottom: 6 }}>
+                <Tag style={softTagStyle(cat.tono)}>{cat.nombre}</Tag>
+                {a.destacada && (
+                  <Tag icon={<StarFilled />} style={softTagStyle("dorado")}>
+                    Destacada
+                  </Tag>
+                )}
+              </div>
+              <Typography.Text strong style={{ display: "block", marginBottom: 4 }}>
+                {a.titulo}
+              </Typography.Text>
+              {a.resumen && (
+                <Typography.Paragraph
+                  ellipsis={{ rows: 2 }}
+                  style={{ color: colors.marronSuave, fontSize: 14, marginBottom: 6 }}
+                >
+                  {a.resumen}
+                </Typography.Paragraph>
+              )}
+              <Typography.Text type="secondary" style={{ fontSize: 12 }}>
+                {formatFechasActividad(a.fecha, a.fecha_fin)}
+                {a.fotos > 0 && (
+                  <span style={{ whiteSpace: "nowrap" }}>
+                    {" · "}
+                    <CameraOutlined /> {a.fotos} {a.fotos === 1 ? "foto" : "fotos"}
+                  </span>
+                )}
+              </Typography.Text>
+            </Card>
+          </Link>
+        </Col>
+      );
+  };
+
+  const fila = (lista: ActividadList[]) => (
+    <Row gutter={[16, 16]}>{lista.map(tarjeta)}</Row>
   );
 
   if (query.isLoading)
@@ -111,7 +183,7 @@ export function ActividadesList() {
     <div>
       {cabecera}
       {intro}
-      {items.length === 0 && (
+      {filtradas.length === 0 && (
         <Empty
           description={
             todas.length === 0
@@ -121,70 +193,30 @@ export function ActividadesList() {
           style={{ margin: "48px 0" }}
         />
       )}
-      <Row gutter={[16, 16]}>
-        {items.map((a) => {
-          const cat = categoriaActividad(a.categoria);
-          return (
-            <Col key={a.id} xs={24} sm={12} lg={8}>
-              <Link to={`/actividades/${a.id}`} className="vc-card-link">
-                <Card
-                  cover={
-                    a.imagen_url ? (
-                      <Imagen
-                        src={a.imagen_url}
-                        alt={a.titulo}
-                        sizes="(max-width: 575px) 100vw, (max-width: 991px) 50vw, 33vw"
-                        style={{
-                          height: 180,
-                          objectFit: "cover",
-                          borderBottom: `1px solid ${colors.borde}`,
-                        }}
-                      />
-                    ) : undefined
-                  }
-                  styles={{ body: { padding: 16 } }}
-                >
-                  {esNuevo(a) && <EtiquetaNuevo posicion="esquina" />}
-                  <div style={{ display: "flex", gap: 6, flexWrap: "wrap", marginBottom: 6 }}>
-                    <Tag style={softTagStyle(cat.tono)}>{cat.nombre}</Tag>
-                    {a.destacada && (
-                      <Tag icon={<StarFilled />} style={softTagStyle("dorado")}>
-                        Destacada
-                      </Tag>
-                    )}
-                  </div>
-                  <Typography.Text strong style={{ display: "block", marginBottom: 4 }}>
-                    {a.titulo}
-                  </Typography.Text>
-                  {a.resumen && (
-                    <Typography.Paragraph
-                      ellipsis={{ rows: 2 }}
-                      style={{ color: colors.marronSuave, fontSize: 14, marginBottom: 6 }}
-                    >
-                      {a.resumen}
-                    </Typography.Paragraph>
-                  )}
-                  <Typography.Text type="secondary" style={{ fontSize: 12 }}>
-                    {formatFechasActividad(a.fecha, a.fecha_fin)}
-                    {a.fotos > 0 && (
-                      <span style={{ whiteSpace: "nowrap" }}>
-                        {" · "}
-                        <CameraOutlined /> {a.fotos} {a.fotos === 1 ? "foto" : "fotos"}
-                      </span>
-                    )}
-                  </Typography.Text>
-                </Card>
-              </Link>
-            </Col>
-          );
-        })}
-      </Row>
-      {filtradas.length > POR_PAGINA && (
+      {filtradas.length > 0 && (
+        <>
+          {tituloSeccion("Próximas")}
+          {proximas.length > 0 ? (
+            fila(proximas)
+          ) : (
+            <Typography.Paragraph style={{ color: colors.marronSuave }}>
+              Ahora mismo no hay ninguna anunciada.
+            </Typography.Paragraph>
+          )}
+        </>
+      )}
+      {celebradas.length > 0 && (
+        <div style={{ marginTop: 36 }}>
+          {tituloSeccion("Ya celebradas")}
+          {fila(items)}
+        </div>
+      )}
+      {celebradas.length > POR_PAGINA && (
         <div style={{ marginTop: 24, display: "flex", justifyContent: "center" }}>
           <Pagination
             current={page}
             pageSize={POR_PAGINA}
-            total={filtradas.length}
+            total={celebradas.length}
             onChange={setPage}
             showSizeChanger={false}
           />

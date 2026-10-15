@@ -3,7 +3,7 @@ import { Card, Col, Row, Typography } from "antd";
 import { useEffect, useState, type ReactNode } from "react";
 import {
   BankOutlined,
-  CameraOutlined,
+  CalendarOutlined,
   CompassOutlined,
   LinkOutlined,
   MedicineBoxOutlined,
@@ -40,9 +40,9 @@ const SECCIONES: Seccion[] = [
     bg: colors.musgoFondo,
   },
   {
-    icon: <CameraOutlined />,
+    icon: <CalendarOutlined />,
     title: "Actividades",
-    desc: "Lo que se ha hecho, con fotos",
+    desc: "Cursos, talleres y lo que se prepara",
     to: "/actividades",
     recursos: ["actividades"],
     color: "#3d6691",
@@ -146,7 +146,7 @@ export function Home() {
               lineHeight: 1.55,
             }}
           >
-            Todo Venialbo en un sitio: lo que pasa y lo que se ha hecho, qué ver
+            Todo Venialbo en un sitio: lo que pasa y lo que se prepara, qué ver
             y por dónde pasear, sus negocios y servicios, y un tablón con la
             información útil del pueblo y los anuncios de los vecinos.
           </Typography.Text>

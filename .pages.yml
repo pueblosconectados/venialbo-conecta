@@ -67,6 +67,10 @@ media:
 content:
   - name: noticias
     label: Noticias
+    description: >-
+      Lo que ha pasado en el pueblo, y las noticias de prensa en las que sale
+      Venialbo. Para anunciar un curso, un taller o algo que se va a hacer, usa
+      Actividades.
     type: collection
     path: web-static/content/noticias
     # Sin subcarpetas: build-content.mjs solo lee los .json de primer nivel, y lo
@@ -150,13 +154,15 @@ content:
             description: Cómo se leerá en la noticia. Si lo dejas vacío, se usa el nombre del archivo.
             type: string
 
-  # El álbum de lo que se ha hecho. La frontera con Noticias: la noticia avisa antes
-  # ("el martes empieza el curso") y la actividad cuenta después lo que pasó.
+  # La agenda: cursos, talleres, excursiones… que se van a hacer. Al pasar su fecha la
+  # web la pasa sola a "Ya celebradas", donde se le pueden añadir las fotos. La
+  # frontera con Noticias: la actividad anuncia; la noticia cuenta lo que ha pasado.
   - name: actividades
     label: Actividades
     description: >-
-      Lo que ya se ha hecho en el pueblo, con fotos: un curso, un taller, una
-      excursión. Para anunciar algo que va a pasar, usa Noticias.
+      Lo que se va a hacer en el pueblo: un curso, un taller, una excursión. Cuando
+      pase, sale sola en «Ya celebradas» y se le pueden añadir las fotos. Para contar
+      algo que ha pasado, usa Noticias.
     type: collection
     path: web-static/content/actividades
     subfolders: false
@@ -177,14 +183,18 @@ content:
         required: true
       - name: fecha
         label: Fecha
-        description: El día en que se hizo, o el primero si duró varios.
+        description: >-
+          El día en que se hace, o el primero si dura varios. Pasado el último, la
+          web la pone en «Ya celebradas».
         type: date
         required: true
         options:
           format: yyyy-MM-dd
       - name: fecha_fin
         label: Hasta
-        description: Solo si duró varios días. En la web sale "del 3 al 24 de marzo".
+        description: >-
+          Solo si dura varios días, o si es un curso con clases semanales: el día de
+          la última. En la web sale "del 3 al 24 de marzo".
         type: date
         options:
           format: yyyy-MM-dd
@@ -224,8 +234,8 @@ content:
           label: "{nombre}"
           search: nombre
       - name: noticia
-        label: Noticia en la que se anunció
-        description: Opcional. Enlaza la actividad con la noticia que la anunciaba.
+        label: Noticia relacionada
+        description: Opcional. Por ejemplo, la noticia que cuenta cómo fue.
         type: reference
         options:
           collection: noticias

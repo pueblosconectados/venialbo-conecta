@@ -162,8 +162,9 @@ const servicios = (await leerColeccion("servicios"))
   .sort((a, b) => porTexto("tipo")(a, b) || porTexto("nombre")(a, b));
 await escribir("servicios", servicios, servicios);
 
-// Actividades — el álbum de lo que se ha hecho. No caducan. "Organiza" y la noticia
-// que la anunció se guardan como ruta del fichero referenciado: se sustituyen por lo
+// Actividades — la agenda: lo que se va a hacer y, cuando pasa, lo ya celebrado, con sus
+// fotos. No caducan: la web las separa al visitarla (yaCelebrada). "Organiza" y la
+// noticia relacionada se guardan como ruta del fichero referenciado: se sustituyen por lo
 // justo para pintar el enlace, y si lo referenciado está oculto o ya no existe, se
 // quita el enlace en vez de dejarlo roto.
 const servicioPorId = new Map(servicios.map((s) => [s.id, s]));

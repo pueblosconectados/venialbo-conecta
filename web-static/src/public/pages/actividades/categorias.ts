@@ -1,3 +1,4 @@
+import { haCaducado } from "../../../datos";
 import type { TagTone } from "../../../theme";
 
 // Las categorías de actividades. Son una lista fija del `select` de .pages.yml, no una
@@ -47,4 +48,12 @@ export const formatFechasActividad = (fecha: string, fechaFin?: string | null): 
       ? fmt(inicio, { day: "numeric", month: "long" })
       : fmt(inicio, completa);
   return `Del ${desde} al ${fmt(fin, completa)}`;
+};
+
+// Ya celebrada cuando ha pasado su último día (incluido). Como la caducidad, se calcula
+// al visitar: una actividad pasa sola de «Próximas» a «Ya celebradas» sin publicar.
+export const yaCelebrada = (a: { fecha: string; fecha_fin?: string | null }): boolean => {
+  const inicio = a.fecha.slice(0, 10);
+  const fin = a.fecha_fin?.slice(0, 10);
+  return haCaducado(fin && fin > inicio ? fin : inicio);
 };

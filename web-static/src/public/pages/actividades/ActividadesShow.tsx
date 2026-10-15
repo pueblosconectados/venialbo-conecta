@@ -12,7 +12,7 @@ import { ImagenAmpliable } from "../../components/ImagenAmpliable";
 import { VideoYoutube } from "../../components/VideoYoutube";
 import { juegoDeMiniaturas } from "../../../miniaturas";
 import { colors, softTagStyle } from "../../../theme";
-import { categoriaActividad, formatFechasActividad } from "./categorias";
+import { categoriaActividad, formatFechasActividad, yaCelebrada } from "./categorias";
 
 type ActividadDetail = {
   novedad_hasta?: string | null;
@@ -74,6 +74,7 @@ export function ActividadesShow() {
       <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginBottom: 12 }}>
         {esNuevo(a) && <EtiquetaNuevo />}
         <Tag style={softTagStyle(cat.tono)}>{cat.nombre}</Tag>
+        {yaCelebrada(a) && <Tag style={softTagStyle("gris")}>Ya celebrada</Tag>}
         {a.destacada && (
           <Tag icon={<StarFilled />} style={softTagStyle("dorado")}>
             Destacada
@@ -130,7 +131,7 @@ export function ActividadesShow() {
 
       {a.noticia && (
         <Typography.Paragraph style={{ margin: "28px 0 0", color: colors.marronSuave }}>
-          <ReadOutlined /> Se anunció en la noticia{" "}
+          <ReadOutlined /> Más en la noticia{" "}
           <Link to={`/noticias/${a.noticia.id}`} style={{ color: colors.musgo, fontWeight: 500 }}>
             {a.noticia.titulo}
           </Link>
