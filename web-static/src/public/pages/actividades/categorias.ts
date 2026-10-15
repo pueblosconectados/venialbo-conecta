@@ -29,7 +29,25 @@ export const categoriaActividad = (clave?: string | null) =>
 
 // "3 de marzo de 2026", o el intervalo si duró varios días, sin repetir lo que
 // comparten: "del 3 al 24 de marzo de 2026", "del 28 de marzo al 2 de abril de 2026".
-export const formatFechasActividad = (fecha: string, fechaFin?: string | null): string => {
+// Con hora (el build la deja como "09:30"): "3 de marzo de 2026, a las 9:30", o
+// "…, de 18:00 a 20:00" si tiene hora de fin.
+export const formatFechasActividad = (
+  fecha: string,
+  fechaFin?: string | null,
+  hora?: string | null,
+  horaFin?: string | null,
+): string => {
+  const dias = formatDias(fecha, fechaFin);
+  if (!hora) return dias;
+  return horaFin
+    ? `${dias}, de ${formatHora(hora)} a ${formatHora(horaFin)}`
+    : `${dias}, a las ${formatHora(hora)}`;
+};
+
+// "09:30" → "9:30"
+export const formatHora = (hora: string) => hora.replace(/^0(?=\d)/, "");
+
+const formatDias = (fecha: string, fechaFin?: string | null): string => {
   // Las fechas vienen sin hora ("2026-03-03"): a mediodía para que el huso horario no
   // las mueva de día.
   const d = (iso: string) => new Date(`${iso.slice(0, 10)}T12:00:00`);

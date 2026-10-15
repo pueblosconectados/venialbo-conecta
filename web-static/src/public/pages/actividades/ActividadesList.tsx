@@ -55,6 +55,8 @@ type ActividadList = {
   titulo: string;
   fecha: string;
   fecha_fin?: string | null;
+  hora?: string | null;
+  hora_fin?: string | null;
   categoria: string;
   resumen?: string | null;
   imagen_url?: string | null;
@@ -204,7 +206,7 @@ export function ActividadesList() {
                 </Typography.Paragraph>
               )}
               <Typography.Text type="secondary" style={{ fontSize: 12 }}>
-                {formatFechasActividad(a.fecha, a.fecha_fin)}
+                {formatFechasActividad(a.fecha, a.fecha_fin, a.hora, a.hora_fin)}
                 {a.fotos > 0 && (
                   <span style={{ whiteSpace: "nowrap" }}>
                     {" · "}

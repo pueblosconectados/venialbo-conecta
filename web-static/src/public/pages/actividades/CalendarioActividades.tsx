@@ -13,13 +13,15 @@ import {
   RightOutlined,
 } from "@ant-design/icons";
 import { colors, softTagStyle, tagTones } from "../../../theme";
-import { categoriaActividad, formatFechasActividad, yaCelebrada } from "./categorias";
+import { categoriaActividad, formatFechasActividad, formatHora, yaCelebrada } from "./categorias";
 
 export type ActividadCalendario = {
   id: string;
   titulo: string;
   fecha: string;
   fecha_fin?: string | null;
+  hora?: string | null;
+  hora_fin?: string | null;
   categoria: string;
 };
 
@@ -52,6 +54,12 @@ const diasMarcados = (a: ActividadCalendario): string[] => {
   for (let t = desde; t <= hasta; t += DIA_MS) dias.push(isoDeMs(t));
   return dias;
 };
+
+// Por día y, dentro del día, por hora: las que no tienen hora van delante
+const porFechaYHora = (a: ActividadCalendario, b: ActividadCalendario) =>
+  a.fecha.localeCompare(b.fecha) ||
+  (a.hora ?? "").localeCompare(b.hora ?? "") ||
+  a.titulo.localeCompare(b.titulo);
 
 const mayuscula = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
 const fechaLocal = (iso: string) => new Date(`${iso}T12:00:00`);
@@ -135,7 +143,7 @@ export function CalendarioActividades({ actividades }: { actividades: ActividadC
   // Día → actividades de ese día, de la que empieza antes a la que empieza después
   const porDia = useMemo(() => {
     const mapa = new Map<string, ActividadCalendario[]>();
-    const ordenadas = [...actividades].sort((a, b) => a.fecha.localeCompare(b.fecha));
+    const ordenadas = [...actividades].sort(porFechaYHora);
     for (const a of ordenadas)
       for (const d of diasMarcados(a)) mapa.set(d, [...(mapa.get(d) ?? []), a]);
     return mapa;
@@ -176,7 +184,7 @@ export function CalendarioActividades({ actividades }: { actividades: ActividadC
           const { inicio, fin } = intervalo(a);
           return inicio <= ultimo && fin >= primero;
         })
-        .sort((a, b) => a.fecha.localeCompare(b.fecha) || a.titulo.localeCompare(b.titulo));
+        .sort(porFechaYHora);
   const tituloLista = dia
     ? mayuscula(fechaLocal(dia).toLocaleDateString("es-ES", { weekday: "long", day: "numeric", month: "long" }))
     : `En ${nombreMes.split(" ")[0].toLowerCase()}`;
@@ -240,9 +248,10 @@ export function CalendarioActividades({ actividades }: { actividades: ActividadC
                         to={`/actividades/${a.id}`}
                         className="vc-cal-evento"
                         style={{ background: tono.bg, color: tono.color }}
-                        title={a.titulo}
+                        title={a.hora ? `${formatHora(a.hora)} · ${a.titulo}` : a.titulo}
                         onClick={(e) => e.stopPropagation()}
                       >
+                        {a.hora && <strong>{formatHora(a.hora)} </strong>}
                         {a.titulo}
                       </Link>
                     );
@@ -324,7 +333,7 @@ export function CalendarioActividades({ actividades }: { actividades: ActividadC
                       {a.titulo}
                     </Typography.Text>
                     <Typography.Text type="secondary" style={{ fontSize: 13 }}>
-                      {formatFechasActividad(a.fecha, a.fecha_fin)}
+                      {formatFechasActividad(a.fecha, a.fecha_fin, a.hora, a.hora_fin)}
                       {yaCelebrada(a) && " · Ya celebrada"}
                     </Typography.Text>
                     <span style={{ display: "block", marginTop: 4 }}>

@@ -178,6 +178,31 @@ const enlaceA = (ruta, porId, campo, quien) => {
   }
   return { id: destino.id, [campo]: destino[campo] };
 };
+// La hora se escribe a mano en el CMS: "18:30", "9:30", "9.30", "18h"… Se deja como
+// "HH:MM" para que ordene bien. Si no se entiende, se quita con un aviso en vez de
+// romper el build: la actividad sigue valiendo sin hora.
+const leerHora = (texto, quien) => {
+  if (texto == null || String(texto).trim() === "") return null;
+  const m = String(texto).trim().match(/^([01]?\d|2[0-3])\s*(?:[:.h]\s*([0-5]\d)?)?\s*h?$/i);
+  if (!m) {
+    console.warn(`  ⚠ ${quien}: no se entiende la hora "${texto}", se quita`);
+    return null;
+  }
+  return `${m[1].padStart(2, "0")}:${m[2] ?? "00"}`;
+};
+// La de fin solo vale con la de inicio y si es después: un curso que acaba a la
+// 1 de la madrugada no lo hay, y es más probable que sea una errata.
+const leerHoras = (a, quien) => {
+  const hora = leerHora(a.hora, quien);
+  let hora_fin = leerHora(a.hora_fin, quien);
+  if (hora_fin && (!hora || hora_fin <= hora)) {
+    console.warn(
+      `  ⚠ ${quien}: la hora de fin (${hora_fin}) ${hora ? `no es después de la de inicio (${hora})` : "no tiene hora de inicio"}, se quita`,
+    );
+    hora_fin = null;
+  }
+  return { hora, hora_fin };
+};
 const actividades = (
   await Promise.all(
     (await leerColeccion("actividades"))
@@ -186,6 +211,7 @@ const actividades = (
         const quien = `actividad ${a.id}`;
         return {
           ...a,
+          ...leerHoras(a, quien),
           organiza: enlaceA(a.organiza, servicioPorId, "nombre", quien),
           noticia: enlaceA(a.noticia, noticiaPorId, "titulo", quien),
           // Una fila de la galería que se quedó sin foto no pinta nada
@@ -195,8 +221,13 @@ const actividades = (
       }),
   )
 )
-  // A igual fecha, el id (que empieza por la fecha de creación) desempata
-  .sort((a, b) => (b.fecha ?? "").localeCompare(a.fecha ?? "") || b.id.localeCompare(a.id));
+  // A igual fecha, la hora y luego el id (que empieza por la fecha de creación)
+  .sort(
+    (a, b) =>
+      (b.fecha ?? "").localeCompare(a.fecha ?? "") ||
+      (b.hora ?? "").localeCompare(a.hora ?? "") ||
+      b.id.localeCompare(a.id),
+  );
 // El listado solo necesita la tarjeta
 await escribir(
   "actividades",
@@ -211,8 +242,10 @@ const actividadPorId = new Map(actividades.map((a) => [a.id, a]));
 
 // Y la agenda como calendario (.ics) para suscribirse desde Google Calendar, el del
 // iPhone o Outlook: se queda en el calendario del móvil y se actualiza solo cada vez
-// que la aplicación vuelve a mirarlo. No hay hora ni lugar en el CMS, así que son
-// eventos de día completo; DTEND es el día siguiente al último, que no se incluye.
+// que la aplicación vuelve a mirarlo. Con hora y de un solo día, el evento va de la
+// hora a la hora de fin, o dura una hora si no la tiene. Sin hora, o de varios días, es de
+// día completo, y la hora va en la descripción; DTEND es entonces el día siguiente al
+// último, que no se incluye.
 const SITIO = (process.env.SITIO_URL ?? "https://venialboconecta.es").replace(/\/$/, "");
 const DOMINIO = new URL(SITIO).hostname;
 const diaIcs = (iso, sumar = 0) => {
@@ -246,27 +279,65 @@ const sinMarkdown = (md) =>
     .replace(/[*_#>`]/g, "")
     .replace(/\n{3,}/g, "\n\n")
     .trim();
-const descripcionIcs = (a) => {
+const descripcionIcs = (a, conHora) => {
   const texto = a.resumen?.trim() || sinMarkdown(a.contenido ?? "");
   const corto = texto.length > 500 ? `${texto.slice(0, 500).replace(/\s+\S*$/, "")}…` : texto;
-  return [corto, `Más información: ${SITIO}/actividades/${a.id}`].filter(Boolean).join("\n\n");
+  const h = (x) => x.replace(/^0/, "");
+  const hora = !conHora
+    ? ""
+    : a.hora_fin
+      ? `De ${h(a.hora)} a ${h(a.hora_fin)}.`
+      : `A las ${h(a.hora)}.`;
+  return [hora, corto, `Más información: ${SITIO}/actividades/${a.id}`]
+    .filter(Boolean)
+    .join("\n\n");
+};
+// La hora del CMS es la de Venialbo: se pasa a UTC (la Z del .ics) mirando qué
+// diferencia tiene Madrid ese día, que cambia con el horario de verano.
+const madrid = new Intl.DateTimeFormat("en-US", {
+  timeZone: "Europe/Madrid",
+  hourCycle: "h23",
+  year: "numeric",
+  month: "numeric",
+  day: "numeric",
+  hour: "numeric",
+  minute: "numeric",
+});
+const desfaseMadrid = (ms) => {
+  const p = Object.fromEntries(madrid.formatToParts(ms).map((x) => [x.type, +x.value]));
+  return Date.UTC(p.year, p.month - 1, p.day, p.hour, p.minute) - ms;
+};
+const instanteIcs = (iso, hora, sumarMs = 0) => {
+  const [h, m] = hora.split(":").map(Number);
+  const local = Date.UTC(+iso.slice(0, 4), +iso.slice(5, 7) - 1, +iso.slice(8, 10), h, m);
+  const utc = local - desfaseMadrid(local - desfaseMadrid(local));
+  return new Date(utc + sumarMs).toISOString().replace(/[-:]/g, "").replace(/\.\d+/, "");
 };
 const sello = new Date().toISOString().replace(/[-:]/g, "").replace(/\.\d+/, "");
 const eventos = actividades
   .filter((a) => a.fecha)
   .map((a) => {
     const fin = a.fecha_fin && a.fecha_fin.slice(0, 10) > a.fecha.slice(0, 10) ? a.fecha_fin : a.fecha;
+    const conHora = a.hora && fin === a.fecha;
+    const cuando = conHora
+      ? [
+          `DTSTART:${instanteIcs(a.fecha, a.hora)}`,
+          a.hora_fin
+            ? `DTEND:${instanteIcs(a.fecha, a.hora_fin)}`
+            : `DTEND:${instanteIcs(a.fecha, a.hora, 3_600_000)}`,
+        ]
+      : [`DTSTART;VALUE=DATE:${diaIcs(a.fecha)}`, `DTEND;VALUE=DATE:${diaIcs(fin, 1)}`];
     return [
       "BEGIN:VEVENT",
       `UID:actividad-${a.id}@${DOMINIO}`,
       `DTSTAMP:${sello}`,
-      `DTSTART;VALUE=DATE:${diaIcs(a.fecha)}`,
-      `DTEND;VALUE=DATE:${diaIcs(fin, 1)}`,
+      ...cuando,
       `SUMMARY:${textoIcs(a.titulo)}`,
-      `DESCRIPTION:${textoIcs(descripcionIcs(a))}`,
+      `DESCRIPTION:${textoIcs(descripcionIcs(a, a.hora && !conHora))}`,
       `URL:${SITIO}/actividades/${a.id}`,
       "LOCATION:Venialbo (Zamora)",
-      "TRANSP:TRANSPARENT",
+      // Las de todo el día no ocupan la agenda (no salen como «ocupado»); las de hora sí
+      `TRANSP:${conHora ? "OPAQUE" : "TRANSPARENT"}`,
       "END:VEVENT",
     ];
   });

@@ -198,6 +198,30 @@ content:
         type: date
         options:
           format: yyyy-MM-dd
+      - name: hora
+        label: Hora
+        description: >-
+          Opcional. A qué hora empieza, como 18:30 (también vale 9:30 o 18h). Si dura
+          varios días, la hora de cada día. Sin hora, en el calendario del móvil sale
+          como un evento de todo el día.
+        type: string
+        options:
+          pattern:
+            # Acepta el campo vacío: la hora es opcional
+            regex: "^\\s*(([01]?\\d|2[0-3])\\s*([:.h]\\s*([0-5]\\d)?)?\\s*h?)?\\s*$"
+            message: "Escribe la hora como 18:30"
+      - name: hora_fin
+        label: Hora de fin
+        description: >-
+          Opcional, y solo con «Hora». A qué hora acaba, como 20:00. En la web sale
+          "de 18:00 a 20:00", y en el calendario del móvil dura eso; sin ella, dura una
+          hora.
+        type: string
+        options:
+          pattern:
+            # Acepta el campo vacío: la hora es opcional
+            regex: "^\\s*(([01]?\\d|2[0-3])\\s*([:.h]\\s*([0-5]\\d)?)?\\s*h?)?\\s*$"
+            message: "Escribe la hora como 18:30"
       # Las etiquetas y los colores de la web están en src/public/pages/actividades/categorias.ts:
       # si se añade una aquí, añadirla también allí.
       - name: categoria

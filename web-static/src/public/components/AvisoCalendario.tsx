@@ -5,7 +5,14 @@ import { CalendarOutlined, RightOutlined } from "@ant-design/icons";
 import { listar } from "../../datos";
 import { formatFechasActividad, yaCelebrada } from "../pages/actividades/categorias";
 
-type Proxima = { id: string; titulo: string; fecha: string; fecha_fin?: string | null };
+type Proxima = {
+  id: string;
+  titulo: string;
+  fecha: string;
+  fecha_fin?: string | null;
+  hora?: string | null;
+  hora_fin?: string | null;
+};
 
 // La franja de la portada que lleva al calendario de Actividades. Dice cuál es la
 // próxima para que el enlace cuente algo; si no hay ninguna anunciada, o el listado no
@@ -39,7 +46,7 @@ export function AvisoCalendario() {
         </Typography.Text>
         <Typography.Text style={{ fontSize: 14, color: "inherit", opacity: 0.85 }}>
           {proxima
-            ? `Próxima: ${proxima.titulo} · ${formatFechasActividad(proxima.fecha, proxima.fecha_fin)}`
+            ? `Próxima: ${proxima.titulo} · ${formatFechasActividad(proxima.fecha, proxima.fecha_fin, proxima.hora, proxima.hora_fin)}`
             : "Cursos, talleres, excursiones y fiestas, día a día"}
         </Typography.Text>
       </span>
