@@ -1,0 +1,15 @@
+{
+  "titulo": "ANUNCIO Sede Electrónica Venialbo",
+  "tipo": "informacion",
+  "descripcion": "Aprobación inicial e información pública del proyecto para sustitución de redes de abastecimiento en Venialbo",
+  "imagen_url": "/media/imagenes/anuncio.jpg",
+  "documentos": [
+    {
+      "archivo": "/media/documentos/anuncio-aprobacion-inicial-e-informacion-publica-del-proyecto-para-sustitucion-de-redes-de-abastecimiento-en-venialbo.pdf",
+      "titulo": "ANUNCIO. Aprobación inicial e información pública del proyecto para sustitución de redes de abastecimiento en Venialbo"
+    }
+  ],
+  "fecha_publicacion": "2026-10-14T12:07",
+  "fecha_caducidad": "2026-11-03",
+  "activo": true
+}
