@@ -1,15 +1,18 @@
 import { useState } from "react";
 import { Link } from "react-router";
 import { Alert } from "antd";
-import { useList } from "../../datos";
+import { haCaducado, useList } from "../../datos";
 
 type Aviso = {
   id: string;
   titulo: string;
   nivel?: "urgente" | "aviso" | "informacion";
-  // A dónde lleva «Más información» (una actividad o una noticia), o null. Lo resuelve
-  // el build.
+  // A dónde lleva «Más información» (una actividad, un anuncio del Tablón o una
+  // noticia), o null. Lo resuelve el build.
   enlace?: string | null;
+  // Si lleva a un anuncio que caduca, hasta cuándo: pasado, el anuncio ya no se ve y
+  // el aviso se queda sin enlace.
+  enlace_hasta?: string | null;
 };
 
 // El color lo pone el nivel que eligio quien publica.
@@ -91,7 +94,7 @@ export const BannerAvisos = () => {
           message={
             <>
               {aviso.titulo}
-              {aviso.enlace && (
+              {aviso.enlace && !haCaducado(aviso.enlace_hasta) && (
                 <>
                   {" "}
                   <Link

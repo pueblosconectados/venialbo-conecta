@@ -1018,25 +1018,38 @@ content:
               label: Aviso (ámbar)
             - name: informacion
               label: Información (verde)
-      - name: noticia
-        label: Noticia relacionada
-        description: >-
-          Opcional. Si la pones, el aviso lleva un enlace «Más información» a la noticia.
-          Para enlazar a una actividad, usa el campo de abajo.
-        type: reference
-        options:
-          collection: noticias
-          value: "{path}"
-          label: "{titulo}"
-          search: titulo
+      # «Más información» lleva a una sola página: estos tres son excluyentes. Pages
+      # CMS no sabe enseñar un campo según lo elegido en otro, así que van los tres y
+      # la descripción lo explica. Si se rellena más de uno, el build avisa y gana el
+      # primero de esta lista: actividad, tablón, noticia.
       - name: actividad
-        label: Actividad relacionada
+        label: "Enlace «Más información»: actividad"
         description: >-
-          Opcional, en vez de la noticia. Si pones las dos, el enlace lleva a la
-          actividad.
+          Opcional. Rellena solo uno de los tres campos de enlace (actividad, Tablón o
+          noticia): el aviso lleva a esa página.
         type: reference
         options:
           collection: actividades
+          value: "{path}"
+          label: "{titulo}"
+          search: titulo
+      - name: anuncio
+        label: "Enlace «Más información»: Tablón"
+        description: >-
+          Opcional, en vez de los otros dos. Si el anuncio caduca antes que el aviso,
+          desde ese día el aviso sale sin enlace.
+        type: reference
+        options:
+          collection: anuncios
+          value: "{path}"
+          label: "{titulo}"
+          search: titulo
+      - name: noticia
+        label: "Enlace «Más información»: noticia"
+        description: Opcional, en vez de los otros dos.
+        type: reference
+        options:
+          collection: noticias
           value: "{path}"
           label: "{titulo}"
           search: titulo

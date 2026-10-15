@@ -482,30 +482,6 @@ await escribir(
   lugares.map((l) => ({ ...l, rutas: rutasPorLugar.get(l.id) ?? [] })),
 );
 
-// Avisos de portada — la banda de arriba. Caducan solos igual que los anuncios.
-// El orden importa porque se apilan: primero el mas grave, y a igual nivel el mas
-// reciente (el id empieza por la fecha, asi que basta con ordenar por id).
-const ORDEN_NIVEL = { urgente: 0, aviso: 1, informacion: 2 };
-const nivelDe = (a) => ORDEN_NIVEL[a.nivel] ?? 9;
-const avisos = (await leerColeccion("avisos"))
-  .filter((a) => a.activo !== false)
-  // El enlace de «Más información»: a la actividad o, si no hay, a la noticia. Si lo
-  // enlazado está oculto o ya no existe, el aviso sale sin enlace en vez de roto.
-  .map((a) => {
-    const actividad = enlaceA(a.actividad, actividadPorId, "titulo", `aviso ${a.id}`);
-    const noticia = enlaceA(a.noticia, noticiaPorId, "titulo", `aviso ${a.id}`);
-    return {
-      ...quitar(a, "actividad", "noticia"),
-      enlace: actividad
-        ? `/actividades/${actividad.id}`
-        : noticia
-          ? `/noticias/${noticia.id}`
-          : null,
-    };
-  })
-  .sort((a, b) => nivelDe(a) - nivelDe(b) || (b.id ?? "").localeCompare(a.id ?? ""));
-await escribir("avisos", avisos, avisos);
-
 // Enlaces de interés — una sola página, sin fichas: no hay detalle que escribir.
 // La foto de la tarjeta: la que se suba a mano en el CMS o, si no hay, la que
 // scripts/avatares.mjs haya bajado de la red social. Si no hay ninguna, sale el icono.
@@ -558,3 +534,38 @@ await escribir(
   anuncios.map((a) => ({ ...quitar(a, "galeria", "documentos"), adjuntos: a.documentos.length })),
   anuncios,
 );
+
+const anuncioPorId = new Map(anuncios.map((a) => [a.id, a]));
+
+// Avisos de portada — la banda de arriba. Caducan solos igual que los anuncios.
+// El orden importa porque se apilan: primero el mas grave, y a igual nivel el mas
+// reciente (el id empieza por la fecha, asi que basta con ordenar por id).
+const ORDEN_NIVEL = { urgente: 0, aviso: 1, informacion: 2 };
+const nivelDe = (a) => ORDEN_NIVEL[a.nivel] ?? 9;
+const avisos = (await leerColeccion("avisos"))
+  .filter((a) => a.activo !== false)
+  // El enlace de «Más información»: a la actividad, al anuncio del Tablón o a la
+  // noticia, el primero que haya (en el CMS se pide solo uno). Si lo enlazado está
+  // oculto o ya no existe, el aviso sale sin enlace en vez de roto. Del anuncio se
+  // guarda además su caducidad: pasada, la web quita el enlace (enlace_hasta).
+  .map((a) => {
+    const quien = `aviso ${a.id}`;
+    const actividad = enlaceA(a.actividad, actividadPorId, "titulo", quien);
+    const anuncio = enlaceA(a.anuncio, anuncioPorId, "titulo", quien);
+    const noticia = enlaceA(a.noticia, noticiaPorId, "titulo", quien);
+    if ([a.actividad, a.anuncio, a.noticia].filter(Boolean).length > 1)
+      console.warn(`  ⚠ ${quien}: tiene más de un enlace; se usa el primero (actividad, tablón, noticia)`);
+    const enlace = actividad
+      ? { enlace: `/actividades/${actividad.id}` }
+      : anuncio
+        ? {
+            enlace: `/tablon/${anuncio.id}`,
+            enlace_hasta: anuncioPorId.get(anuncio.id).fecha_caducidad ?? null,
+          }
+        : noticia
+          ? { enlace: `/noticias/${noticia.id}` }
+          : { enlace: null };
+    return { ...quitar(a, "actividad", "anuncio", "noticia"), ...enlace };
+  })
+  .sort((a, b) => nivelDe(a) - nivelDe(b) || (b.id ?? "").localeCompare(a.id ?? ""));
+await escribir("avisos", avisos, avisos);
