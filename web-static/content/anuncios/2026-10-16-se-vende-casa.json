@@ -1,9 +1,20 @@
 {
-  "titulo": "se vende casa ",
+  "titulo": "Se vende casa ",
   "tipo": "compra_venta",
   "descripcion": "casa en calle los mesones n 20\ntres habitaciones comedor cocina baño\n45000 €",
   "contacto": "tf 649627972 solo wasap ",
+  "imagen_url": "/media/imagenes/1000133081.jpg",
+  "galeria": [
+    {
+      "imagen": "/media/imagenes/1000133083.jpg"
+    },
+    {
+      "imagen": "/media/imagenes/1000133092.jpg"
+    },
+    {
+      "imagen": "/media/imagenes/1000133085.jpg"
+    }
+  ],
   "fecha_publicacion": "2026-10-16T18:15",
-  "fecha_caducidad": "2026-11-15",
-  "activo": false
+  "activo": true
 }
