@@ -775,3 +775,33 @@ a:hover {
     padding: 14px 16px;
   }
 }
+
+/* Fechas señaladas del calendario (el patrón, las fiestas): el día tintado y con una
+   raya terracota arriba, que en el móvil es lo único que se ve; en pantalla ancha,
+   además, el nombre encima de las actividades. Sin enlace: no tienen ficha. */
+.vc-cal-celda.vc-cal-senalada {
+  background: #fcf1ea;
+  box-shadow: inset 0 3px 0 #d05211;
+}
+
+.vc-cal-celda.vc-cal-senalada:hover {
+  background: #f9e6da;
+}
+
+.vc-cal-senal {
+  display: block;
+  padding: 0 6px;
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1.4;
+  color: #b1460e;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.vc-cal-fila.vc-cal-fila-senalada,
+.vc-cal-fila.vc-cal-fila-senalada:hover {
+  background: #fdf7f2;
+  border-color: #f0d5c4;
+}

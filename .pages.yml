@@ -369,6 +369,65 @@ content:
             description: Cómo se leerá en la actividad. Si lo dejas vacío, se usa el nombre del archivo.
             type: string
 
+  # Fechas señaladas: días del pueblo que solo hay que marcar en el calendario (el
+  # patrón, las fiestas, un festivo local), sin ficha propia. Salen en la vista de
+  # calendario de Actividades y en «Añadir a mi calendario».
+  - name: fechas
+    label: Fechas señaladas
+    description: >-
+      Días importantes del pueblo que solo hay que marcar en el calendario: el patrón,
+      las fiestas, un festivo local. No tienen ficha. Si ese día hay algo organizado,
+      créalo además en Actividades.
+    type: collection
+    path: web-static/content/fechas
+    subfolders: false
+    format: json
+    filename: "{year}-{month}-{day}-{primary}.json"
+    view:
+      primary: nombre
+      fields: [nombre, fecha, anual, activa]
+      sort: [fecha, nombre]
+      search: [nombre]
+      default:
+        sort: fecha
+        order: asc
+    fields:
+      - name: nombre
+        label: Nombre
+        description: Como saldrá en el calendario. Por ejemplo, Fiestas de San Roque.
+        type: string
+        required: true
+      - name: fecha
+        label: Fecha
+        description: El día, o el primero si son varios.
+        type: date
+        required: true
+        options:
+          format: yyyy-MM-dd
+      - name: fecha_fin
+        label: Hasta
+        description: Opcional. Solo si son varios días seguidos, el último.
+        type: date
+        options:
+          format: yyyy-MM-dd
+      - name: anual
+        label: Todos los años
+        description: >-
+          Márcala si cae siempre el mismo día (el patrón, un festivo fijo): sale en el
+          calendario cada año desde el de «Fecha». Si cambia de día cada año, como unas
+          fiestas que van por fin de semana, déjala sin marcar y crea una cada año.
+        type: boolean
+        default: false
+      - name: nota
+        label: Nota
+        description: Opcional. Una línea, por ejemplo «Festivo local».
+        type: string
+      - name: activa
+        label: Visible en la web
+        description: Desmárcala para ocultarla sin borrarla.
+        type: boolean
+        default: true
+
   # "Qué ver" de Descubre Venialbo: sitios que se pueden visitar en cualquier momento.
   # Van sobre todo para el que viene de fuera: lo importante es dónde está y si se
   # puede entrar.

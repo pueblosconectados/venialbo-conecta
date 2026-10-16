@@ -7,11 +7,13 @@ import {
   CheckOutlined,
   CopyOutlined,
   DownOutlined,
+  FlagFilled,
   GoogleOutlined,
   LeftOutlined,
   PlusOutlined,
   RightOutlined,
 } from "@ant-design/icons";
+import { useList } from "../../../datos";
 import { colors, softTagStyle, tagTones } from "../../../theme";
 import {
   SEMANAS_REPETICION,
@@ -31,6 +33,17 @@ export type ActividadCalendario = {
   repeticion?: string | null;
   categoria: string;
 };
+
+// Una fecha señalada del pueblo (el patrón, las fiestas): solo se marca, no tiene ficha
+export type FechaSenalada = {
+  id: string;
+  nombre: string;
+  fecha: string;
+  fecha_fin?: string | null;
+  anual?: boolean;
+  nota?: string | null;
+};
+type Ocurrencia = FechaSenalada & { inicio: string; fin: string };
 
 // Una actividad de pocos días se marca en todos ellos; una larga (una exposición de
 // dos meses, un curso de todo el año) llenaría el mes de puntos, así que solo se marcan
@@ -63,6 +76,22 @@ const diasMarcados = (a: ActividadCalendario): string[] => {
   const dias = [];
   for (let t = desde; t <= hasta; t += paso) dias.push(isoDeMs(t));
   return dias;
+};
+
+// Las veces que cae una fecha señalada en esos años. La de todos los años se mueve al
+// mismo día de cada año (desde el suyo) y dura lo mismo; un 29 de febrero, solo en
+// los bisiestos, como en el .ics.
+const ocurrencias = (f: FechaSenalada, anos: number[]): Ocurrencia[] => {
+  const inicio = f.fecha.slice(0, 10);
+  const finCms = f.fecha_fin?.slice(0, 10);
+  const fin = finCms && finCms > inicio ? finCms : inicio;
+  if (!f.anual) return [{ ...f, inicio, fin }];
+  const dura = msDe(fin) - msDe(inicio);
+  return anos
+    .filter((y) => y >= +inicio.slice(0, 4))
+    .map((y) => `${y}${inicio.slice(4)}`)
+    .filter((i) => isoDeMs(msDe(i)) === i)
+    .map((i) => ({ ...f, inicio: i, fin: isoDeMs(msDe(i) + dura) }));
 };
 
 // Por día y, dentro del día, por hora: las que no tienen hora van delante
@@ -149,6 +178,12 @@ export function CalendarioActividades({ actividades }: { actividades: ActividadC
   const hoy = hoyIso();
   const [mes, setMes] = useState({ y: +hoy.slice(0, 4), m: +hoy.slice(5, 7) - 1 });
   const [dia, setDia] = useState<string | null>(null);
+  // Las fechas señaladas las trae el calendario: la lista no las usa. Si fallan, el
+  // calendario sale igual, sin ellas.
+  const { result: resultadoFechas } = useList<FechaSenalada>({
+    resource: "fechas",
+    pagination: { mode: "off" },
+  });
 
   // Día → actividades de ese día, de la que empieza antes a la que empieza después
   const porDia = useMemo(() => {
@@ -169,6 +204,21 @@ export function CalendarioActividades({ actividades }: { actividades: ActividadC
     ...Array.from({ length: diasDelMes }, (_, i) => isoDe(mes.y, mes.m, i + 1)),
   ];
   while (celdas.length % 7) celdas.push(null);
+
+  // Las fechas señaladas que tocan el mes (también las que vienen de diciembre del año
+  // anterior) y, día a día, las que caen en cada uno
+  const senaladas = (resultadoFechas?.data ?? [])
+    .flatMap((f) => ocurrencias(f, [mes.y - 1, mes.y]))
+    .filter((o) => o.inicio <= ultimo && o.fin >= primero)
+    .sort((a, b) => a.inicio.localeCompare(b.inicio) || a.nombre.localeCompare(b.nombre));
+  const senaladasPorDia = new Map<string, Ocurrencia[]>();
+  for (const o of senaladas) {
+    const hasta = msDe(o.fin < ultimo ? o.fin : ultimo);
+    for (let t = msDe(o.inicio > primero ? o.inicio : primero); t <= hasta; t += DIA_MS) {
+      const d = isoDeMs(t);
+      senaladasPorDia.set(d, [...(senaladasPorDia.get(d) ?? []), o]);
+    }
+  }
 
   const cambiarMes = (salto: number) => {
     const d = new Date(mes.y, mes.m + salto, 1);
@@ -195,6 +245,7 @@ export function CalendarioActividades({ actividades }: { actividades: ActividadC
           return inicio <= ultimo && fin >= primero;
         })
         .sort(porFechaYHora);
+  const senaladasLista = dia ? (senaladasPorDia.get(dia) ?? []) : senaladas;
   const tituloLista = dia
     ? mayuscula(fechaLocal(dia).toLocaleDateString("es-ES", { weekday: "long", day: "numeric", month: "long" }))
     : `En ${nombreMes.split(" ")[0].toLowerCase()}`;
@@ -228,18 +279,21 @@ export function CalendarioActividades({ actividades }: { actividades: ActividadC
         {celdas.map((iso, i) => {
           if (!iso) return <div key={`h${i}`} className="vc-cal-celda vc-cal-hueco" />;
           const delDia = porDia.get(iso) ?? [];
+          const senaladasDelDia = senaladasPorDia.get(iso) ?? [];
           const clases = [
             "vc-cal-celda",
             iso === hoy && "vc-cal-hoy",
             iso === dia && "vc-cal-elegido",
             iso < hoy && "vc-cal-pasado",
             delDia.length > 0 && "vc-cal-con",
+            senaladasDelDia.length > 0 && "vc-cal-senalada",
           ]
             .filter(Boolean)
             .join(" ");
           const numero = +iso.slice(8);
           const etiqueta =
             `${numero} de ${nombreMes.split(" ")[0].toLowerCase()}` +
+            senaladasDelDia.map((o) => `, ${o.nombre}`).join("") +
             (delDia.length
               ? `, ${delDia.length} ${delDia.length === 1 ? "actividad" : "actividades"}`
               : "");
@@ -250,6 +304,11 @@ export function CalendarioActividades({ actividades }: { actividades: ActividadC
               </button>
               {amplio ? (
                 <>
+                  {senaladasDelDia.map((o) => (
+                    <span key={o.id} className="vc-cal-senal" title={o.nombre}>
+                      <FlagFilled /> {o.nombre}
+                    </span>
+                  ))}
                   {delDia.slice(0, EN_CELDA).map((a) => {
                     const tono = tagTones[categoriaActividad(a.categoria).tono];
                     return (
@@ -319,12 +378,46 @@ export function CalendarioActividades({ actividades }: { actividades: ActividadC
         )}
       </div>
 
-      {lista.length === 0 ? (
+      {lista.length === 0 && senaladasLista.length === 0 ? (
         <Typography.Paragraph style={{ color: colors.marronSuave }}>
           {dia ? "No hay nada anunciado este día." : "No hay nada anunciado este mes."}
         </Typography.Paragraph>
       ) : (
         <ul className="vc-cal-lista">
+          {senaladasLista.map((o) => {
+            const f = fechaLocal(o.inicio);
+            return (
+              <li key={`${o.id}-${o.inicio}`}>
+                <div
+                  className={`vc-cal-fila vc-cal-fila-senalada${o.fin < hoy ? " vc-cal-fila-pasada" : ""}`}
+                >
+                  <span className="vc-cal-fecha" style={softTagStyle("terracota")}>
+                    <strong>{f.getDate()}</strong>
+                    {f.toLocaleDateString("es-ES", { month: "short" }).replace(".", "")}
+                  </span>
+                  <span style={{ minWidth: 0 }}>
+                    <Typography.Text strong style={{ display: "block" }}>
+                      {o.nombre}
+                    </Typography.Text>
+                    <Typography.Text type="secondary" style={{ fontSize: 13 }}>
+                      {formatFechasActividad({ fecha: o.inicio, fecha_fin: o.fin })}
+                      {o.anual && " · Todos los años"}
+                    </Typography.Text>
+                    {o.nota && (
+                      <Typography.Text style={{ display: "block", fontSize: 14 }}>
+                        {o.nota}
+                      </Typography.Text>
+                    )}
+                    <span style={{ display: "block", marginTop: 4 }}>
+                      <Tag icon={<FlagFilled />} style={softTagStyle("terracota")}>
+                        Fecha señalada
+                      </Tag>
+                    </span>
+                  </span>
+                </div>
+              </li>
+            );
+          })}
           {lista.map((a) => {
             const cat = categoriaActividad(a.categoria);
             // La que se repite enseña la clase de ese día o, en el mes, la primera

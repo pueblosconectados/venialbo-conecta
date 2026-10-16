@@ -256,6 +256,27 @@ await escribir(
 
 const actividadPorId = new Map(actividades.map((a) => [a.id, a]));
 
+// Fechas señaladas — días del pueblo que solo se marcan en el calendario, sin ficha.
+// Las de «Todos los años» las repite la web (y el .ics con RRULE) cada año desde el de
+// su fecha. Un «Hasta» que no es posterior a la fecha se quita.
+const fechas = (await leerColeccion("fechas"))
+  .filter((f) => f.activa !== false)
+  .filter((f) => {
+    if (f.fecha) return true;
+    console.warn(`  ⚠ fecha señalada ${f.id}: no tiene fecha, se quita`);
+    return false;
+  })
+  .map((f) => ({
+    id: f.id,
+    nombre: f.nombre,
+    fecha: f.fecha.slice(0, 10),
+    fecha_fin: f.fecha_fin && f.fecha_fin.slice(0, 10) > f.fecha.slice(0, 10) ? f.fecha_fin.slice(0, 10) : null,
+    anual: f.anual === true,
+    nota: f.nota ?? null,
+  }))
+  .sort((a, b) => a.fecha.localeCompare(b.fecha) || porTexto("nombre")(a, b));
+await escribir("fechas", fechas, []);
+
 // Y la agenda como calendario (.ics) para suscribirse desde Google Calendar, el del
 // iPhone o Outlook: se queda en el calendario del móvil y se actualiza solo cada vez
 // que la aplicación vuelve a mirarlo.
@@ -383,6 +404,22 @@ const eventos = actividades
       "END:VEVENT",
     ];
   });
+// Las fechas señaladas, de día completo y sin ocupar la agenda. Las de todos los años
+// se repiten con RRULE (un 29 de febrero, solo los bisiestos).
+const eventosFechas = fechas.map((f) => [
+  "BEGIN:VEVENT",
+  `UID:fecha-${f.id}@${DOMINIO}`,
+  `DTSTAMP:${sello}`,
+  `DTSTART;VALUE=DATE:${diaIcs(f.fecha)}`,
+  `DTEND;VALUE=DATE:${diaIcs(f.fecha_fin ?? f.fecha, 1)}`,
+  ...(f.anual ? ["RRULE:FREQ=YEARLY"] : []),
+  `SUMMARY:${textoIcs(f.nombre)}`,
+  ...(f.nota ? [`DESCRIPTION:${textoIcs(f.nota)}`] : []),
+  `URL:${SITIO}/actividades?vista=calendario`,
+  "LOCATION:Venialbo (Zamora)",
+  "TRANSP:TRANSPARENT",
+  "END:VEVENT",
+]);
 const ics = [
   "BEGIN:VCALENDAR",
   "VERSION:2.0",
@@ -397,6 +434,7 @@ const ics = [
   "X-PUBLISHED-TTL:PT6H",
   ...ZONA,
   ...eventos.flat(),
+  ...eventosFechas.flat(),
   "END:VCALENDAR",
 ];
 await writeFile(join(DATA_DIR, "actividades.ics"), `${ics.map(plegar).join("\r\n")}\r\n`);
