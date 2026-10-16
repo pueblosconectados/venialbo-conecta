@@ -10,5 +10,11 @@
   "novedad_hasta": "2026-10-16",
   "imagen_url": "/media/imagenes/20261003205206.jpg",
   "contenido": "El pasado 3 de octubre tuvo lugar en el Salón de Plenos del Ayuntamiento de Venialbo la presentación de **Venialbo CONECTA**, la nueva página web creada para acercar la información del municipio a todos sus vecinos y facilitar la comunicación y la participación.\n\nLa presentación contó con una gran acogida, con la sala completamente llena. Durante el encuentro, se explicó a los asistentes el funcionamiento de la plataforma y se instaló en los teléfonos móviles de todos los presentes. Además, realizamos una práctica conjunta de sus diferentes opciones, aprendiendo a enviar anuncios y a comunicarnos directamente con la página.\n\nUna jornada muy participativa que permitió a los vecinos conocer de primera mano esta nueva herramienta, pensada para que **nadie se quede sin conocer las noticias, actividades y novedades de Venialbo**.",
+  "galeria": [
+    {
+      "imagen": "/media/imagenes/20261003200810.jpg",
+      "pie": "Asistentes a la presentación de la Web Venialbo CONECTA"
+    }
+  ],
   "video_url": "https://youtu.be/sReryljQzao"
 }
