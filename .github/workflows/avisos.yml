@@ -1,14 +1,12 @@
 name: Avisos push
 
 # Manda los avisos push de lo nuevo (avisos/enviar.mjs; el plan, en NOTIFICACIONES.md):
+# avisos de portada, noticias, actividades y anuncios, al terminar cada publicación de la
+# web. Si es de noche (22:00-9:00 en Madrid) el script no manda nada y lo deja para la
+# pasada de las 9:00.
 #
-# - urgentes: los avisos de portada, al terminar cada publicación de la web. Si es de
-#   noche (22:00-9:00 en Madrid) el script no manda nada y lo deja para la pasada de las
-#   9:00.
-# - resumen: noticias, actividades y anuncios nuevos, en un solo aviso a las 19:00.
-#
-# El cron va en UTC: cada pasada se lanza a las dos horas UTC que pueden ser la hora de
-# Madrid (verano e invierno), y el script descarta la que no toca.
+# El cron va en UTC: la pasada de las 9:00 se lanza a las dos horas UTC que pueden serlo
+# (verano e invierno); en la que no toca simplemente no hay nada pendiente.
 #
 # Lo ya avisado se apunta en avisos/notificados.json, que se commitea aquí mismo.
 # Necesita los secretos AVISOS_TOKEN y VAPID_PRIVADA.
@@ -17,14 +15,9 @@ on:
     workflows: ["Publicar web-static en GitHub Pages"]
     types: [completed]
   schedule:
-    - cron: "2 7,8 * * *" # 9:00 en Madrid: lo urgente que esperó a la mañana
-    - cron: "2 17,18 * * *" # 19:00 en Madrid: el resumen
+    - cron: "2 7,8 * * *" # 9:00 en Madrid: lo que se publicó de noche
   workflow_dispatch:
     inputs:
-      modo:
-        description: Qué mandar
-        type: choice
-        options: [urgentes, resumen]
       ya:
         description: Sin mirar la hora (para probar)
         type: boolean
@@ -63,9 +56,8 @@ jobs:
         env:
           AVISOS_TOKEN: ${{ secrets.AVISOS_TOKEN }}
           VAPID_PRIVADA: ${{ secrets.VAPID_PRIVADA }}
-          MODO: ${{ inputs.modo || (github.event.schedule == '2 17,18 * * *' && 'resumen') || 'urgentes' }}
           YA: ${{ inputs.ya && '--ya' || '' }}
-        run: node avisos/enviar.mjs "$MODO" $YA
+        run: node avisos/enviar.mjs novedades $YA
 
       - name: Apuntar lo avisado
         run: |

@@ -1,7 +1,7 @@
 // Manda los avisos push de lo que se ha publicado (fase 3 de NOTIFICACIONES.md).
 //
-//   node avisos/enviar.mjs urgentes      avisos de portada nuevos, al momento
-//   node avisos/enviar.mjs resumen       noticias, actividades y anuncios nuevos, en un aviso
+//   node avisos/enviar.mjs novedades     manda lo nuevo: avisos de portada, noticias,
+//                                        actividades y anuncios
 //   node avisos/enviar.mjs inicializar   da por avisado todo lo publicado, sin mandar nada
 //
 //   --dry   enseña lo que mandaría, sin mandar ni apuntar nada
@@ -12,9 +12,12 @@
 // avisado. No vale mirar qué ficheros cambian en un commit: lo de Tally entra oculto y se
 // activa después, y corregir una errata no debe volver a avisar.
 //
-// Lo urgente no se manda de 22:00 a 9:00 (hora de Madrid): se queda pendiente y sale en la
-// pasada de las 9:00. El resumen solo sale si son las 19:00. La Action lo lanza a varias
-// horas UTC por el cambio de hora y aquí se descartan las que no tocan.
+// Se lanza al terminar cada publicación de la web. De 22:00 a 9:00 (hora de Madrid) no se
+// manda nada: lo publicado de noche se queda pendiente y sale en la pasada de las 9:00.
+// Si en una publicación entran varias cosas, van juntas en un solo aviso.
+//
+// Hasta el 2026-10-19 noticias, actividades y anuncios iban en un resumen a las 19:00. Se
+// cambió porque se publica poco: no hay tanto que agrupar.
 //
 // El repositorio es público y los registros de Actions también: no se imprime nada de
 // las suscripciones, solo cuántas son.
@@ -48,7 +51,8 @@ const vigenteHasta = (fecha) => !fecha || fecha.slice(0, 10) >= hoyMadrid;
 
 const RECURSOS = {
   avisos: {
-    modo: "urgentes",
+    // Los avisos de portada son lo urgente: van con prioridad alta
+    urgente: true,
     vigente: (a) => vigenteHasta(a.fecha_caducidad),
     uno: (a) => ({
       titulo: a.nivel === "urgente" ? "Aviso urgente" : "Aviso del pueblo",
@@ -58,7 +62,6 @@ const RECURSOS = {
     nombre: ["aviso", "avisos"],
   },
   noticias: {
-    modo: "resumen",
     vigente: () => true,
     uno: (n) => ({ titulo: "Nueva noticia", cuerpo: n.titulo, url: `/noticias/${n.id}` }),
     nombre: ["noticia", "noticias"],
@@ -67,14 +70,12 @@ const RECURSOS = {
   // De una actividad se avisa al publicarla, si aún no se ha celebrado. Las que se suben
   // después, con las fotos, no avisan.
   actividades: {
-    modo: "resumen",
     vigente: (a) => vigenteHasta(a.fecha_fin ?? a.fecha),
     uno: (a) => ({ titulo: "Nueva actividad", cuerpo: a.titulo, url: `/actividades/${a.id}` }),
     nombre: ["actividad", "actividades"],
     listado: "/actividades",
   },
   anuncios: {
-    modo: "resumen",
     vigente: (a) => vigenteHasta(a.fecha_caducidad),
     uno: (a) => ({ titulo: "Nuevo en el tablón", cuerpo: a.titulo.trim(), url: `/tablon/${a.id}` }),
     nombre: ["anuncio", "anuncios"],
@@ -118,8 +119,8 @@ const mensajeDe = (novedades) => {
   const unico = recursos.size === 1 ? RECURSOS[[...recursos][0]] : null;
   const titulos = novedades.map((x) => RECURSOS[x.recurso].uno(x.fila).cuerpo).join(" · ");
   return {
-    titulo: modo === "urgentes" ? `${novedades.length} avisos del pueblo` : "Novedades en Venialbo",
-    cuerpo: recortar(modo === "urgentes" ? titulos : `${recuento(novedades)}: ${titulos}`, 220),
+    titulo: unico === RECURSOS.avisos ? `${novedades.length} avisos del pueblo` : "Novedades en Venialbo",
+    cuerpo: recortar(unico === RECURSOS.avisos ? titulos : `${recuento(novedades)}: ${titulos}`, 220),
     url: unico?.listado ?? "/",
   };
 };
@@ -140,7 +141,7 @@ const secretos = async () => {
   return { token: token.trim(), privada: privada.trim(), publica };
 };
 
-const enviar = async (mensaje) => {
+const enviar = async (mensaje, urgente) => {
   const { token, privada, publica } = await secretos();
   webpush.setVapidDetails("mailto:info@venialboconecta.es", publica, privada);
 
@@ -149,10 +150,10 @@ const enviar = async (mensaje) => {
   const suscripciones = await r.json();
 
   const opciones = {
-    // Lo urgente, al momento; el resumen, cuando a Android le venga bien (ahorra batería)
-    urgency: modo === "urgentes" ? "high" : "normal",
+    // Lo urgente, al momento; lo demás, cuando a Android le venga bien (ahorra batería)
+    urgency: urgente ? "high" : "normal",
     // Si el móvil está apagado, cuánto tiempo guarda el aviso el servicio de push
-    TTL: modo === "urgentes" ? 12 * 3600 : 24 * 3600,
+    TTL: 12 * 3600,
   };
   const cuerpo = JSON.stringify(mensaje);
   let bien = 0;
@@ -208,17 +209,13 @@ if (modo === "inicializar") {
   process.exit(0);
 }
 
-if (modo !== "urgentes" && modo !== "resumen") {
-  console.error("Uso: node avisos/enviar.mjs urgentes|resumen|inicializar [--dry] [--ya]");
+if (modo !== "novedades") {
+  console.error("Uso: node avisos/enviar.mjs novedades|inicializar [--dry] [--ya]");
   process.exit(1);
 }
 
-if (!YA && modo === "urgentes" && (horaMadrid >= 22 || horaMadrid < 9)) {
-  console.log(`Son las ${horaMadrid}:xx en Madrid: lo urgente espera a las 9:00`);
-  process.exit(0);
-}
-if (!YA && modo === "resumen" && horaMadrid !== 19) {
-  console.log(`Son las ${horaMadrid}:xx en Madrid: el resumen es a las 19:00`);
+if (!YA && (horaMadrid >= 22 || horaMadrid < 9)) {
+  console.log(`Son las ${horaMadrid}:xx en Madrid: lo nuevo espera a las 9:00`);
   process.exit(0);
 }
 
@@ -230,8 +227,7 @@ if (!notificados) {
 }
 const ya = new Set(notificados);
 
-const recursos = Object.keys(RECURSOS).filter((r) => RECURSOS[r].modo === modo);
-const pendientes = (await publicado(recursos)).filter(({ recurso, fila }) => !ya.has(clave(recurso, fila.id)));
+const pendientes = (await publicado(Object.keys(RECURSOS))).filter(({ recurso, fila }) => !ya.has(clave(recurso, fila.id)));
 const novedades = pendientes.filter(({ recurso, fila }) => RECURSOS[recurso].vigente(fila));
 // Lo que caducó o ya se celebró antes de avisar, se da por avisado sin mandarlo
 for (const { recurso, fila } of pendientes) ya.add(clave(recurso, fila.id));
@@ -250,5 +246,5 @@ if (DRY) {
   console.log("--dry: no se manda ni se apunta nada");
   process.exit(0);
 }
-await enviar(mensaje);
+await enviar(mensaje, novedades.some(({ recurso }) => RECURSOS[recurso].urgente));
 await guardar(ya);
