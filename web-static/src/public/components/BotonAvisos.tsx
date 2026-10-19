@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Link } from "react-router";
 import { Button, Modal, Typography } from "antd";
 import { BellOutlined, CheckCircleOutlined } from "@ant-design/icons";
-import { useAvisos, type EstadoAvisos } from "../../avisos";
+import { useAvisos, useEsBrave, type EstadoAvisos } from "../../avisos";
 import { colors } from "../../theme";
 
 // El botón «Avisarme de novedades»: en el pie de todas las páginas (BotonAvisos) y en una
@@ -24,6 +24,7 @@ const PRIVACIDAD = (
 
 // Lo que se explica cuando no se puede activar con un toque
 function Ayuda({ estado, onClose }: { estado: EstadoAvisos | null; onClose: () => void }) {
+  const brave = useEsBrave();
   return (
     <Modal
       open={estado !== null}
@@ -31,7 +32,31 @@ function Ayuda({ estado, onClose }: { estado: EstadoAvisos | null; onClose: () =
       footer={<Button onClick={onClose}>Entendido</Button>}
       title={estado === "bloqueados" ? "Los avisos están bloqueados" : "Avisos en el iPhone"}
     >
-      {estado === "bloqueados" ? (
+      {estado === "bloqueados" && brave ? (
+        <div className="vc-md">
+          <p>
+            Brave bloquea los avisos de las webs por su cuenta, aunque hayas dicho que sí.
+            Para permitirlos:
+          </p>
+          <ol>
+            <li>
+              Mantén pulsado el icono de <strong>Brave</strong>, toca{" "}
+              <em>Información de la aplicación</em> (o la «i») y activa las{" "}
+              <em>Notificaciones</em>.
+            </li>
+            <li>
+              En Brave, entra en <em>Configuración → Configuración de sitios →
+              Notificaciones</em> y quita <strong>venialboconecta.es</strong> de los sitios
+              bloqueados.
+            </li>
+            <li>Vuelve aquí y pulsa «Avisarme de novedades».</li>
+          </ol>
+          <p>
+            En Brave los avisos pueden llegar en silencio. Cuando te llegue uno, mantenlo
+            pulsado y elige <em>Predeterminado</em> para que suene.
+          </p>
+        </div>
+      ) : estado === "bloqueados" ? (
         <div className="vc-md">
           <p>
             En algún momento se dijo que no a los avisos de esta web, y el móvil ya no

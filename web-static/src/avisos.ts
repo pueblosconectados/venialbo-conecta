@@ -40,6 +40,17 @@ const esProbador = () => {
   }
 };
 
+// Brave bloquea los avisos por su cuenta aunque se acepte el permiso, y luego los deja
+// en silencio: necesita su propia explicación. Se reconoce porque añade navigator.brave.
+export function useEsBrave() {
+  const [brave, setBrave] = useState(false);
+  useEffect(() => {
+    const b = (navigator as Navigator & { brave?: { isBrave?: () => Promise<boolean> } }).brave;
+    b?.isBrave?.().then(setBrave).catch(() => {});
+  }, []);
+  return brave;
+}
+
 const esIphone = () =>
   /iPad|iPhone|iPod/.test(navigator.userAgent) ||
   // El iPad se hace pasar por un Mac, pero tiene pantalla táctil
