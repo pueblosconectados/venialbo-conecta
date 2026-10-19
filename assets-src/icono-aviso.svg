@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="96" height="96" viewBox="69 -59 790 790">
+  <!-- Silueta del puente para la barra de notificaciones (ver assets-src/README.md).
+       Android la pinta en blanco: solo cuenta la transparencia. -->
+  <defs>
+    <mask id="arcos">
+      <rect x="0" y="0" width="1000" height="800" fill="#fff"/>
+      <path fill="#000" d="
+        M215 600 L215 360 A70 70 0 0 1 355 360 L355 600 Z
+        M410 600 L410 317 A55 55 0 0 1 520 317 L520 600 Z
+        M570 600 L570 287.5 A47.5 47.5 0 0 1 665 287.5 L665 600 Z
+        M700 600 L700 264.5 A32.5 32.5 0 0 1 765 264.5 L765 600 Z
+        M795 600 L795 246.5 A18.5 18.5 0 0 1 832 246.5 L832 600 Z"/>
+    </mask>
+  </defs>
+  <!-- El pretil -->
+  <path fill="#fff" d="M80 205 Q450 160 848 160 L848 185 Q450 200 80 275 Z"/>
+  <!-- El cuerpo, con el estribo escalonado a la izquierda y los arcos calados -->
+  <path fill="#fff" mask="url(#arcos)" d="M80 293 Q450 218 848 203 L848 355 L175 512 L148 505 L148 445 L80 460 Z"/>
+</svg>

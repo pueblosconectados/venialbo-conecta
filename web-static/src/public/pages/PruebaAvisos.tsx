@@ -99,6 +99,7 @@ export function PruebaAvisos() {
       await reg.showNotification("Aviso de prueba", {
         body: "Si ves esto, el móvil enseña los avisos de VenialboConecta.",
         icon: "/apple-touch-icon.png",
+        badge: "/icono-aviso.png",
         data: { url: "/prueba-avisos" },
       });
     });

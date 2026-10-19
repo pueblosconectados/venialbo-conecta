@@ -22,6 +22,9 @@ self.addEventListener("push", (event) => {
     self.registration.showNotification(datos.titulo || "VenialboConecta", {
       body: datos.cuerpo || "",
       icon: "/apple-touch-icon.png",
+      // El de la barra de notificaciones. Android lo pinta en blanco y solo mira la
+      // silueta: sin él, Chrome pone su campana
+      badge: "/icono-aviso.png",
       data: { url: datos.url || "/" },
     }),
   );

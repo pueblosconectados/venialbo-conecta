@@ -46,3 +46,9 @@ actualiza la constante `BBOX_*` correspondiente.
 - **WebP con transparencia** no funciona en Safari anterior a 14 (2020). Si eso
   llega a importar, hay que envolver la imagen de la portada en un `<picture>`
   con un PNG de respaldo.
+- **El icono de los avisos** (`icono-aviso.svg` → `web-static/public/icono-aviso.png`)
+  no sale del logo: es una silueta del puente dibujada a mano. Android pinta ese
+  icono de la barra de notificaciones en blanco y solo mira la transparencia, y
+  el puente del logo, con sus ladrillos, se quedaba en rayas a 24 px. Si se
+  cambia el SVG, se regenera el PNG desde `web-static/`:
+  `node -e "require('sharp')('../assets-src/icono-aviso.svg').png().toFile('public/icono-aviso.png')"`
