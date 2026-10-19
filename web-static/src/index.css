@@ -746,6 +746,48 @@ a:hover {
   }
 }
 
+/* La franja de la portada para activar los avisos push (BotonAvisos.tsx). Como la del
+   calendario, pero en verde */
+.vc-aviso-push {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin: 0 0 20px;
+  padding: 16px 20px;
+  background: #edf2e9;
+  color: #34581a;
+  border: 1px solid #d3e0c8;
+  border-radius: 14px;
+}
+
+.vc-aviso-push-icono {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: #ffffff;
+  color: #487824;
+  font-size: 24px;
+}
+
+.vc-aviso-push-boton {
+  flex-shrink: 0;
+  font-weight: 600;
+}
+
+@media (max-width: 560px) {
+  .vc-aviso-push {
+    flex-wrap: wrap;
+    padding: 14px 16px;
+  }
+  .vc-aviso-push-boton {
+    width: 100%;
+  }
+}
+
 .vc-cal-suscribirse {
   display: flex;
   align-items: center;

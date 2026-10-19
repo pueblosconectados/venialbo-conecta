@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Alert, Button, Descriptions, Divider, Space, Typography } from "antd";
 import { VAPID_PUBLICA } from "../../config";
+import { marcarProbador } from "../../avisos";
 import { colors } from "../../theme";
 
 // Página de prueba de los avisos push: la fase 0 de NOTIFICACIONES.md. Sirve para saber
@@ -39,6 +40,9 @@ export function PruebaAvisos() {
   const [copiado, setCopiado] = useState(false);
   const s = soporta();
   const todoSoportado = s.serviceWorker && s.pushManager && s.notification;
+
+  // Quien entra aquí pasa a ver el botón de avisos del pie y de la portada (avisos.ts)
+  useEffect(marcarProbador, []);
 
   // Si ya había suscripción de otra vez, se enseña al entrar
   useEffect(() => {

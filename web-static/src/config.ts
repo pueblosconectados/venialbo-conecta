@@ -19,6 +19,11 @@ export const CONTACTO_EMAIL = "info@venialboconecta.es";
 export const VAPID_PUBLICA =
   "BBrC708VaZ68j67GO4rfnfNxmC5OIZuhqt5I68Tw4x8VtMWsSy4L-UfgXF4UvHETwZEK6vgVH3QlGo76V6aUNB8";
 
+// El Worker que guarda las suscripciones (avisos/worker/). Para probar con el de local:
+// VITE_AVISOS_URL=http://127.0.0.1:8787 npm run dev
+export const AVISOS_URL =
+  import.meta.env.VITE_AVISOS_URL ?? "https://venialbo-avisos.venialboconecta.workers.dev";
+
 export const formatFecha = (iso: string): string =>
   new Date(iso).toLocaleDateString("es-ES", {
     day: "numeric",

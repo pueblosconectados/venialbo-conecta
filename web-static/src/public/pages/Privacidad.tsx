@@ -1,4 +1,5 @@
-import { Link } from "react-router";
+import { useEffect } from "react";
+import { Link, useLocation } from "react-router";
 import { Divider, Typography } from "antd";
 import { CONTACTO_EMAIL, FORMULARIOS } from "../../config";
 import { colors } from "../../theme";
@@ -7,9 +8,15 @@ import { colors } from "../../theme";
 // tarde en tarde y conviene que quede en el repositorio, con su historial de cambios.
 // Si se cambia algo de cómo se tratan los datos (otro servicio de formularios, otro
 // plazo), hay que actualizar también este texto y la fecha de abajo.
-const ACTUALIZADO = "5 de octubre de 2026";
+const ACTUALIZADO = "19 de octubre de 2026";
 
 export function Privacidad() {
+  // «Más en Privacidad», junto al botón de los avisos, entra por #avisos
+  const { hash } = useLocation();
+  useEffect(() => {
+    if (hash) document.getElementById(hash.slice(1))?.scrollIntoView();
+  }, [hash]);
+
   return (
     <div style={{ maxWidth: 760, margin: "0 auto" }}>
       <Typography.Title level={2}>Privacidad</Typography.Title>
@@ -81,6 +88,23 @@ export function Privacidad() {
           Puedes pedirnos ver lo que tenemos tuyo, corregirlo o borrarlo, incluido un
           anuncio ya publicado. Escribe a{" "}
           <a href={`mailto:${CONTACTO_EMAIL}`}>{CONTACTO_EMAIL}</a> y lo hacemos.
+        </p>
+
+        <h3 id="avisos">Avisos en el móvil</h3>
+        <p>
+          Si pulsas «Avisarme de novedades», tu navegador nos da una dirección para
+          mandarle avisos. Es lo único que guardamos: una dirección larga que no dice
+          quién eres, ni tu nombre, ni tu teléfono, ni tu correo. No guardamos tu IP ni
+          cuándo te apuntaste. La guardamos en un servicio de Cloudflare y la usamos solo
+          para avisarte de lo que se publica aquí: avisos del pueblo, actividades, noticias
+          y anuncios del tablón.
+        </p>
+        <p>
+          Quien entrega los avisos es la empresa de tu navegador (Google, Apple o
+          Mozilla), que sabe que tu móvil recibe avisos de esta web, pero no lo que dicen:
+          van cifrados. Para darte de baja, pulsa «Desactivar» en el pie de la web o quita
+          el permiso de notificaciones en los ajustes del navegador o del móvil. Al darte
+          de baja, la dirección se borra.
         </p>
 
         <h3>Cookies</h3>

@@ -5,6 +5,7 @@ import { MenuOutlined } from "@ant-design/icons";
 import { FORMULARIOS } from "../../config";
 import { colors, fonts } from "../../theme";
 import { BannerAvisos } from "../components/BannerAvisos";
+import { BotonAvisos } from "../components/BotonAvisos";
 
 const { Header, Content, Footer } = Layout;
 const { useBreakpoint } = Grid;
@@ -143,6 +144,7 @@ export function PublicLayout() {
           borderTop: `1px solid ${colors.borde}`,
         }}
       >
+        <BotonAvisos />
         <div style={{ marginBottom: 6 }}>
           {/* Contacto sale fuera, al formulario de Tally; privacidad es página propia.
               Van aquí y no en el menú de arriba, que ya va justo de sitio. */}
