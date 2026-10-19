@@ -1,14 +1,15 @@
 import { useParams, Link } from "react-router";
 import { esNuevo, useOne } from "../../../datos";
 import { EtiquetaNuevo } from "../../components/EtiquetaNuevo";
-import { Alert, Button, Divider, Spin, Tag, Typography } from "antd";
-import { PictureOutlined, ReadOutlined, StarFilled, TeamOutlined } from "@ant-design/icons";
+import { Alert, Divider, Spin, Tag, Typography } from "antd";
+import { ReadOutlined, StarFilled, TeamOutlined } from "@ant-design/icons";
 import { imgUrl } from "../../../config";
 import { CabeceraFicha } from "../../components/CabeceraFicha";
 import { ContenidoRico } from "../../components/ContenidoRico";
 import { Documentos, type Documento } from "../../components/Documentos";
 import { Galeria, type Foto } from "../../components/Galeria";
 import { ImagenAmpliable } from "../../components/ImagenAmpliable";
+import { MasFotos } from "../../components/MasFotos";
 import { VideoYoutube } from "../../components/VideoYoutube";
 import { juegoDeMiniaturas } from "../../../miniaturas";
 import { colors, softTagStyle } from "../../../theme";
@@ -29,7 +30,8 @@ type ActividadDetail = {
   contenido?: string | null;
   galeria?: Foto[];
   video_url?: string | null;
-  album_externo?: string | null;
+  album_facebook?: string | null;
+  album_drive?: string | null;
   documentos?: Documento[];
   // build-content.mjs cambia la ruta del fichero por lo justo para el enlace
   organiza?: { id: string; nombre: string } | null;
@@ -111,17 +113,8 @@ export function ActividadesShow() {
           <Galeria fotos={a.galeria} titulo={a.titulo} />
         </>
       )}
-      {a.album_externo && (
-        <Button
-          href={a.album_externo}
-          target="_blank"
-          rel="noopener noreferrer"
-          icon={<PictureOutlined />}
-          style={{ marginTop: 16 }}
-        >
-          Ver más fotos
-        </Button>
-      )}
+      {/* Los tres meses de Drive cuentan desde que se acaba la actividad */}
+      <MasFotos facebook={a.album_facebook} drive={a.album_drive} desde={a.fecha_fin ?? a.fecha} />
 
       {a.video_url && (
         <>

@@ -131,6 +131,18 @@ content:
           # markdown ya es el valor por defecto, pero se deja explícito: se
           # guarda legible en el JSON y la web lo renderiza con markdown-it.
           format: markdown
+      - name: album_facebook
+        label: Álbum en Facebook
+        description: Opcional. El enlace al álbum con más fotos. Quien no tenga Facebook no lo podrá ver; para eso está el de Drive.
+        type: string
+      - name: album_drive
+        label: Álbum en Google Drive
+        description: >-
+          Opcional. El enlace a la carpeta, compartida como «Cualquier persona con el
+          enlace». Al pulsarlo se avisa de que las fotos solo estarán 3 meses, y a los 3
+          meses de la fecha de publicación el botón se quita solo: borra la carpeta después
+          de ese día, no antes.
+        type: string
       - name: documentos
         label: Documentos para descargar
         description: >-
@@ -342,9 +354,17 @@ content:
         label: Vídeo de YouTube
         description: Opcional. El enlace del vídeo, tal cual lo da YouTube al compartir.
         type: string
-      - name: album_externo
-        label: Álbum con más fotos
-        description: Opcional. Un enlace a Google Fotos o similar.
+      - name: album_facebook
+        label: Álbum en Facebook
+        description: Opcional. El enlace al álbum con más fotos. Quien no tenga Facebook no lo podrá ver; para eso está el de Drive.
+        type: string
+      - name: album_drive
+        label: Álbum en Google Drive
+        description: >-
+          Opcional. El enlace a la carpeta, compartida como «Cualquier persona con el
+          enlace». Al pulsarlo se avisa de que las fotos solo estarán 3 meses, y a los 3
+          meses de la fecha de la actividad (o de su «Hasta», si dura varios días) el botón se quita solo: borra la carpeta después
+          de ese día, no antes.
         type: string
       - name: documentos
         label: Documentos para descargar

@@ -14,6 +14,7 @@ import { CabeceraFicha } from "../../components/CabeceraFicha";
 import { ContenidoRico } from "../../components/ContenidoRico";
 import { Documentos, type Documento } from "../../components/Documentos";
 import { ImagenAmpliable } from "../../components/ImagenAmpliable";
+import { MasFotos } from "../../components/MasFotos";
 import { juegoDeMiniaturas } from "../../../miniaturas";
 import { colors, softTagStyle, softTagStyleFromHex } from "../../../theme";
 
@@ -23,6 +24,8 @@ type NoticiaDetail = {
   contenido: string;
   imagen_url?: string;
   documentos?: Documento[];
+  album_facebook?: string | null;
+  album_drive?: string | null;
   categoria: { id: string; nombre: string; color?: string };
   fecha_publicacion: string;
   destacada: boolean;
@@ -42,6 +45,10 @@ export function NoticiasShow() {
     return <Alert type="error" message="Noticia no encontrada" />;
 
   const n = result;
+  // Los tres meses de Drive cuentan desde la publicación, salvo que se haya puesto la
+  // fecha del documento original: entonces, desde el día en que se creó (el del id).
+  const creada = n.id.match(/^(\d{4}-\d{2}-\d{2})-/)?.[1] ?? "";
+  const desdeDrive = [n.fecha_publicacion.slice(0, 10), creada].sort().at(-1);
 
   return (
     <div style={{ maxWidth: 800, margin: "0 auto" }}>
@@ -80,6 +87,7 @@ export function NoticiasShow() {
       </Typography.Text>
       <Divider style={{ borderColor: colors.borde }} />
       <ContenidoRico texto={n.contenido} />
+      <MasFotos facebook={n.album_facebook} drive={n.album_drive} desde={desdeDrive} />
       <Documentos documentos={n.documentos} />
       <Link to="/noticias" style={{ color: colors.musgo, fontWeight: 500 }}>← Volver a Noticias</Link>
     </div>

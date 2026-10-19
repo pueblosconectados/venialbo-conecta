@@ -137,8 +137,12 @@ const noticias = (
       }),
   )
 ).sort(porFechaDesc);
-// Los adjuntos solo se usan en la ficha, no en el listado.
-await escribir("noticias", noticias.map((n) => quitar(n, "contenido", "documentos")), noticias);
+// Los adjuntos y los álbumes solo se usan en la ficha, no en el listado.
+await escribir(
+  "noticias",
+  noticias.map((n) => quitar(n, "contenido", "documentos", "album_facebook", "album_drive")),
+  noticias,
+);
 
 // Negocios
 const negocios = (await leerColeccion("negocios"))
@@ -248,7 +252,7 @@ const actividades = (
 await escribir(
   "actividades",
   actividades.map((a) => ({
-    ...quitar(a, "contenido", "documentos", "galeria", "noticia", "video_url", "album_externo"),
+    ...quitar(a, "contenido", "documentos", "galeria", "noticia", "video_url", "album_facebook", "album_drive"),
     fotos: a.galeria.length,
   })),
   actividades,
