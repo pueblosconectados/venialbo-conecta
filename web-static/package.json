@@ -36,7 +36,6 @@
     "sharp": "^0.35.4",
     "typescript": "~6.0.2",
     "typescript-eslint": "^8.58.2",
-    "vite": "^8.0.10",
-    "web-push": "^3.6.7"
+    "vite": "^8.0.10"
   }
 }

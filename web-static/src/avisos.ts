@@ -18,28 +18,6 @@ export type EstadoAvisos =
 
 const EVENTO = "vc-avisos";
 
-// Mientras no exista el envío automático (fase 3), el botón solo lo ven los navegadores
-// que han pasado por /prueba-avisos: si no, la gente se apuntaría y no le llegaría nada.
-// Para abrirlo a todo el mundo, ABIERTO = true (y quitar la página de prueba).
-const ABIERTO = false;
-const PROBADOR = "vc-avisos-probador";
-
-export const marcarProbador = () => {
-  try {
-    localStorage.setItem(PROBADOR, "1");
-  } catch {
-    // Sin almacenamiento (navegación privada): este navegador no verá el botón
-  }
-};
-
-const esProbador = () => {
-  try {
-    return localStorage.getItem(PROBADOR) === "1";
-  } catch {
-    return false;
-  }
-};
-
 // Brave bloquea los avisos por su cuenta aunque se acepte el permiso, y luego los deja
 // en silencio: necesita su propia explicación. Se reconoce porque añade navigator.brave.
 export function useEsBrave() {
@@ -77,7 +55,6 @@ const suscripcionActual = async () => {
 };
 
 const leerEstado = async (): Promise<EstadoAvisos> => {
-  if (!ABIERTO && !esProbador()) return "no-disponible";
   if (!hayPush()) return esIphone() && !instalada() ? "iphone-sin-instalar" : "no-disponible";
   if (Notification.permission === "denied") return "bloqueados";
   if (Notification.permission !== "granted") return "desactivados";

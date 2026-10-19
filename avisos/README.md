@@ -4,6 +4,9 @@ El plan completo está en `NOTIFICACIONES.md` (local, gitignoreado). Aquí vive 
 hace falta fuera de la web estática:
 
 - `worker/` — el Cloudflare Worker que guarda las suscripciones (fase 2).
+- `enviar.mjs` — el envío automático, que lanza `.github/workflows/avisos.yml` (fase 3).
+- `aviso-a-mano.mjs` — un aviso suelto a todos los suscritos, con confirmación:
+  `node avisos/aviso-a-mano.mjs "Título" "Texto" [/ruta] [--urgente]`.
 
 La clave privada VAPID está en `.secretos/vapid.json`; la pública, en
 `web-static/src/config.ts`. **No se pueden cambiar** sin perder a todos los suscriptores.
