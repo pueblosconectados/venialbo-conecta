@@ -1,0 +1,85 @@
+name: Avisos push
+
+# Manda los avisos push de lo nuevo (avisos/enviar.mjs; el plan, en NOTIFICACIONES.md):
+#
+# - urgentes: los avisos de portada, al terminar cada publicación de la web. Si es de
+#   noche (22:00-9:00 en Madrid) el script no manda nada y lo deja para la pasada de las
+#   9:00.
+# - resumen: noticias, actividades y anuncios nuevos, en un solo aviso a las 19:00.
+#
+# El cron va en UTC: cada pasada se lanza a las dos horas UTC que pueden ser la hora de
+# Madrid (verano e invierno), y el script descarta la que no toca.
+#
+# Lo ya avisado se apunta en avisos/notificados.json, que se commitea aquí mismo.
+# Necesita los secretos AVISOS_TOKEN y VAPID_PRIVADA.
+on:
+  workflow_run:
+    workflows: ["Publicar web-static en GitHub Pages"]
+    types: [completed]
+  schedule:
+    - cron: "2 7,8 * * *" # 9:00 en Madrid: lo urgente que esperó a la mañana
+    - cron: "2 17,18 * * *" # 19:00 en Madrid: el resumen
+  workflow_dispatch:
+    inputs:
+      modo:
+        description: Qué mandar
+        type: choice
+        options: [urgentes, resumen]
+      ya:
+        description: Sin mirar la hora (para probar)
+        type: boolean
+        default: false
+
+permissions:
+  contents: write
+
+# Las pasadas no se pisan: dos a la vez avisarían dos veces de lo mismo
+concurrency:
+  group: avisos
+  cancel-in-progress: false
+
+jobs:
+  enviar:
+    # Tras una publicación fallida no hay nada nuevo en la web
+    if: github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: avisos/package-lock.json
+
+      - run: npm ci
+        working-directory: avisos
+
+      # Lo publicado y vigente, igual que en la web. build-content no necesita
+      # dependencias: no hace falta el npm ci de web-static
+      - run: node web-static/scripts/build-content.mjs > /dev/null
+
+      - name: Enviar
+        env:
+          AVISOS_TOKEN: ${{ secrets.AVISOS_TOKEN }}
+          VAPID_PRIVADA: ${{ secrets.VAPID_PRIVADA }}
+          MODO: ${{ inputs.modo || (github.event.schedule == '2 17,18 * * *' && 'resumen') || 'urgentes' }}
+          YA: ${{ inputs.ya && '--ya' || '' }}
+        run: node avisos/enviar.mjs "$MODO" $YA
+
+      - name: Apuntar lo avisado
+        run: |
+          if git diff --quiet -- avisos/notificados.json; then
+            echo "Nada que apuntar"
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add avisos/notificados.json
+          git commit -m "chore(avisos): apuntar lo avisado"
+          # El CMS commitea en main a su aire
+          for intento in 1 2 3; do
+            git pull --rebase origin main && git push origin HEAD:main && exit 0
+            sleep 5
+          done
+          exit 1

@@ -1,0 +1,9 @@
+{
+  "name": "venialbo-avisos-envio",
+  "private": true,
+  "type": "module",
+  "description": "El envío de los avisos push (enviar.mjs). El Worker está en worker/, con su propio package.json.",
+  "dependencies": {
+    "web-push": "^3.6.7"
+  }
+}
