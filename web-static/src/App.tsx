@@ -18,6 +18,7 @@ import { RutasShow } from "./public/pages/descubre/RutasShow";
 import { NegociosList } from "./public/pages/negocios/NegociosList";
 import { NegociosShow } from "./public/pages/negocios/NegociosShow";
 import { Privacidad } from "./public/pages/Privacidad";
+import { PruebaAvisos } from "./public/pages/PruebaAvisos";
 import { ServiciosList } from "./public/pages/servicios/ServiciosList";
 import { ServiciosShow } from "./public/pages/servicios/ServiciosShow";
 import { AnunciosList } from "./public/pages/anuncios/AnunciosList";
@@ -49,6 +50,8 @@ function App() {
             <Route path="/pueblos-conectados" element={<PueblosConectados />} />
             <Route path="/enlaces" element={<EnlacesInteres />} />
             <Route path="/privacidad" element={<Privacidad />} />
+            {/* Temporal: fase 0 de NOTIFICACIONES.md */}
+            <Route path="/prueba-avisos" element={<PruebaAvisos />} />
           </Route>
           {/* 404 */}
           <Route path="*" element={<NotFound />} />

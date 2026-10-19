@@ -117,6 +117,14 @@ export function Privacidad() {
           ← Volver a la portada
         </Link>
       </div>
+
+      {/* Temporal: la fase 0 de NOTIFICACIONES.md. La web instalada no tiene barra de
+          direcciones y hay que poder llegar a la página de prueba. */}
+      <div style={{ marginTop: 40, textAlign: "right" }}>
+        <Link to="/prueba-avisos" style={{ color: colors.borde, fontSize: 12 }}>
+          ·
+        </Link>
+      </div>
     </div>
   );
 }

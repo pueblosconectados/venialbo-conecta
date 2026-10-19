@@ -1,0 +1,13 @@
+{
+  "name": "VenialboConecta",
+  "short_name": "Venialbo",
+  "lang": "es",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "theme_color": "#487824",
+  "background_color": "#faf6ef",
+  "icons": [
+    { "src": "/apple-touch-icon.png", "sizes": "180x180", "type": "image/png" }
+  ]
+}

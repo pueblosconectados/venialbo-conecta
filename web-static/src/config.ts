@@ -14,6 +14,11 @@ export const FORMULARIOS = {
 
 export const CONTACTO_EMAIL = "info@venialboconecta.es";
 
+// Clave pública VAPID de los avisos push (ver NOTIFICACIONES.md). La privada está en
+// .secretos/vapid.json. No se puede cambiar sin perder a todos los suscriptores.
+export const VAPID_PUBLICA =
+  "BBrC708VaZ68j67GO4rfnfNxmC5OIZuhqt5I68Tw4x8VtMWsSy4L-UfgXF4UvHETwZEK6vgVH3QlGo76V6aUNB8";
+
 export const formatFecha = (iso: string): string =>
   new Date(iso).toLocaleDateString("es-ES", {
     day: "numeric",
