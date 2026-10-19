@@ -1,0 +1,18 @@
+# El Worker de los avisos. Ver README.md.
+name = "venialbo-avisos"
+main = "src/index.js"
+compatibility_date = "2026-10-01"
+
+# Sin registros de peticiones: no se guardan IPs ni nada de quién llama
+[observability]
+enabled = false
+
+# Desde dónde se puede suscribir y dar de baja (separadas por comas)
+[vars]
+ORIGENES = "https://venialboconecta.es,http://localhost:5173"
+
+# Creado con `npx wrangler kv namespace create SUSCRIPCIONES`. En local (`npm run dev`)
+# no se usa: wrangler monta un KV de pruebas en .wrangler/.
+[[kv_namespaces]]
+binding = "SUSCRIPCIONES"
+id = "260e7b45d17b4b32858282d641f09b2e"

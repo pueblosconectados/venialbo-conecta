@@ -1,0 +1,4 @@
+node_modules/
+.wrangler/
+# El token de pruebas en local
+.dev.vars
