@@ -1,6 +1,7 @@
 // Lo que el Worker le pide a GitHub, con GITHUB_TOKEN: un token de grano fino solo para
-// este repositorio, con "Actions: Read and write" (lanzar los workflows de traer) y
-// "Contents: Read" (leer tally/respuestas-importadas.json sin la caché de raw).
+// este repositorio, con "Actions: Read and write" (lanzar los workflows de traer y ver
+// cuáles fallan) y "Contents: Read" (leer tally/respuestas-importadas.json sin la caché
+// de raw).
 
 const REPO = "pueblosconectados/venialbo-conecta";
 const API = `https://api.github.com/repos/${REPO}`;
@@ -41,4 +42,13 @@ export const leerImportadas = async (env) => {
   const datos = await respuesta.json();
   // La primera versión era una lista suelta de negocios (ver tally/comun.mjs)
   return Array.isArray(datos) ? { negocios: datos } : datos;
+};
+
+// Las últimas ejecuciones de todos los workflows, de la más nueva a la más vieja. null si
+// GitHub rechaza el token (caducado o sin permiso); error si falla otra cosa.
+export const listarEjecuciones = async (env) => {
+  const respuesta = await fetch(`${API}/actions/runs?per_page=50`, { headers: cabeceras(env) });
+  if (respuesta.status === 401 || respuesta.status === 403) return null;
+  if (!respuesta.ok) throw new Error(`GitHub: HTTP ${respuesta.status} al listar las ejecuciones`);
+  return (await respuesta.json()).workflow_runs;
 };

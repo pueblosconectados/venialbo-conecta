@@ -2,7 +2,8 @@
 // escribe en el grupo y con cada pulsación de un botón con callback_data, y esto
 // contesta. El webhook y el menú de comandos los da de alta avisos/telegram-config.mjs.
 //
-//   /estado      si GitHub Pages, Actions y la web funcionan ahora (vigilancia.js)
+//   /estado      si GitHub Pages, Actions y la web funcionan ahora (vigilancia.js), y
+//                qué workflows del repositorio están fallando (publicaciones.js)
 //   /visitas     lo que va de semana (resumen.js)
 //   /pendientes  lo que han mandado por Tally y aún no está en el CMS, con botones
 //                para traerlo
@@ -26,6 +27,7 @@ import { lanzarTraer, leerImportadas, TRAER } from "./github.js";
 import { resumenSemanal, suscriptores } from "./resumen.js";
 import { aTelegram, escapaHtml, filas } from "./telegram.js";
 import { COMPONENTES, estadoDe, vigilar } from "./vigilancia.js";
+import { fallandoAhora } from "./publicaciones.js";
 
 const TALLY = "https://api.tally.so";
 
@@ -58,7 +60,10 @@ const estado = async (env) => {
     lineas.push(`${icono} ${nombre}: ${texto}${actual.incidente ? ` («${escapaHtml(actual.incidente)}»)` : ""}`);
   }
   lineas.push(fallo ? `🔴 La web: ${escapaHtml(fallo)}` : "🟢 La web: responde");
-  return { texto: lineas.join("\n") };
+  const fallando = await fallandoAhora(env);
+  if (!fallando.length) lineas.push("🟢 Nuestras Actions: todas bien la última vez");
+  for (const { nombre } of fallando) lineas.push(`🔴 Falla «${escapaHtml(nombre)}»`);
+  return { texto: lineas.join("\n"), botones: fallando.map(({ nombre, url }) => ({ text: `Ver «${nombre}»`, url })) };
 };
 
 const visitas = async (env) => ({ texto: await resumenSemanal(env, { enCurso: true }) });

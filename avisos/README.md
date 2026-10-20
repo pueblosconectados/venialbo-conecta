@@ -174,3 +174,23 @@ Necesita `GITHUB_TOKEN` en el Worker: un token de grano fino de la organización
 `pueblosconectados`, solo para `venialbo-conecta`, con **Actions: Read and write** (lanzar
 los workflows) y **Contents: Read** (leer `tally/respuestas-importadas.json` para
 `/pendientes`). `/pendientes` necesita además `TALLY_API_KEY`.
+
+## Avisar si falla una Action
+
+En la misma vuelta del cron (cada 5 minutos), el Worker mira las últimas ejecuciones de
+los workflows del repositorio y avisa al grupo cuando uno falla («🔴 Ha fallado
+«Publicar la web»», con el título del commit y lo que deja de pasar mientras tanto) y
+cuando ese mismo workflow vuelve a salir bien («🟢 … vuelve a funcionar», con cuánto ha
+durado). Mientras sigue fallando no repite. Está en `worker/src/publicaciones.js`.
+
+- **Por qué desde aquí** y no con un paso `if: failure()` en cada workflow: no hay que
+  llevar los secretos de Telegram a GitHub, y vale para cualquier workflow, también los
+  que se añadan.
+- **Las canceladas no cuentan**: las produce la `concurrency` cuando un guardado nuevo
+  deja vieja la publicación anterior.
+- **Si GitHub rechaza el token** (caducado o sin permisos), avisa una vez con el enlace
+  para crear otro, y otra cuando vuelve a aceptarlo. Es el mismo `GITHUB_TOKEN` que trae
+  solos los formularios, así que este aviso cubre las dos cosas.
+- **El estado** va en el KV `ESTADO`, clave `publicaciones`. La primera vez no avisa de
+  lo antiguo: empieza a mirar desde ese momento.
+- **`/estado`** dice también qué workflows están fallando ahora, con un botón a cada uno.

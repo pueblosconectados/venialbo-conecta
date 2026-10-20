@@ -15,8 +15,8 @@
 //                                    vigilancia.js). No avisa ni guarda nada
 //   POST /telegram       Telegram    los comandos del grupo y los botones (en comandos.js)
 //
-// Y el cron de wrangler.toml, cada 5 minutos: la vigilancia de GitHub y de la web, y
-// los lunes a las 9:00 el resumen semanal.
+// Y el cron de wrangler.toml, cada 5 minutos: la vigilancia de GitHub y de la web, las
+// Actions que fallen (publicaciones.js) y los lunes a las 9:00 el resumen semanal.
 //
 // Cada suscripción se guarda en KV con el hash de su dirección como clave y la propia
 // suscripción como metadato. Así la lista entera sale de una sola llamada a list(), sin
@@ -27,6 +27,7 @@ import { webhookTally } from "./tally.js";
 import { enviarResumen, horaMadrid, resumenSemanal } from "./resumen.js";
 import { vigilar } from "./vigilancia.js";
 import { webhookTelegram } from "./comandos.js";
+import { revisarPublicaciones } from "./publicaciones.js";
 
 // Los servicios de push conocidos. Lo demás se rechaza, para que nadie llene el KV con
 // direcciones inventadas.
@@ -192,6 +193,7 @@ export default {
   async scheduled(controller, env, ctx) {
     const momento = new Date(controller.scheduledTime);
     ctx.waitUntil(vigilar(env));
+    ctx.waitUntil(revisarPublicaciones(env));
     const esLunes = new Intl.DateTimeFormat("en-US", { timeZone: "Europe/Madrid", weekday: "short" }).format(momento) === "Mon";
     if (esLunes && horaMadrid(momento) === 9 && momento.getUTCMinutes() === 0) ctx.waitUntil(enviarResumen(env));
   },
