@@ -8,7 +8,7 @@ import { colors } from "../../theme";
 // tarde en tarde y conviene que quede en el repositorio, con su historial de cambios.
 // Si se cambia algo de cómo se tratan los datos (otro servicio de formularios, otro
 // plazo), hay que actualizar también este texto y la fecha de abajo.
-const ACTUALIZADO = "19 de octubre de 2026";
+const ACTUALIZADO = "20 de octubre de 2026";
 
 export function Privacidad() {
   // «Más en Privacidad», junto al botón de los avisos, entra por #avisos
@@ -107,9 +107,26 @@ export function Privacidad() {
           de baja, la dirección se borra.
         </p>
 
+        <h3 id="visitas">Estadísticas de visitas</h3>
+        <p>
+          Para saber cuánta gente entra y qué se mira más, la web usa{" "}
+          <strong>Cloudflare Web Analytics</strong>. Cuenta las visitas sin poner cookies
+          y sin seguirte de una web a otra: lo que nos llega son totales (cuántas visitas,
+          qué páginas, desde qué tipo de dispositivo y país), nunca quién eres. Se rige
+          por{" "}
+          <a
+            href="https://www.cloudflare.com/privacypolicy/"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            la política de Cloudflare
+          </a>
+          .
+        </p>
+
         <h3>Cookies</h3>
         <p>
-          Esta web no lleva analítica, ni rastreadores, ni cookies de publicidad. Lo único
+          Esta web no lleva rastreadores ni cookies de publicidad. Lo único
           que guarda tu navegador es qué avisos de la banda superior has cerrado, para no
           volver a enseñártelos mientras sigas en la web; se borra al cerrar la pestaña, se
           queda en tu móvil o tu ordenador y no llega a nosotros. Los vídeos de YouTube no se cargan hasta que pulsas para verlos, y a
