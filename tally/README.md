@@ -216,7 +216,25 @@ y Tally entiende que son las mismas preguntas, en vez de verlas como nuevas y pe
 hilo con las respuestas ya recibidas. Por eso **la `clave` de un campo no se cambia** a
 la ligera: cambiarla equivale a borrar la pregunta y crear otra.
 
+## El aviso por Telegram
+
+Cada respuesta nueva llega al grupo de Telegram de los administradores (el mismo de los
+avisos de prensa de news-rastreator), con todos los campos, para saber si corre prisa.
+Tally llama a un webhook en el Worker de avisos (`POST /tally`, en
+`avisos/worker/src/tally.js`), que comprueba la firma y reenvía el mensaje. Las fotos no
+se enlazan, solo se cuentan: el enlace va firmado y abre la foto a quien lo tenga. En
+las altas y los anuncios el mensaje recuerda qué botón del CMS los trae.
+
+```bash
+node tally/crear-webhooks.mjs --dry    # enseña lo que haría
+node tally/crear-webhooks.mjs          # da de alta los que falten (no duplica)
+```
+
+El secreto con el que Tally firma está en `.secretos/tally-webhook-secret`, y el mismo
+como `TALLY_SIGNING_SECRET` en el Worker. Si Telegram falla, Tally reintenta (a los
+5 min, 30 min, 1 h, 6 h y 1 día) y, si nada sale, manda un correo.
+
 ## Lo que esto no resuelve
 
-- El flujo sigue siendo *vecino envía → lo publicamos nosotros en el CMS*. Tally tiene
-  webhooks, pero para recibirlos hace falta algo que escuche y la web es estática.
+- El flujo sigue siendo *vecino envía → lo publicamos nosotros en el CMS*. El aviso de
+  Telegram dice que hay algo, pero pasarlo al CMS sigue siendo un botón.

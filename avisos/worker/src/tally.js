@@ -1,0 +1,136 @@
+// POST /tally: el webhook de los formularios. Tally llama aquí con cada respuesta nueva
+// y esto la reenvía, entera, al grupo de Telegram de los administradores (el mismo de
+// los avisos de prensa de news-rastreator). Los webhooks los da de alta
+// tally/crear-webhooks.mjs.
+//
+// Tally firma el cuerpo con el secreto compartido (TALLY_SIGNING_SECRET): HMAC-SHA256
+// en base64, en la cabecera Tally-Signature. Sin firma buena no se manda nada, para que
+// nadie pueda escribir en el grupo a través del bot.
+//
+// Si Telegram falla se responde 500 y Tally reintenta por su cuenta (a los 5 min, 30 min,
+// 1 h, 6 h y 1 día).
+
+// Los formularios, por su id de tally/formularios-creados.json. El recordatorio dice qué
+// botón del CMS trae la respuesta; contacto no se importa a ningún sitio.
+const FORMULARIOS = {
+  obJXzX: { titulo: "✉️ Mensaje de contacto" },
+  ZjxqQa: {
+    titulo: "🏪 Alta de negocio",
+    recordatorio: "Para pasarla al CMS: botón «Traer las altas de negocio». Entra oculta.",
+  },
+  NpzGOW: {
+    titulo: "📌 Anuncio para el tablón",
+    recordatorio: "Para pasarlo al CMS: botón «Traer los anuncios del tablón». Entra oculto.",
+  },
+};
+
+// Telegram corta en 4096 caracteres; se deja margen para la cabecera y el pie
+const MAX_CAMPO = 1500;
+const MAX_MENSAJE = 4000;
+const MAX_CUERPO = 64 * 1024;
+
+const escapaHtml = (texto) =>
+  String(texto).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+
+const recorta = (texto, max) => (texto.length > max ? `${texto.slice(0, max - 1)}…` : texto);
+
+const firmaValida = async (cuerpo, firma, secreto) => {
+  if (!firma || !secreto) return false;
+  const clave = await crypto.subtle.importKey(
+    "raw",
+    new TextEncoder().encode(secreto),
+    { name: "HMAC", hash: "SHA-256" },
+    false,
+    ["sign"],
+  );
+  const esperada = async (texto) => {
+    const bytes = await crypto.subtle.sign("HMAC", clave, new TextEncoder().encode(texto));
+    return btoa(String.fromCharCode(...new Uint8Array(bytes)));
+  };
+  const igual = (a, b) => {
+    const x = new TextEncoder().encode(a);
+    const y = new TextEncoder().encode(b);
+    return x.byteLength === y.byteLength && crypto.subtle.timingSafeEqual(x, y);
+  };
+  // La documentación de Tally firma JSON.stringify(cuerpo) en su ejemplo, no los bytes
+  // tal cual llegan. Suelen coincidir; por si no, se prueban los dos.
+  if (igual(firma, await esperada(cuerpo))) return true;
+  return igual(firma, await esperada(JSON.stringify(JSON.parse(cuerpo))));
+};
+
+// Una línea por campo respondido. Lo vacío no sale.
+const lineaDe = (campo) => {
+  const { label, type, value, options } = campo;
+  if (value === null || value === undefined || value === "") return null;
+  // Las casillas: la de aceptar la privacidad (siempre marcada) y, en los campos de
+  // varias casillas, una por opción que repite lo que ya dice el campo entero
+  if (typeof value === "boolean") return null;
+
+  let texto;
+  if (type === "FILE_UPLOAD" || type === "SIGNATURE") {
+    if (!Array.isArray(value) || !value.length) return null;
+    // Las fotos no se descargan ni se enlazan (el enlace va firmado y abre la foto a
+    // quien lo tenga): se miran en Tally
+    texto = `📎 ${value.length} ${value.length === 1 ? "archivo" : "archivos"}, ver en Tally`;
+  } else if (Array.isArray(value)) {
+    if (!value.length) return null;
+    const nombres = new Map((options ?? []).map((o) => [o.id, o.text]));
+    texto = value.map((v) => nombres.get(v) ?? v).join(", ");
+  } else if (typeof value === "object") {
+    texto = JSON.stringify(value);
+  } else {
+    texto = String(value).trim();
+    if (!texto) return null;
+  }
+  return `<b>${escapaHtml(label || "(sin título)")}</b>\n${escapaHtml(recorta(texto, MAX_CAMPO))}`;
+};
+
+const mensajeDe = ({ formId, formName, fields }) => {
+  const formulario = FORMULARIOS[formId] ?? { titulo: `📝 ${formName}` };
+  const pie = [
+    formulario.recordatorio && `👉 ${escapaHtml(formulario.recordatorio)}`,
+    `https://tally.so/forms/${formId}/submissions`,
+  ].filter(Boolean);
+  const campos = (fields ?? []).map(lineaDe).filter(Boolean);
+  // Si aun así no cabe, se quitan campos enteros del final (cortar a ciegas podría
+  // romper una etiqueta y Telegram rechazaría el mensaje)
+  const montar = (cuantos) =>
+    [
+      `<b>${escapaHtml(formulario.titulo)}</b>`,
+      ...campos.slice(0, cuantos),
+      ...(cuantos < campos.length ? ["<i>…sigue en Tally</i>"] : []),
+      pie.join("\n"),
+    ].join("\n\n");
+  let cuantos = campos.length;
+  while (cuantos > 0 && montar(cuantos).length > MAX_MENSAJE) cuantos--;
+  return montar(cuantos);
+};
+
+const aTelegram = async (env, texto) => {
+  const respuesta = await fetch(`https://api.telegram.org/bot${env.TELEGRAM_TOKEN}/sendMessage`, {
+    method: "POST",
+    headers: { "content-type": "application/json" },
+    body: JSON.stringify({
+      chat_id: env.TELEGRAM_CHAT_ID,
+      text: texto,
+      parse_mode: "HTML",
+      link_preview_options: { is_disabled: true },
+    }),
+  });
+  return respuesta.ok;
+};
+
+export const webhookTally = async (request, env, json) => {
+  if (request.method !== "POST") return json({ error: "método no permitido" }, 405);
+  const cuerpo = await request.text();
+  if (cuerpo.length > MAX_CUERPO) return json({ error: "demasiado grande" }, 413);
+  if (!(await firmaValida(cuerpo, request.headers.get("tally-signature"), env.TALLY_SIGNING_SECRET)))
+    return json({ error: "firma no válida" }, 401);
+
+  const evento = JSON.parse(cuerpo);
+  // Por ahora Tally solo manda este tipo; lo demás se acepta y se ignora
+  if (evento.eventType !== "FORM_RESPONSE" || !evento.data) return json({ ignorado: true });
+
+  if (!(await aTelegram(env, mensajeDe(evento.data)))) return json({ error: "telegram" }, 500);
+  return json({ ok: true });
+};

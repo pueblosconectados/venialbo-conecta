@@ -19,6 +19,7 @@ La clave privada VAPID está en `.secretos/vapid.json`; la pública, en
 | `POST /baja` | La web | La borra |
 | `GET /suscripciones` | La Action, con `Authorization: Bearer <TOKEN>` | Devuelve la lista |
 | `POST /borrar` | La Action, con el token | Quita las que den `404`/`410`: `{"endpoints": [...]}` |
+| `POST /tally` | Tally, firmado | Reenvía la respuesta de un formulario a Telegram (ver `tally/README.md`) |
 
 Solo acepta direcciones de los servicios de push conocidos (Google, Mozilla, Apple y
 Windows), cuerpos de menos de 4 KB y, para suscribir y dar de baja, peticiones desde
@@ -53,3 +54,14 @@ npm run deploy                                      # → venialbo-avisos.<cuent
 ```
 
 El mismo token va luego como secreto de GitHub para la Action (fase 3).
+
+Para el aviso de los formularios por Telegram (`/tally`), tres secretos más:
+
+```bash
+openssl rand -hex 32 > ../../.secretos/tally-webhook-secret
+npx wrangler secret put TALLY_SIGNING_SECRET < ../../.secretos/tally-webhook-secret
+npx wrangler secret put TELEGRAM_TOKEN      # el del bot de news-rastreator
+npx wrangler secret put TELEGRAM_CHAT_ID    # el grupo; en los grupos es negativo
+npm run deploy
+node ../../tally/crear-webhooks.mjs         # con TALLY_API_KEY_FILE=../../.secretos/api-key
+```

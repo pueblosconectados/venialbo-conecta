@@ -6,11 +6,15 @@
 //   POST /baja           la web      la borra
 //   GET  /suscripciones  la Action   la lista entera (con el token)
 //   POST /borrar         la Action   quita las que el servicio de push da por muertas
+//   POST /tally          Tally       una respuesta de formulario, que va a Telegram
+//                                    (en tally.js)
 //
 // Cada suscripción se guarda en KV con el hash de su dirección como clave y la propia
 // suscripción como metadato. Así la lista entera sale de una sola llamada a list(), sin
 // leer clave por clave, y volver a suscribirse desde el mismo móvil no duplica nada.
 // No se guardan IPs, fechas ni nada que no sea la suscripción.
+
+import { webhookTally } from "./tally.js";
 
 // Los servicios de push conocidos. Lo demás se rechaza, para que nadie llene el KV con
 // direcciones inventadas.
@@ -136,6 +140,8 @@ export default {
         if (pathname === "/borrar" && metodo === "POST") return await borrar(request, env);
         return json({ error: "método no permitido" }, 405);
       }
+
+      if (pathname === "/tally") return await webhookTally(request, env, json);
 
       return json({ error: "no existe" }, 404);
     } catch {
