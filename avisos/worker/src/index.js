@@ -14,9 +14,12 @@
 //   GET  /vigilancia     a mano      lo que vería ahora la vigilancia (con el token; en
 //                                    vigilancia.js). No avisa ni guarda nada
 //   POST /telegram       Telegram    los comandos del grupo y los botones (en comandos.js)
+//   GET  /revision       a mano      el recordatorio de lo oculto sin revisar (con el
+//                                    token; en revision.js). No lo manda
 //
 // Y el cron de wrangler.toml, cada 5 minutos: la vigilancia de GitHub y de la web, las
-// Actions que fallen (publicaciones.js) y los lunes a las 9:00 el resumen semanal.
+// Actions que fallen (publicaciones.js), cada día a las 10:00 lo oculto sin revisar
+// (revision.js) y los lunes a las 9:00 el resumen semanal.
 //
 // Cada suscripción se guarda en KV con el hash de su dirección como clave y la propia
 // suscripción como metadato. Así la lista entera sale de una sola llamada a list(), sin
@@ -28,6 +31,7 @@ import { enviarResumen, horaMadrid, resumenSemanal } from "./resumen.js";
 import { vigilar } from "./vigilancia.js";
 import { webhookTelegram } from "./comandos.js";
 import { revisarPublicaciones } from "./publicaciones.js";
+import { recordarSinRevisar, sinRevisar } from "./revision.js";
 
 // Los servicios de push conocidos. Lo demás se rechaza, para que nadie llene el KV con
 // direcciones inventadas.
@@ -174,6 +178,19 @@ export default {
 
       if (pathname === "/telegram") return await webhookTelegram(request, env);
 
+      if (pathname === "/revision") {
+        if (!conToken(request, env)) return json({ error: "no autorizado" }, 401);
+        if (metodo !== "GET") return json({ error: "método no permitido" }, 405);
+        try {
+          return json({
+            sinRevisar: await sinRevisar(env),
+            recordatorio: await recordarSinRevisar(env, { enviar: false }),
+          });
+        } catch (e) {
+          return json({ error: String(e.message ?? e) }, 502);
+        }
+      }
+
       if (pathname === "/vigilancia") {
         if (!conToken(request, env)) return json({ error: "no autorizado" }, 401);
         if (metodo !== "GET") return json({ error: "método no permitido" }, 405);
@@ -195,6 +212,8 @@ export default {
     ctx.waitUntil(vigilar(env));
     ctx.waitUntil(revisarPublicaciones(env));
     const esLunes = new Intl.DateTimeFormat("en-US", { timeZone: "Europe/Madrid", weekday: "short" }).format(momento) === "Mon";
-    if (esLunes && horaMadrid(momento) === 9 && momento.getUTCMinutes() === 0) ctx.waitUntil(enviarResumen(env));
+    const enPunto = momento.getUTCMinutes() === 0;
+    if (esLunes && horaMadrid(momento) === 9 && enPunto) ctx.waitUntil(enviarResumen(env));
+    if (horaMadrid(momento) === 10 && enPunto) ctx.waitUntil(recordarSinRevisar(env));
   },
 };

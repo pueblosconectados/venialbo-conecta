@@ -52,3 +52,17 @@ export const listarEjecuciones = async (env) => {
   if (!respuesta.ok) throw new Error(`GitHub: HTTP ${respuesta.status} al listar las ejecuciones`);
   return (await respuesta.json()).workflow_runs;
 };
+
+// Una consulta a la API GraphQL de GitHub (la usa revision.js para leer muchas fichas en
+// una sola llamada). Devuelve `data`; si GitHub da errores, los lanza.
+export const graphql = async (env, query) => {
+  const respuesta = await fetch("https://api.github.com/graphql", {
+    method: "POST",
+    headers: { ...cabeceras(env), "content-type": "application/json" },
+    body: JSON.stringify({ query }),
+  });
+  if (!respuesta.ok) throw new Error(`GitHub GraphQL: HTTP ${respuesta.status}`);
+  const { data, errors } = await respuesta.json();
+  if (errors?.length) throw new Error(`GitHub GraphQL: ${errors.map((e) => e.message).join("; ")}`);
+  return data;
+};

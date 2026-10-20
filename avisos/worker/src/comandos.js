@@ -6,7 +6,7 @@
 //                qué workflows del repositorio están fallando (publicaciones.js)
 //   /visitas     lo que va de semana (resumen.js)
 //   /pendientes  lo que han mandado por Tally y aún no está en el CMS, con botones
-//                para traerlo
+//                para traerlo, y lo que ya está pero oculto sin revisar (revision.js)
 //   /avisos      cuántos dispositivos tienen las push activadas
 //   /chatid      el id de este chat
 //   /ayuda       la lista
@@ -28,6 +28,7 @@ import { resumenSemanal, suscriptores } from "./resumen.js";
 import { aTelegram, escapaHtml, filas } from "./telegram.js";
 import { COMPONENTES, estadoDe, vigilar } from "./vigilancia.js";
 import { fallandoAhora } from "./publicaciones.js";
+import { listaSinRevisar, sinRevisar } from "./revision.js";
 
 const TALLY = "https://api.tally.so";
 
@@ -111,13 +112,20 @@ const pendientes = async (env) => {
     lineas.push(`<b>${formulario.nombre}: ${faltan.length}</b>\n${lista.join("\n")}`);
     botones.push({ text: `📥 Traer ${formulario.boton} (${faltan.length})`, callback_data: `traer:${clave}` });
   }
-  if (!lineas.length) return { texto: "✅ Nada pendiente: todo lo que ha llegado por los formularios está en el CMS." };
-  return {
-    texto: ["📋 <b>Sin traer al CMS</b>", ...lineas, "<i>Los mensajes de contacto no se traen, no salen aquí.</i>"].join(
-      "\n\n",
-    ),
-    botones: [botones],
-  };
+  const partes = lineas.length ? ["📋 <b>Sin traer al CMS</b>", ...lineas] : ["✅ Todo lo de los formularios está ya en el CMS."];
+
+  // Lo que ya está en el CMS pero sigue oculto sin que nadie lo haya tocado
+  const fichas = await sinRevisar(env);
+  const filasBotones = botones.length ? [botones] : [];
+  if (fichas.length) {
+    const lista = listaSinRevisar(fichas);
+    partes.push(`🕰 <b>En el CMS, ocultas sin revisar: ${fichas.length}</b>\n${lista.lineas.join("\n")}`);
+    filasBotones.push(...lista.botones.map((b) => [b]));
+  } else {
+    partes.push("✅ Nada oculto esperando revisión.");
+  }
+  if (lineas.length) partes.push("<i>Los mensajes de contacto no se traen, no salen aquí.</i>");
+  return { texto: partes.join("\n\n"), botones: filasBotones };
 };
 
 const chatid = async (_env, mensaje) => ({ texto: `El id de este chat es <code>${mensaje.chat.id}</code>` });
@@ -125,7 +133,7 @@ const chatid = async (_env, mensaje) => ({ texto: `El id de este chat es <code>$
 const AYUDA = [
   ["estado", "Si GitHub y la web funcionan ahora"],
   ["visitas", "Las visitas de lo que va de semana"],
-  ["pendientes", "Lo de los formularios que falta traer al CMS"],
+  ["pendientes", "Lo de los formularios sin traer o sin revisar"],
   ["avisos", "Cuántos tienen los avisos activados"],
   ["chatid", "El id de este chat"],
   ["ayuda", "Esta lista"],

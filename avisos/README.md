@@ -23,6 +23,7 @@ La clave privada VAPID está en `.secretos/vapid.json`; la pública, en
 | `GET /resumen` | A mano, con el token | El resumen semanal de visitas. Solo lo enseña; `?enviar` lo manda al grupo y `?en-curso` usa lo que va de semana |
 | `GET /vigilancia` | A mano, con el token | Lo que vería ahora la vigilancia de GitHub y de la web, sin avisar ni guardar nada |
 | `POST /telegram` | Telegram, con su clave | Los comandos del grupo y los botones «📥 Traer» |
+| `GET /revision` | A mano, con el token | Lo oculto sin revisar y el recordatorio que saldría, sin mandarlo |
 
 Solo acepta direcciones de los servicios de push conocidos (Google, Mozilla, Apple y
 Windows), cuerpos de menos de 4 KB y, para suscribir y dar de baja, peticiones desde
@@ -135,7 +136,7 @@ Escribiendo en el grupo de Telegram, el bot contesta. Está en `worker/src/coman
 |---|---|
 | `/estado` | Si GitHub Pages, Actions y la web funcionan ahora |
 | `/visitas` | El resumen de lo que va de semana |
-| `/pendientes` | Lo que ha llegado por Tally y aún no está en el CMS, con botones «📥 Traer» |
+| `/pendientes` | Lo que ha llegado por Tally y aún no está en el CMS, con botones «📥 Traer», y lo que está en el CMS oculto sin revisar, con un botón para abrir cada ficha |
 | `/avisos` | Cuántos dispositivos tienen las push activadas |
 | `/chatid` | El id del chat donde se escribe |
 | `/ayuda` | La lista |
@@ -194,3 +195,19 @@ durado). Mientras sigue fallando no repite. Está en `worker/src/publicaciones.j
 - **El estado** va en el KV `ESTADO`, clave `publicaciones`. La primera vez no avisa de
   lo antiguo: empieza a mirar desde ese momento.
 - **`/estado`** dice también qué workflows están fallando ahora, con un botón a cada uno.
+
+## Recordatorio de lo oculto sin revisar
+
+Las altas y los anuncios que llegan por Tally entran en el CMS ocultos, y alguien tiene
+que repasarlos. Cada día a las 10:00 (hora de Madrid), si alguno lleva más de 2 días
+así, el Worker lo recuerda en el grupo, con un botón que abre cada ficha en Pages CMS.
+Si no hay nada, no escribe. Está en `worker/src/revision.js`.
+
+- **«Sin revisar»** es: oculta (`"activo": false`) y con el último commit todavía de
+  `github-actions[bot]`, la Action que la trajo. Si alguien la abre en el CMS y la
+  guarda, aunque la deje oculta, ya no sale: la ha ocultado a propósito. Las noticias y
+  demás ocultas no se miran; son borradores de los admin.
+- **Se lee con la API GraphQL de GitHub**: una llamada trae todas las fichas con su
+  contenido y otra el último commit de las ocultas. Por REST sería una petición por
+  fichero, y el plan gratuito de Workers da 50 por ejecución. Usa el `GITHUB_TOKEN`
+  (*Contents: Read*).
