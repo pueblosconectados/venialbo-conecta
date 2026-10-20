@@ -223,7 +223,9 @@ avisos de prensa de news-rastreator), con todos los campos, para saber si corre 
 Tally llama a un webhook en el Worker de avisos (`POST /tally`, en
 `avisos/worker/src/tally.js`), que comprueba la firma y reenvía el mensaje. Las fotos no
 se enlazan, solo se cuentan: el enlace va firmado y abre la foto a quien lo tenga. En
-las altas y los anuncios el mensaje recuerda qué botón del CMS los trae.
+las altas y los anuncios el mensaje recuerda qué botón del CMS los trae, y lleva debajo
+un botón que abre esa colección en Pages CMS; todos llevan otro a las respuestas en
+Tally.
 
 ```bash
 node tally/crear-webhooks.mjs --dry    # enseña lo que haría

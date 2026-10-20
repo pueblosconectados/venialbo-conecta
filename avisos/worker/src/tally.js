@@ -10,6 +10,10 @@
 // Si Telegram falla se responde 500 y Tally reintenta por su cuenta (a los 5 min, 30 min,
 // 1 h, 6 h y 1 día).
 
+// La lista de una colección en Pages CMS. La ficha aún no existe cuando llega el aviso
+// (se crea al pulsar el botón de traer), así que se enlaza la lista, no la ficha.
+const CMS = "https://app.pagescms.org/pueblosconectados/venialbo-conecta/main/collection";
+
 // Los formularios, por su id de tally/formularios-creados.json. El recordatorio dice qué
 // botón del CMS trae la respuesta; contacto no se importa a ningún sitio.
 const FORMULARIOS = {
@@ -17,10 +21,12 @@ const FORMULARIOS = {
   ZjxqQa: {
     titulo: "🏪 Alta de negocio",
     recordatorio: "Para pasarla al CMS: botón «Traer las altas de negocio». Entra oculta.",
+    cms: `${CMS}/negocios`,
   },
   NpzGOW: {
     titulo: "📌 Anuncio para el tablón",
     recordatorio: "Para pasarlo al CMS: botón «Traer los anuncios del tablón». Entra oculto.",
+    cms: `${CMS}/anuncios`,
   },
 };
 
@@ -85,12 +91,21 @@ const lineaDe = (campo) => {
   return `<b>${escapaHtml(label || "(sin título)")}</b>\n${escapaHtml(recorta(texto, MAX_CAMPO))}`;
 };
 
-const mensajeDe = ({ formId, formName, fields }) => {
-  const formulario = FORMULARIOS[formId] ?? { titulo: `📝 ${formName}` };
-  const pie = [
-    formulario.recordatorio && `👉 ${escapaHtml(formulario.recordatorio)}`,
-    `https://tally.so/forms/${formId}/submissions`,
-  ].filter(Boolean);
+const formularioDe = ({ formId, formName }) => FORMULARIOS[formId] ?? { titulo: `📝 ${formName}` };
+
+// Los enlaces van como botones debajo del mensaje, no como URL sueltas en el texto
+const botonesDe = (datos) => {
+  const { cms } = formularioDe(datos);
+  return [
+    ...(cms ? [{ text: "📝 Abrir en el CMS", url: cms }] : []),
+    { text: "Ver en Tally", url: `https://tally.so/forms/${datos.formId}/submissions` },
+  ];
+};
+
+const mensajeDe = (datos) => {
+  const { fields } = datos;
+  const formulario = formularioDe(datos);
+  const pie = formulario.recordatorio ? [`👉 ${escapaHtml(formulario.recordatorio)}`] : [];
   const campos = (fields ?? []).map(lineaDe).filter(Boolean);
   // Si aun así no cabe, se quitan campos enteros del final (cortar a ciegas podría
   // romper una etiqueta y Telegram rechazaría el mensaje)
@@ -99,14 +114,14 @@ const mensajeDe = ({ formId, formName, fields }) => {
       `<b>${escapaHtml(formulario.titulo)}</b>`,
       ...campos.slice(0, cuantos),
       ...(cuantos < campos.length ? ["<i>…sigue en Tally</i>"] : []),
-      pie.join("\n"),
+      ...pie,
     ].join("\n\n");
   let cuantos = campos.length;
   while (cuantos > 0 && montar(cuantos).length > MAX_MENSAJE) cuantos--;
   return montar(cuantos);
 };
 
-const aTelegram = async (env, texto) => {
+const aTelegram = async (env, texto, botones) => {
   const respuesta = await fetch(`https://api.telegram.org/bot${env.TELEGRAM_TOKEN}/sendMessage`, {
     method: "POST",
     headers: { "content-type": "application/json" },
@@ -115,6 +130,7 @@ const aTelegram = async (env, texto) => {
       text: texto,
       parse_mode: "HTML",
       link_preview_options: { is_disabled: true },
+      reply_markup: { inline_keyboard: [botones] },
     }),
   });
   return respuesta.ok;
@@ -131,6 +147,7 @@ export const webhookTally = async (request, env, json) => {
   // Por ahora Tally solo manda este tipo; lo demás se acepta y se ignora
   if (evento.eventType !== "FORM_RESPONSE" || !evento.data) return json({ ignorado: true });
 
-  if (!(await aTelegram(env, mensajeDe(evento.data)))) return json({ error: "telegram" }, 500);
+  const { data } = evento;
+  if (!(await aTelegram(env, mensajeDe(data), botonesDe(data)))) return json({ error: "telegram" }, 500);
   return json({ ok: true });
 };
