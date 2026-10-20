@@ -8,6 +8,7 @@
 //   /pendientes  lo que han mandado por Tally y aún no está en el CMS, con botones
 //                para traerlo, y lo que ya está pero oculto sin revisar (revision.js)
 //   /caducan     lo que desaparece de la web en los próximos 7 días (caducidad.js)
+//   /cambios     los últimos guardados en el CMS, con quién y cuándo (cambios.js)
 //   /republicar  vuelve a lanzar la publicación de la web
 //   /avisos      cuántos dispositivos tienen las push activadas
 //   /chatid      el id de este chat
@@ -32,6 +33,7 @@ import { COMPONENTES, estadoDe, vigilar } from "./vigilancia.js";
 import { fallandoAhora, marcarReintentado, nombreDe } from "./publicaciones.js";
 import { listaSinRevisar, sinRevisar } from "./revision.js";
 import { listaCaducan } from "./caducidad.js";
+import { ultimosCambios } from "./cambios.js";
 
 const TALLY = "https://api.tally.so";
 
@@ -149,6 +151,7 @@ const CONSULTAR = [
   ["visitas", "Las visitas de lo que va de semana"],
   ["pendientes", "Lo de los formularios sin traer o sin revisar"],
   ["caducan", "Lo que desaparece de la web en 7 días"],
+  ["cambios", "Lo último que se ha guardado en el CMS, y quién"],
   ["avisos", "Cuántos tienen los avisos activados"],
   ["chatid", "El id de este chat"],
   ["ayuda", "Esta lista"],
@@ -172,7 +175,9 @@ const ayuda = async () => ({
 
 const caducan = async () => listaCaducan();
 
-const ACCIONES = { estado, visitas, pendientes, caducan, republicar, avisos, chatid, ayuda, start: ayuda };
+const cambios = async (env) => ultimosCambios(env);
+
+const ACCIONES = { estado, visitas, pendientes, caducan, cambios, republicar, avisos, chatid, ayuda, start: ayuda };
 // Los que se contestan fuera del grupo
 const EN_CUALQUIER_CHAT = new Set(["chatid"]);
 

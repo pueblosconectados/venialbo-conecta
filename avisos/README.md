@@ -142,6 +142,7 @@ algo es `/republicar`.
 | `/visitas` | El resumen de lo que va de semana |
 | `/pendientes` | Lo que ha llegado por Tally y aún no está en el CMS, con botones «📥 Traer», y lo que está en el CMS oculto sin revisar, con un botón para abrir cada ficha |
 | `/caducan` | Los anuncios y avisos que desaparecen de la web en los próximos 7 días, con un botón para cambiar su fecha en el CMS |
+| `/cambios` | Los últimos 5 guardados en el CMS: qué ficha, quién y cuándo (➕ creado, ✏️ cambiado, 🗑 borrado) |
 | `/republicar` | Vuelve a lanzar la publicación de la web, para cuando ha fallado por algo pasajero |
 | `/avisos` | Cuántos dispositivos tienen las push activadas |
 | `/chatid` | El id del chat donde se escribe |
@@ -236,3 +237,17 @@ hay nada, no escribe. Está en `worker/src/caducidad.js`.
   días, `caducidadDe` en `build-content.mjs`). No hace falta token.
 - **La fecha es el último día que se ve**: `haCaducado` (en `web-static/src/datos.ts`)
   lo deja hasta las 23:59 de ese día.
+
+## Los últimos cambios
+
+`/cambios` lista los últimos 5 guardados en el CMS, para coordinarse y no pisarse. Sale
+de los commits de `main` que hace Pages CMS, que llevan el nombre de quien edita y un
+mensaje `Create|Update|Delete <ruta> (via Pages CMS)`. Está en `worker/src/cambios.js`.
+
+- **Se juntan los guardados seguidos de la misma ficha**, aunque sean de varias personas
+  («MJ-Venialbo y David Hernando»), y las tandas de fotos de una misma persona («4
+  archivos subidos»). Manda la acción más nueva: si se borró, sale como borrada; si se
+  creó y luego se cambió, como creada.
+- **El título** es el actual de la ficha (una consulta GraphQL para todas); si ya no
+  existe, sale del nombre del fichero.
+- Los commits de las Actions y los de código no cuentan.

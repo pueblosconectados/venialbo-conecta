@@ -71,3 +71,11 @@ export const graphql = async (env, query) => {
   if (errors?.length) throw new Error(`GitHub GraphQL: ${errors.map((e) => e.message).join("; ")}`);
   return data;
 };
+
+// Los últimos commits de main, del más nuevo al más viejo (los usa cambios.js). Con
+// 100 da para ver lo último del CMS aunque entre medias haya commits de las Actions.
+export const listarCommits = async (env) => {
+  const respuesta = await fetch(`${API}/commits?sha=main&per_page=100`, { headers: cabeceras(env) });
+  if (!respuesta.ok) throw new Error(`GitHub: HTTP ${respuesta.status} al listar los commits`);
+  return respuesta.json();
+};
