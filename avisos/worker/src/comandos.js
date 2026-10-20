@@ -9,6 +9,7 @@
 //                para traerlo, y lo que ya está pero oculto sin revisar (revision.js)
 //   /caducan     lo que desaparece de la web en los próximos 7 días (caducidad.js)
 //   /cambios     los últimos guardados en el CMS, con quién y cuándo (cambios.js)
+//   /buscar x    busca en todo lo que se ve en la web (buscar.js)
 //   /republicar  vuelve a lanzar la publicación de la web
 //   /avisos      cuántos dispositivos tienen las push activadas
 //   /chatid      el id de este chat
@@ -34,6 +35,7 @@ import { fallandoAhora, marcarReintentado, nombreDe } from "./publicaciones.js";
 import { listaSinRevisar, sinRevisar } from "./revision.js";
 import { listaCaducan } from "./caducidad.js";
 import { ultimosCambios } from "./cambios.js";
+import { buscar } from "./buscar.js";
 
 const TALLY = "https://api.tally.so";
 
@@ -152,6 +154,7 @@ const CONSULTAR = [
   ["pendientes", "Lo de los formularios sin traer o sin revisar"],
   ["caducan", "Lo que desaparece de la web en 7 días"],
   ["cambios", "Lo último que se ha guardado en el CMS, y quién"],
+  ["buscar", "Busca en la web: /buscar panadería"],
   ["avisos", "Cuántos tienen los avisos activados"],
   ["chatid", "El id de este chat"],
   ["ayuda", "Esta lista"],
@@ -177,7 +180,10 @@ const caducan = async () => listaCaducan();
 
 const cambios = async (env) => ultimosCambios(env);
 
-const ACCIONES = { estado, visitas, pendientes, caducan, cambios, republicar, avisos, chatid, ayuda, start: ayuda };
+// Lo que va detrás del comando: "/buscar bar toca" → "bar toca"
+const buscarEnWeb = async (_env, _mensaje, argumentos) => buscar(argumentos);
+
+const ACCIONES = { estado, visitas, pendientes, caducan, cambios, buscar: buscarEnWeb, republicar, avisos, chatid, ayuda, start: ayuda };
 // Los que se contestan fuera del grupo
 const EN_CUALQUIER_CHAT = new Set(["chatid"]);
 
@@ -253,7 +259,8 @@ export const webhookTelegram = async (request, env) => {
   if (!EN_CUALQUIER_CHAT.has(comando) && !delGrupo(mensaje.chat, env)) return responderJson(null);
 
   try {
-    return responderJson(contestar(mensaje, await accion(env, mensaje)));
+    const argumentos = texto.replace(/^\S+\s*/, "");
+    return responderJson(contestar(mensaje, await accion(env, mensaje, argumentos)));
   } catch (e) {
     return responderJson(contestar(mensaje, { texto: `⚠️ No he podido: ${escapaHtml(String(e.message ?? e))}` }));
   }

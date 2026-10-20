@@ -143,6 +143,7 @@ algo es `/republicar`.
 | `/pendientes` | Lo que ha llegado por Tally y aún no está en el CMS, con botones «📥 Traer», y lo que está en el CMS oculto sin revisar, con un botón para abrir cada ficha |
 | `/caducan` | Los anuncios y avisos que desaparecen de la web en los próximos 7 días, con un botón para cambiar su fecha en el CMS |
 | `/cambios` | Los últimos 5 guardados en el CMS: qué ficha, quién y cuándo (➕ creado, ✏️ cambiado, 🗑 borrado) |
+| `/buscar <texto>` | Busca en todo lo que se ve en la web: el teléfono de un negocio, el contacto de un anuncio… con botones a la ficha en la web y en el CMS |
 | `/republicar` | Vuelve a lanzar la publicación de la web, para cuando ha fallado por algo pasajero |
 | `/avisos` | Cuántos dispositivos tienen las push activadas |
 | `/chatid` | El id del chat donde se escribe |
@@ -251,3 +252,18 @@ mensaje `Create|Update|Delete <ruta> (via Pages CMS)`. Está en `worker/src/camb
 - **El título** es el actual de la ficha (una consulta GraphQL para todas); si ya no
   existe, sale del nombre del fichero.
 - Los commits de las Actions y los de código no cuentan.
+
+## Buscar
+
+`/buscar <texto>` busca en los listados que publica la web (`data/<recurso>.json`:
+negocios, servicios, tablón, noticias, actividades, lugares, rutas y avisos), así que
+encuentra lo mismo que vería un vecino: lo oculto y lo caducado no sale. No hace falta
+token. Está en `worker/src/buscar.js`.
+
+- Sin distinguir mayúsculas ni tildes, y **por el principio de las palabras**: «toca»
+  encuentra «Bar El Toca» y «tocar», pero no algo que lo lleve en medio. Con varias
+  palabras, tienen que estar todas. Primero las que coinciden en el título.
+- De cada resultado enseña lo útil: teléfonos y correo de negocios y servicios, el
+  contacto de los anuncios, la fecha de las actividades, y la de publicación de anuncios
+  y noticias (para distinguir los que se llaman igual). Hasta 5, con botones a la web y
+  al CMS.
