@@ -1,0 +1,205 @@
+// POST /telegram: el webhook del bot. Telegram llama aquí con cada comando que se
+// escribe en el grupo y con cada pulsación de un botón con callback_data, y esto
+// contesta. El webhook y el menú de comandos los da de alta avisos/telegram-config.mjs.
+//
+//   /estado      si GitHub Pages, Actions y la web funcionan ahora (vigilancia.js)
+//   /visitas     lo que va de semana (resumen.js)
+//   /pendientes  lo que han mandado por Tally y aún no está en el CMS, con botones
+//                para traerlo
+//   /avisos      cuántos dispositivos tienen las push activadas
+//   /chatid      el id de este chat
+//   /ayuda       la lista
+//
+// El bot es público: cualquiera puede escribirle. Por eso Telegram manda en cada
+// llamada la cabecera X-Telegram-Bot-Api-Secret-Token (TELEGRAM_WEBHOOK_SECRET, fijada
+// en setWebhook), y solo se contesta en el chat del grupo (TELEGRAM_CHAT_ID). La única
+// excepción es /chatid, que solo dice el id del chat donde se escribe: quien lo pide ya
+// lo tiene, y sirve justo para sacar el de un chat nuevo.
+//
+// Se contesta en la propia respuesta del webhook (Telegram ejecuta el método que va en
+// el cuerpo), así que no hace falta otra llamada. A Telegram se le responde siempre
+// 200, también a lo que se ignora: si no, reintenta.
+//
+// Con el webhook puesto, getUpdates deja de funcionar (error 409). Para el chat_id, /chatid.
+
+import { lanzarTraer, leerImportadas, TRAER } from "./github.js";
+import { resumenSemanal, suscriptores } from "./resumen.js";
+import { aTelegram, escapaHtml, filas } from "./telegram.js";
+import { COMPONENTES, estadoDe, vigilar } from "./vigilancia.js";
+
+const TALLY = "https://api.tally.so";
+
+// Lo que se trae al CMS, por formulario: su id de tally/formularios-creados.json y la
+// pregunta que hace de título en la lista de pendientes
+const FORMULARIOS = {
+  negocios: { id: "ZjxqQa", titulo: "Nombre del negocio", nombre: "Altas de negocio", boton: "altas" },
+  tablon: { id: "NpzGOW", titulo: "Título del anuncio", nombre: "Anuncios del tablón", boton: "anuncios" },
+};
+const MAX_LISTA = 5;
+
+const igualSeguro = (a, b) => {
+  const x = new TextEncoder().encode(a ?? "");
+  const y = new TextEncoder().encode(b ?? "");
+  return x.byteLength === y.byteLength && x.byteLength > 0 && crypto.subtle.timingSafeEqual(x, y);
+};
+
+const delGrupo = (chat, env) => String(chat?.id) === String(env.TELEGRAM_CHAT_ID).trim();
+
+// ── Los comandos ─────────────────────────────────────────────────────────────
+
+const estado = async (env) => {
+  const { github, fallo } = await vigilar(env, { enviar: false });
+  const lineas = ["🩺 <b>Estado ahora</b>"];
+  if (!github) lineas.push("⚪️ githubstatus.com no contesta");
+  for (const [id, { nombre }] of Object.entries(COMPONENTES)) {
+    const actual = github?.[id];
+    if (!actual) continue;
+    const { icono, texto } = estadoDe(actual.estado);
+    lineas.push(`${icono} ${nombre}: ${texto}${actual.incidente ? ` («${escapaHtml(actual.incidente)}»)` : ""}`);
+  }
+  lineas.push(fallo ? `🔴 La web: ${escapaHtml(fallo)}` : "🟢 La web: responde");
+  return { texto: lineas.join("\n") };
+};
+
+const visitas = async (env) => ({ texto: await resumenSemanal(env, { enCurso: true }) });
+
+const avisos = async (env) => {
+  const total = await suscriptores(env);
+  return { texto: `🔔 ${total} ${total === 1 ? "dispositivo tiene" : "dispositivos tienen"} los avisos activados` };
+};
+
+// Todas las respuestas completas de un formulario, de todas las páginas
+const respuestasDe = async (env, formId) => {
+  const todas = [];
+  let preguntas = [];
+  for (let pagina = 1; ; pagina++) {
+    const respuesta = await fetch(`${TALLY}/forms/${formId}/submissions?page=${pagina}&limit=100`, {
+      headers: { authorization: `Bearer ${env.TALLY_API_KEY}` },
+    });
+    if (!respuesta.ok) throw new Error(`Tally: HTTP ${respuesta.status}`);
+    const datos = await respuesta.json();
+    preguntas = datos.questions ?? preguntas;
+    todas.push(...datos.submissions.filter((s) => s.isCompleted));
+    if (!datos.hasMore) break;
+  }
+  return { preguntas, respuestas: todas };
+};
+
+const diaCorto = new Intl.DateTimeFormat("es-ES", { day: "numeric", month: "short", timeZone: "Europe/Madrid" });
+
+const pendientes = async (env) => {
+  const importadas = await leerImportadas(env);
+  const lineas = [];
+  const botones = [];
+  for (const [clave, formulario] of Object.entries(FORMULARIOS)) {
+    const { preguntas, respuestas } = await respuestasDe(env, formulario.id);
+    const yaHechas = new Set(importadas[clave] ?? []);
+    const faltan = respuestas.filter((s) => !yaHechas.has(s.id));
+    if (!faltan.length) continue;
+
+    const pregunta = preguntas.find((q) => q.title === formulario.titulo)?.id;
+    const lista = faltan.slice(0, MAX_LISTA).map((s) => {
+      const titulo = s.responses.find((r) => r.questionId === pregunta)?.answer || "(sin título)";
+      return `• ${diaCorto.format(new Date(s.submittedAt))} · ${escapaHtml(String(titulo).trim())}`;
+    });
+    if (faltan.length > MAX_LISTA) lista.push(`• …y ${faltan.length - MAX_LISTA} más`);
+    lineas.push(`<b>${formulario.nombre}: ${faltan.length}</b>\n${lista.join("\n")}`);
+    botones.push({ text: `📥 Traer ${formulario.boton} (${faltan.length})`, callback_data: `traer:${clave}` });
+  }
+  if (!lineas.length) return { texto: "✅ Nada pendiente: todo lo que ha llegado por los formularios está en el CMS." };
+  return {
+    texto: ["📋 <b>Sin traer al CMS</b>", ...lineas, "<i>Los mensajes de contacto no se traen, no salen aquí.</i>"].join(
+      "\n\n",
+    ),
+    botones: [botones],
+  };
+};
+
+const chatid = async (_env, mensaje) => ({ texto: `El id de este chat es <code>${mensaje.chat.id}</code>` });
+
+const AYUDA = [
+  ["estado", "Si GitHub y la web funcionan ahora"],
+  ["visitas", "Las visitas de lo que va de semana"],
+  ["pendientes", "Lo de los formularios que falta traer al CMS"],
+  ["avisos", "Cuántos tienen los avisos activados"],
+  ["chatid", "El id de este chat"],
+  ["ayuda", "Esta lista"],
+];
+// La misma lista, para el menú de Telegram (telegram-config.mjs la lee de aquí)
+export const COMANDOS = AYUDA.map(([command, description]) => ({ command, description }));
+
+const ayuda = async () => ({
+  texto: ["🤖 <b>Lo que me puedes pedir</b>", ...AYUDA.map(([c, d]) => `/${c} · ${d}`)].join("\n"),
+});
+
+const ACCIONES = { estado, visitas, pendientes, avisos, chatid, ayuda, start: ayuda };
+// Los que se contestan fuera del grupo
+const EN_CUALQUIER_CHAT = new Set(["chatid"]);
+
+// ── Las pulsaciones de botones ───────────────────────────────────────────────
+
+const pulsacion = async (env, consulta) => {
+  const responder = (text, show_alert = false) => ({
+    method: "answerCallbackQuery",
+    callback_query_id: consulta.id,
+    text,
+    show_alert,
+  });
+  if (!delGrupo(consulta.message?.chat, env)) return responder("Esto solo funciona en el grupo.");
+
+  const [accion, cual] = String(consulta.data ?? "").split(":");
+  if (accion !== "traer" || !TRAER[cual]) return responder("No sé qué hacer con este botón.");
+
+  if (!(await lanzarTraer(env, cual).catch(() => false)))
+    return responder("GitHub no ha aceptado lanzarlo. Usa el botón del CMS y mira el token de GitHub del Worker.", true);
+
+  // El aviso al grupo, para que el otro admin también se entere de que ya está pedido
+  const quien = escapaHtml(consulta.from?.first_name ?? "Alguien");
+  const { texto, ocultos } = TRAER[cual];
+  await aTelegram(env, `📥 ${quien} ha pedido traer ${texto} al CMS. En un par de minutos estarán en la lista, ${ocultos}.`);
+  return responder("📥 Hecho: en un par de minutos estará en el CMS.");
+};
+
+// ── La ruta ──────────────────────────────────────────────────────────────────
+
+const contestar = (mensaje, { texto, botones = [] }) => ({
+  method: "sendMessage",
+  chat_id: mensaje.chat.id,
+  text: texto,
+  parse_mode: "HTML",
+  link_preview_options: { is_disabled: true },
+  reply_parameters: { message_id: mensaje.message_id, allow_sending_without_reply: true },
+  ...(botones.length ? { reply_markup: { inline_keyboard: filas(botones) } } : {}),
+});
+
+const responderJson = (cuerpo) =>
+  new Response(cuerpo ? JSON.stringify(cuerpo) : "", {
+    status: 200,
+    headers: cuerpo ? { "content-type": "application/json; charset=utf-8" } : {},
+  });
+
+export const webhookTelegram = async (request, env) => {
+  if (request.method !== "POST") return new Response("método no permitido", { status: 405 });
+  if (!igualSeguro(request.headers.get("x-telegram-bot-api-secret-token"), env.TELEGRAM_WEBHOOK_SECRET))
+    return new Response("no autorizado", { status: 401 });
+
+  const update = await request.json();
+
+  if (update.callback_query) return responderJson(await pulsacion(env, update.callback_query));
+
+  const mensaje = update.message;
+  const texto = mensaje?.text?.trim() ?? "";
+  if (!texto.startsWith("/")) return responderJson(null);
+
+  // "/estado@VenialboBot argumentos" → "estado"
+  const comando = texto.slice(1).split(/\s/)[0].split("@")[0].toLowerCase();
+  const accion = ACCIONES[comando];
+  if (!accion) return responderJson(null);
+  if (!EN_CUALQUIER_CHAT.has(comando) && !delGrupo(mensaje.chat, env)) return responderJson(null);
+
+  try {
+    return responderJson(contestar(mensaje, await accion(env, mensaje)));
+  } catch (e) {
+    return responderJson(contestar(mensaje, { texto: `⚠️ No he podido: ${escapaHtml(String(e.message ?? e))}` }));
+  }
+};

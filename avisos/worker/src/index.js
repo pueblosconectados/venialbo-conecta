@@ -13,6 +13,7 @@
 //                                    grupo y ?en-curso usa lo que va de semana
 //   GET  /vigilancia     a mano      lo que vería ahora la vigilancia (con el token; en
 //                                    vigilancia.js). No avisa ni guarda nada
+//   POST /telegram       Telegram    los comandos del grupo y los botones (en comandos.js)
 //
 // Y el cron de wrangler.toml, cada 5 minutos: la vigilancia de GitHub y de la web, y
 // los lunes a las 9:00 el resumen semanal.
@@ -25,6 +26,7 @@
 import { webhookTally } from "./tally.js";
 import { enviarResumen, horaMadrid, resumenSemanal } from "./resumen.js";
 import { vigilar } from "./vigilancia.js";
+import { webhookTelegram } from "./comandos.js";
 
 // Los servicios de push conocidos. Lo demás se rechaza, para que nadie llene el KV con
 // direcciones inventadas.
@@ -168,6 +170,8 @@ export default {
           return json({ error: String(e.message ?? e) }, 502);
         }
       }
+
+      if (pathname === "/telegram") return await webhookTelegram(request, env);
 
       if (pathname === "/vigilancia") {
         if (!conToken(request, env)) return json({ error: "no autorizado" }, 401);

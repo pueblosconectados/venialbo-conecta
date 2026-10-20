@@ -20,7 +20,7 @@ const FALLOS_WEB = 2;
 const ESPERA_WEB = 15_000;
 
 // Los ids de componentes.json de githubstatus
-const COMPONENTES = {
+export const COMPONENTES = {
   vg70hn9s2tyj: { nombre: "GitHub Pages", efecto: "la web puede no verse" },
   br0l2tvcx85d: { nombre: "GitHub Actions", efecto: "lo que se guarde en el CMS no se publica" },
 };
@@ -32,7 +32,7 @@ const ESTADOS = {
   partial_outage: { texto: "caída parcial", icono: "🟠" },
   major_outage: { texto: "caída total", icono: "🔴" },
 };
-const estadoDe = (codigo) => ESTADOS[codigo] ?? { texto: codigo, icono: "⚪️" };
+export const estadoDe = (codigo) => ESTADOS[codigo] ?? { texto: codigo, icono: "⚪️" };
 
 // "1 h 20 min", "35 min"
 const duracion = (desde, hasta) => {

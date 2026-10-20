@@ -280,7 +280,7 @@ const comparacion = (ahora, antes) => {
   return `${cambio > 0 ? "↗️ +" : "↘️ "}${cambio} % respecto a la semana anterior (${n(antes)})`;
 };
 
-const suscriptores = async (env) => {
+export const suscriptores = async (env) => {
   let total = 0;
   let cursor;
   do {

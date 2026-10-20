@@ -22,6 +22,7 @@ La clave privada VAPID está en `.secretos/vapid.json`; la pública, en
 | `POST /tally` | Tally, firmado | Reenvía la respuesta de un formulario a Telegram (ver `tally/README.md`) |
 | `GET /resumen` | A mano, con el token | El resumen semanal de visitas. Solo lo enseña; `?enviar` lo manda al grupo y `?en-curso` usa lo que va de semana |
 | `GET /vigilancia` | A mano, con el token | Lo que vería ahora la vigilancia de GitHub y de la web, sin avisar ni guardar nada |
+| `POST /telegram` | Telegram, con su clave | Los comandos del grupo y los botones «📥 Traer» |
 
 Solo acepta direcciones de los servicios de push conocidos (Google, Mozilla, Apple y
 Windows), cuerpos de menos de 4 KB y, para suscribir y dar de baja, peticiones desde
@@ -125,3 +126,51 @@ Para ver qué vería ahora, sin avisar ni guardar:
 ```bash
 curl -H "Authorization: Bearer $(cat .secretos/token-avisos)" https://venialbo-avisos.venialboconecta.workers.dev/vigilancia
 ```
+
+## Los comandos del bot
+
+Escribiendo en el grupo de Telegram, el bot contesta. Está en `worker/src/comandos.js`.
+
+| Comando | Qué contesta |
+|---|---|
+| `/estado` | Si GitHub Pages, Actions y la web funcionan ahora |
+| `/visitas` | El resumen de lo que va de semana |
+| `/pendientes` | Lo que ha llegado por Tally y aún no está en el CMS, con botones «📥 Traer» |
+| `/avisos` | Cuántos dispositivos tienen las push activadas |
+| `/chatid` | El id del chat donde se escribe |
+| `/ayuda` | La lista |
+
+- **Seguridad**: el bot es público. Telegram manda en cada llamada la cabecera
+  `X-Telegram-Bot-Api-Secret-Token`, que el Worker compara con `TELEGRAM_WEBHOOK_SECRET`
+  (también en `.secretos/telegram-webhook-secret`), y solo se contesta en el chat de
+  `TELEGRAM_CHAT_ID`. La excepción es `/chatid`, que solo dice el id de donde se escribe.
+- **Los botones «📥 Traer»** lanzan la Action de traer al CMS, la misma del botón de
+  Pages CMS, y avisan al grupo de quién lo ha pedido.
+- **Con el webhook puesto, `getUpdates` deja de funcionar** (error 409). Para sacar un
+  chat_id, `/chatid`.
+- **Para configurarlo** (el webhook y el menú que sale al escribir `/`, solo en el
+  grupo), desde una terminal propia, con el token del bot:
+
+  ```bash
+  read -rsp "Token: " TELEGRAM_TOKEN; echo; export TELEGRAM_TOKEN
+  read -rp "Chat: " TELEGRAM_CHAT_ID; export TELEGRAM_CHAT_ID
+  node avisos/telegram-config.mjs --dry      # lo que haría
+  node avisos/telegram-config.mjs            # lo configura
+  node avisos/telegram-config.mjs --quitar   # lo quita (vuelve getUpdates)
+  ```
+
+  Si se añade un comando, se vuelve a pasar el script para que salga en el menú.
+
+## Traer al CMS sin pulsar nada
+
+Cuando llega una alta de negocio o un anuncio por Tally, el Worker lanza la Action de
+traerlo (`altas-negocio.yml` o `anuncios-tablon.yml`) antes de avisar, y el mensaje dice
+que ya va de camino, oculto. Si GitHub no la acepta, el mensaje lo dice y lleva un botón
+«📥 Traer al CMS» para reintentarlo. Lanzarla de más no duplica nada: trae solo lo
+pendiente, y su `concurrency` evita que dos a la vez se pisen. Está en
+`worker/src/github.js`.
+
+Necesita `GITHUB_TOKEN` en el Worker: un token de grano fino de la organización
+`pueblosconectados`, solo para `venialbo-conecta`, con **Actions: Read and write** (lanzar
+los workflows) y **Contents: Read** (leer `tally/respuestas-importadas.json` para
+`/pendientes`). `/pendientes` necesita además `TALLY_API_KEY`.

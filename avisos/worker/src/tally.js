@@ -7,29 +7,34 @@
 // en base64, en la cabecera Tally-Signature. Sin firma buena no se manda nada, para que
 // nadie pueda escribir en el grupo a través del bot.
 //
+// Las altas de negocio y los anuncios se traen solos al CMS: antes de avisar se lanza la
+// Action de traer (la del botón de Pages CMS), que los crea ocultos. Si GitHub no la
+// acepta, el mensaje lleva un botón «📥 Traer al CMS» para reintentarlo desde Telegram
+// (lo atiende comandos.js).
+//
 // Si Telegram falla se responde 500 y Tally reintenta por su cuenta (a los 5 min, 30 min,
-// 1 h, 6 h y 1 día).
+// 1 h, 6 h y 1 día). Volver a lanzar la Action no duplica nada: trae solo lo pendiente.
 
+import { lanzarTraer } from "./github.js";
 import { aTelegram, escapaHtml } from "./telegram.js";
 
 // La lista de una colección en Pages CMS. La ficha aún no existe cuando llega el aviso
 // (se crea al pulsar el botón de traer), así que se enlaza la lista, no la ficha.
 const CMS = "https://app.pagescms.org/pueblosconectados/venialbo-conecta/main/collection";
 
-// Los formularios, por su id de tally/formularios-creados.json. El recordatorio dice qué
-// botón del CMS trae la respuesta; contacto no se importa a ningún sitio.
+// Los formularios, por su id de tally/formularios-creados.json. `traer` es la Action que
+// lo pasa al CMS (ver TRAER en github.js); contacto no se importa a ningún sitio.
 const FORMULARIOS = {
   obJXzX: { titulo: "✉️ Mensaje de contacto" },
-  ZjxqQa: {
-    titulo: "🏪 Alta de negocio",
-    recordatorio: "Para pasarla al CMS: botón «Traer las altas de negocio». Entra oculta.",
-    cms: `${CMS}/negocios`,
-  },
-  NpzGOW: {
-    titulo: "📌 Anuncio para el tablón",
-    recordatorio: "Para pasarlo al CMS: botón «Traer los anuncios del tablón». Entra oculto.",
-    cms: `${CMS}/anuncios`,
-  },
+  ZjxqQa: { titulo: "🏪 Alta de negocio", traer: "negocios", oculto: "oculta", cms: `${CMS}/negocios` },
+  NpzGOW: { titulo: "📌 Anuncio para el tablón", traer: "tablon", oculto: "oculto", cms: `${CMS}/anuncios` },
+};
+
+// Lo que dice el pie según haya salido la Action de traer
+const pieDe = ({ traer, oculto }, lanzado) => {
+  if (!traer) return null;
+  if (lanzado) return `📥 Ya va de camino al CMS: en un par de minutos estará en la lista, ${oculto}.`;
+  return "⚠️ No se ha podido traer solo al CMS. Pulsa «📥 Traer al CMS» para reintentarlo.";
 };
 
 // Telegram corta en 4096 caracteres; se deja margen para la cabecera y el pie
@@ -92,19 +97,21 @@ const lineaDe = (campo) => {
 
 const formularioDe = ({ formId, formName }) => FORMULARIOS[formId] ?? { titulo: `📝 ${formName}` };
 
-// Los enlaces van como botones debajo del mensaje, no como URL sueltas en el texto
-const botonesDe = (datos) => {
-  const { cms } = formularioDe(datos);
-  return [
+// Los enlaces van como botones debajo del mensaje, no como URL sueltas en el texto. Si
+// no se pudo traer, una fila más con el botón de reintentar.
+const botonesDe = (datos, lanzado) => {
+  const { cms, traer } = formularioDe(datos);
+  const enlaces = [
     ...(cms ? [{ text: "📝 Abrir en el CMS", url: cms }] : []),
     { text: "Ver en Tally", url: `https://tally.so/forms/${datos.formId}/submissions` },
   ];
+  return traer && !lanzado ? [enlaces, [{ text: "📥 Traer al CMS", callback_data: `traer:${traer}` }]] : [enlaces];
 };
 
-const mensajeDe = (datos) => {
+const mensajeDe = (datos, lanzado) => {
   const { fields } = datos;
   const formulario = formularioDe(datos);
-  const pie = formulario.recordatorio ? [`👉 ${escapaHtml(formulario.recordatorio)}`] : [];
+  const pie = [pieDe(formulario, lanzado)].filter(Boolean);
   const campos = (fields ?? []).map(lineaDe).filter(Boolean);
   // Si aun así no cabe, se quitan campos enteros del final (cortar a ciegas podría
   // romper una etiqueta y Telegram rechazaría el mensaje)
@@ -132,6 +139,9 @@ export const webhookTally = async (request, env, json) => {
   if (evento.eventType !== "FORM_RESPONSE" || !evento.data) return json({ ignorado: true });
 
   const { data } = evento;
-  if (!(await aTelegram(env, mensajeDe(data), botonesDe(data)))) return json({ error: "telegram" }, 500);
+  const { traer } = formularioDe(data);
+  const lanzado = traer ? await lanzarTraer(env, traer).catch(() => false) : null;
+  if (!(await aTelegram(env, mensajeDe(data, lanzado), botonesDe(data, lanzado))))
+    return json({ error: "telegram" }, 500);
   return json({ ok: true });
 };
