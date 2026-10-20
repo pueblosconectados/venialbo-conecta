@@ -7,6 +7,7 @@
 //   /visitas     lo que va de semana (resumen.js)
 //   /pendientes  lo que han mandado por Tally y aún no está en el CMS, con botones
 //                para traerlo, y lo que ya está pero oculto sin revisar (revision.js)
+//   /republicar  vuelve a lanzar la publicación de la web
 //   /avisos      cuántos dispositivos tienen las push activadas
 //   /chatid      el id de este chat
 //   /ayuda       la lista
@@ -23,11 +24,11 @@
 //
 // Con el webhook puesto, getUpdates deja de funcionar (error 409). Para el chat_id, /chatid.
 
-import { lanzarTraer, leerImportadas, TRAER } from "./github.js";
+import { lanzarTraer, lanzarWorkflow, leerImportadas, PUBLICAR, TRAER } from "./github.js";
 import { resumenSemanal, suscriptores } from "./resumen.js";
 import { aTelegram, escapaHtml, filas } from "./telegram.js";
 import { COMPONENTES, estadoDe, vigilar } from "./vigilancia.js";
-import { fallandoAhora } from "./publicaciones.js";
+import { fallandoAhora, marcarReintentado, nombreDe } from "./publicaciones.js";
 import { listaSinRevisar, sinRevisar } from "./revision.js";
 
 const TALLY = "https://api.tally.so";
@@ -128,9 +129,20 @@ const pendientes = async (env) => {
   return { texto: partes.join("\n\n"), botones: filasBotones };
 };
 
+const republicar = async (env) => {
+  if (!(await lanzarWorkflow(env, PUBLICAR).catch(() => false)))
+    return { texto: "⚠️ GitHub no ha aceptado lanzar la publicación. Mira el token de GitHub del Worker." };
+  // Se puede republicar sin que haya fallado nada: el mensaje solo habla del fallo si lo hubo
+  if (await marcarReintentado(env, PUBLICAR))
+    return { texto: "🔁 Publicando la web de nuevo. La última vez falló: si vuelve a fallar, os aviso." };
+  return { texto: "🔁 Publicando la web de nuevo con lo último del CMS. Estará en un par de minutos." };
+};
+
 const chatid = async (_env, mensaje) => ({ texto: `El id de este chat es <code>${mensaje.chat.id}</code>` });
 
-const AYUDA = [
+// Separados: los que solo consultan y los que cambian algo (lanzan una Action, mandan
+// algo…). Un comando nuevo va en el grupo que le toque.
+const CONSULTAR = [
   ["estado", "Si GitHub y la web funcionan ahora"],
   ["visitas", "Las visitas de lo que va de semana"],
   ["pendientes", "Lo de los formularios sin traer o sin revisar"],
@@ -138,14 +150,24 @@ const AYUDA = [
   ["chatid", "El id de este chat"],
   ["ayuda", "Esta lista"],
 ];
-// La misma lista, para el menú de Telegram (telegram-config.mjs la lee de aquí)
-export const COMANDOS = AYUDA.map(([command, description]) => ({ command, description }));
+const HACER = [["republicar", "Vuelve a publicar la web"]];
+
+// La misma lista, para el menú de Telegram (telegram-config.mjs la lee de aquí). El menú
+// no tiene apartados: los que hacen algo van al final y con ⚡ delante.
+export const COMANDOS = [
+  ...CONSULTAR.map(([command, description]) => ({ command, description })),
+  ...HACER.map(([command, description]) => ({ command, description: `⚡ ${description}` })),
+];
 
 const ayuda = async () => ({
-  texto: ["🤖 <b>Lo que me puedes pedir</b>", ...AYUDA.map(([c, d]) => `/${c} · ${d}`)].join("\n"),
+  texto: [
+    "🤖 <b>Lo que me puedes pedir</b>",
+    ["👀 <b>Para consultar</b>", ...CONSULTAR.map(([c, d]) => `/${c} · ${d}`)].join("\n"),
+    ["⚡ <b>Hacen algo</b>", ...HACER.map(([c, d]) => `/${c} · ${d}`)].join("\n"),
+  ].join("\n\n"),
 });
 
-const ACCIONES = { estado, visitas, pendientes, avisos, chatid, ayuda, start: ayuda };
+const ACCIONES = { estado, visitas, pendientes, republicar, avisos, chatid, ayuda, start: ayuda };
 // Los que se contestan fuera del grupo
 const EN_CUALQUIER_CHAT = new Set(["chatid"]);
 
@@ -161,13 +183,23 @@ const pulsacion = async (env, consulta) => {
   if (!delGrupo(consulta.message?.chat, env)) return responder("Esto solo funciona en el grupo.");
 
   const [accion, cual] = String(consulta.data ?? "").split(":");
+  const quien = escapaHtml(consulta.from?.first_name ?? "Alguien");
+
+  // «🔁 Reintentar» de los avisos de Actions que fallan (publicaciones.js)
+  if (accion === "reintentar" && /^[a-z0-9-]+\.yml$/.test(cual ?? "")) {
+    if (!(await lanzarWorkflow(env, cual).catch(() => false)))
+      return responder("GitHub no ha aceptado lanzarlo. Mira el token de GitHub del Worker.", true);
+    await marcarReintentado(env, cual);
+    await aTelegram(env, `🔁 ${quien} ha relanzado «${escapaHtml(nombreDe(cual))}». Si vuelve a fallar, os aviso.`);
+    return responder("🔁 Lanzado de nuevo.");
+  }
+
   if (accion !== "traer" || !TRAER[cual]) return responder("No sé qué hacer con este botón.");
 
   if (!(await lanzarTraer(env, cual).catch(() => false)))
     return responder("GitHub no ha aceptado lanzarlo. Usa el botón del CMS y mira el token de GitHub del Worker.", true);
 
   // El aviso al grupo, para que el otro admin también se entere de que ya está pedido
-  const quien = escapaHtml(consulta.from?.first_name ?? "Alguien");
   const { texto, ocultos } = TRAER[cual];
   await aTelegram(env, `📥 ${quien} ha pedido traer ${texto} al CMS. En un par de minutos estarán en la lista, ${ocultos}.`);
   return responder("📥 Hecho: en un par de minutos estará en el CMS.");

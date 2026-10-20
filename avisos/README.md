@@ -132,11 +132,16 @@ curl -H "Authorization: Bearer $(cat .secretos/token-avisos)" https://venialbo-a
 
 Escribiendo en el grupo de Telegram, el bot contesta. Está en `worker/src/comandos.js`.
 
+Van en dos grupos: los que solo consultan y los que **hacen algo** (en el menú, al
+final y con ⚡ delante; en `/ayuda`, en su propio apartado). Ahora el único que hace
+algo es `/republicar`.
+
 | Comando | Qué contesta |
 |---|---|
 | `/estado` | Si GitHub Pages, Actions y la web funcionan ahora |
 | `/visitas` | El resumen de lo que va de semana |
 | `/pendientes` | Lo que ha llegado por Tally y aún no está en el CMS, con botones «📥 Traer», y lo que está en el CMS oculto sin revisar, con un botón para abrir cada ficha |
+| `/republicar` | Vuelve a lanzar la publicación de la web, para cuando ha fallado por algo pasajero |
 | `/avisos` | Cuántos dispositivos tienen las push activadas |
 | `/chatid` | El id del chat donde se escribe |
 | `/ayuda` | La lista |
@@ -195,6 +200,11 @@ durado). Mientras sigue fallando no repite. Está en `worker/src/publicaciones.j
 - **El estado** va en el KV `ESTADO`, clave `publicaciones`. La primera vez no avisa de
   lo antiguo: empieza a mirar desde ese momento.
 - **`/estado`** dice también qué workflows están fallando ahora, con un botón a cada uno.
+- **«🔁 Reintentar»**: el aviso de fallo lleva este botón, que lanza el workflow de nuevo
+  sobre `main` (como `/republicar` para la web). No repite la ejecución fallida, porque
+  esa publicaría su commit, quizá ya viejo, y podría pisar uno más nuevo. Si el
+  reintento también falla, se avisa otra vez («sigue fallando después de reintentarlo»);
+  sin reintento de por medio, no se repite.
 
 ## Recordatorio de lo oculto sin revisar
 

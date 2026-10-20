@@ -12,7 +12,10 @@
 //
 // El estado va en el KV ESTADO, clave "publicaciones":
 //   { visto: ISO de la última ejecución terminada ya mirada,
-//     fallando: { <ruta del workflow>: { nombre, desde, url } }, tokenMalo: bool }
+//     fallando: { <ruta del workflow>: { nombre, desde, url, reintentado } }, tokenMalo: bool }
+//
+// Mientras un workflow sigue fallando no se repite el aviso, salvo si alguien lo ha
+// reintentado desde Telegram (marcarReintentado) y el reintento vuelve a fallar.
 
 import { listarEjecuciones } from "./github.js";
 import { aTelegram, escapaHtml } from "./telegram.js";
@@ -36,6 +39,10 @@ const WORKFLOWS = {
     efecto: "los anuncios del tablón no se traen al CMS",
   },
 };
+
+// El nombre claro de un workflow por su fichero ("web-static-pages.yml"), para los
+// mensajes del bot
+export const nombreDe = (fichero) => WORKFLOWS[`.github/workflows/${fichero}`]?.nombre ?? fichero;
 
 // Lo que cuenta como fallo. "cancelled" no: lo produce la `concurrency` cuando un
 // guardado nuevo deja vieja la publicación anterior.
@@ -80,11 +87,29 @@ export const revisar = (anterior, ejecuciones, ahora) => {
     const yaFallaba = nuevo.fallando[e.path];
     const { nombre = e.name, efecto } = WORKFLOWS[e.path] ?? {};
 
-    if (FALLOS.has(e.conclusion) && !yaFallaba) {
+    if (FALLOS.has(e.conclusion) && yaFallaba?.reintentado) {
+      mensajes.push({
+        texto: `🔴 <b>«${escapaHtml(nombre)}» sigue fallando después de reintentarlo</b>\nToca mirar qué pasa.`,
+        botones: [
+          { text: "Ver qué ha pasado", url: e.html_url },
+          { text: "🔁 Reintentar", callback_data: `reintentar:${e.path.split("/").pop()}` },
+        ],
+      });
+      nuevo.fallando[e.path] = { ...yaFallaba, url: e.html_url, reintentado: false };
+    } else if (FALLOS.has(e.conclusion) && !yaFallaba) {
       const lineas = [`🔴 <b>Ha fallado «${escapaHtml(nombre)}»</b>`];
       if (e.display_title && e.display_title !== e.name && e.display_title !== nombre) lineas.push(`«${escapaHtml(primeraLinea(e.display_title))}»`);
       if (efecto) lineas.push(`Mientras no se arregle, ${efecto}.`);
-      mensajes.push({ texto: lineas.join("\n"), botones: [{ text: "Ver qué ha pasado", url: e.html_url }] });
+      // «Reintentar» lanza el workflow de nuevo sobre main (lo atiende comandos.js). No se
+      // repite la ejecución fallida: esa publicaría su commit, quizá ya viejo.
+      const fichero = e.path.split("/").pop();
+      mensajes.push({
+        texto: lineas.join("\n"),
+        botones: [
+          { text: "Ver qué ha pasado", url: e.html_url },
+          { text: "🔁 Reintentar", callback_data: `reintentar:${fichero}` },
+        ],
+      });
       nuevo.fallando[e.path] = { nombre, desde: Date.parse(e.updated_at), url: e.html_url };
     } else if (e.conclusion === "success" && yaFallaba) {
       mensajes.push({
@@ -98,6 +123,18 @@ export const revisar = (anterior, ejecuciones, ahora) => {
 };
 
 const leerEstado = async (env) => (await env.ESTADO.get(CLAVE, "json")) ?? { visto: null, fallando: {}, tokenMalo: false };
+
+// Apunta que alguien ha reintentado ese workflow (el fichero, "web-static-pages.yml"),
+// para avisar si el reintento también falla. Devuelve si estaba fallando; si no, no hace
+// nada.
+export const marcarReintentado = async (env, fichero) => {
+  const estado = await leerEstado(env);
+  const ruta = `.github/workflows/${fichero}`;
+  if (!estado.fallando[ruta]) return false;
+  estado.fallando[ruta].reintentado = true;
+  await env.ESTADO.put(CLAVE, JSON.stringify(estado));
+  return true;
+};
 
 // Lo que falla ahora, para /estado: [{ nombre, desde, url }]
 export const fallandoAhora = async (env) => Object.values((await leerEstado(env)).fallando);

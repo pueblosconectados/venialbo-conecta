@@ -22,16 +22,21 @@ const cabeceras = (env) => ({
   "user-agent": "venialbo-avisos",
 });
 
-// true si GitHub aceptó lanzarlo (responde 204)
-export const lanzarTraer = async (env, cual) => {
-  const { workflow } = TRAER[cual];
-  const respuesta = await fetch(`${API}/actions/workflows/${workflow}/dispatches`, {
+// Lanza un workflow sobre main (el fichero, como "web-static-pages.yml"). true si GitHub
+// lo aceptó (responde 204). Todos los del repo admiten workflow_dispatch.
+export const lanzarWorkflow = async (env, fichero, inputs = {}) => {
+  const respuesta = await fetch(`${API}/actions/workflows/${fichero}/dispatches`, {
     method: "POST",
     headers: { ...cabeceras(env), "content-type": "application/json" },
-    body: JSON.stringify({ ref: "main", inputs: { payload: "" } }),
+    body: JSON.stringify({ ref: "main", inputs }),
   });
   return respuesta.status === 204;
 };
+
+export const lanzarTraer = (env, cual) => lanzarWorkflow(env, TRAER[cual].workflow, { payload: "" });
+
+// El que publica la web
+export const PUBLICAR = "web-static-pages.yml";
 
 // { negocios: [ids...], tablon: [ids...] }, lo que ya está pasado al CMS
 export const leerImportadas = async (env) => {
