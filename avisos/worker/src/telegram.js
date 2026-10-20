@@ -4,6 +4,11 @@
 export const escapaHtml = (texto) =>
   String(texto).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
 
+// Un elemento de una lista: el título en negrita en su línea y el detalle debajo. Las
+// listas se separan con una línea en blanco (LISTA) para distinguir un elemento de otro.
+export const elemento = (titulo, detalle) => `• <b>${escapaHtml(titulo)}</b>\n   ${detalle}`;
+export const LISTA = "\n\n";
+
 // Los botones van debajo del mensaje: una fila [{ text, url }, ...] o varias
 // [[...], [...]]. Un botón con callback_data en vez de url lo atiende comandos.js.
 export const filas = (botones) => (Array.isArray(botones[0]) ? botones : [botones]).filter((f) => f.length);

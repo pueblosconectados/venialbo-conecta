@@ -141,6 +141,7 @@ algo es `/republicar`.
 | `/estado` | Si GitHub Pages, Actions y la web funcionan ahora |
 | `/visitas` | El resumen de lo que va de semana |
 | `/pendientes` | Lo que ha llegado por Tally y aún no está en el CMS, con botones «📥 Traer», y lo que está en el CMS oculto sin revisar, con un botón para abrir cada ficha |
+| `/caducan` | Los anuncios y avisos que desaparecen de la web en los próximos 7 días, con un botón para cambiar su fecha en el CMS |
 | `/republicar` | Vuelve a lanzar la publicación de la web, para cuando ha fallado por algo pasajero |
 | `/avisos` | Cuántos dispositivos tienen las push activadas |
 | `/chatid` | El id del chat donde se escribe |
@@ -221,3 +222,17 @@ Si no hay nada, no escribe. Está en `worker/src/revision.js`.
   contenido y otra el último commit de las ocultas. Por REST sería una petición por
   fichero, y el plan gratuito de Workers da 50 por ejecución. Usa el `GITHUB_TOKEN`
   (*Contents: Read*).
+
+## Lo que caduca
+
+Los anuncios del tablón y los avisos desaparecen solos de la web al pasar su fecha de
+caducidad. `/caducan` lista lo que se va en los próximos 7 días, y cada día a las 10:00
+el Worker avisa en el grupo de lo que se ve **por última vez mañana**, para que dé
+tiempo a renovarlo. Cada uno lleva un botón a su pantalla de edición en el CMS. Si no
+hay nada, no escribe. Está en `worker/src/caducidad.js`.
+
+- **Los datos** salen de la web publicada (`data/anuncios.json` y `data/avisos.json`),
+  que ya lleva la fecha calculada, también la de los anuncios de vecinos sin fecha (30
+  días, `caducidadDe` en `build-content.mjs`). No hace falta token.
+- **La fecha es el último día que se ve**: `haCaducado` (en `web-static/src/datos.ts`)
+  lo deja hasta las 23:59 de ese día.

@@ -19,7 +19,8 @@
 //
 // Y el cron de wrangler.toml, cada 5 minutos: la vigilancia de GitHub y de la web, las
 // Actions que fallen (publicaciones.js), cada día a las 10:00 lo oculto sin revisar
-// (revision.js) y los lunes a las 9:00 el resumen semanal.
+// (revision.js) y lo que está en su último día de mañana (caducidad.js), y los lunes a
+// las 9:00 el resumen semanal.
 //
 // Cada suscripción se guarda en KV con el hash de su dirección como clave y la propia
 // suscripción como metadato. Así la lista entera sale de una sola llamada a list(), sin
@@ -32,6 +33,7 @@ import { vigilar } from "./vigilancia.js";
 import { webhookTelegram } from "./comandos.js";
 import { revisarPublicaciones } from "./publicaciones.js";
 import { recordarSinRevisar, sinRevisar } from "./revision.js";
+import { recordarCaducan } from "./caducidad.js";
 
 // Los servicios de push conocidos. Lo demás se rechaza, para que nadie llene el KV con
 // direcciones inventadas.
@@ -214,6 +216,9 @@ export default {
     const esLunes = new Intl.DateTimeFormat("en-US", { timeZone: "Europe/Madrid", weekday: "short" }).format(momento) === "Mon";
     const enPunto = momento.getUTCMinutes() === 0;
     if (esLunes && horaMadrid(momento) === 9 && enPunto) ctx.waitUntil(enviarResumen(env));
-    if (horaMadrid(momento) === 10 && enPunto) ctx.waitUntil(recordarSinRevisar(env));
+    if (horaMadrid(momento) === 10 && enPunto) {
+      ctx.waitUntil(recordarSinRevisar(env));
+      ctx.waitUntil(recordarCaducan(env));
+    }
   },
 };

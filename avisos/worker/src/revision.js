@@ -13,7 +13,7 @@
 // sería una petición por fichero, y el plan gratuito da 50 por ejecución.
 
 import { graphql } from "./github.js";
-import { aTelegram, escapaHtml } from "./telegram.js";
+import { aTelegram, elemento, LISTA } from "./telegram.js";
 
 const DIAS_AVISO = 2;
 const BOT = "github-actions[bot]";
@@ -76,7 +76,7 @@ const hace = (desde, ahora) => {
 // Las líneas de la lista, y un botón por ficha para abrirla en el CMS (hasta 3)
 export const listaSinRevisar = (fichas, ahora = Date.now()) => ({
   lineas: fichas.map(
-    (f) => `• ${COLECCIONES[f.coleccion].tipo} «${escapaHtml(f.titulo)}» · ${hace(f.desde, ahora)}`,
+    (f) => elemento(f.titulo, `${COLECCIONES[f.coleccion].tipo} · llegó ${hace(f.desde, ahora)}`),
   ),
   botones: fichas.slice(0, 3).map((f) => ({
     text: `📝 ${f.titulo.length > 24 ? `${f.titulo.slice(0, 23)}…` : f.titulo}`,
@@ -94,7 +94,7 @@ export const recordarSinRevisar = async (env, { ahora = Date.now(), enviar = tru
     viejas.length === 1
       ? "Llegó por los formularios y sigue oculta sin que nadie la haya tocado:"
       : "Llegaron por los formularios y siguen ocultas sin que nadie las haya tocado:",
-    lineas.join("\n"),
+    lineas.join(LISTA),
     viejas.length === 1
       ? "<i>Repásala y márcala como visible. Si no vale, guárdala oculta o bórrala, y deja de salir aquí.</i>"
       : "<i>Repásalas y márcalas como visibles. Las que no valgan, guárdalas ocultas o bórralas, y dejan de salir aquí.</i>",

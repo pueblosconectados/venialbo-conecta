@@ -7,6 +7,7 @@
 //   /visitas     lo que va de semana (resumen.js)
 //   /pendientes  lo que han mandado por Tally y aún no está en el CMS, con botones
 //                para traerlo, y lo que ya está pero oculto sin revisar (revision.js)
+//   /caducan     lo que desaparece de la web en los próximos 7 días (caducidad.js)
 //   /republicar  vuelve a lanzar la publicación de la web
 //   /avisos      cuántos dispositivos tienen las push activadas
 //   /chatid      el id de este chat
@@ -26,10 +27,11 @@
 
 import { lanzarTraer, lanzarWorkflow, leerImportadas, PUBLICAR, TRAER } from "./github.js";
 import { resumenSemanal, suscriptores } from "./resumen.js";
-import { aTelegram, escapaHtml, filas } from "./telegram.js";
+import { aTelegram, elemento, escapaHtml, filas, LISTA } from "./telegram.js";
 import { COMPONENTES, estadoDe, vigilar } from "./vigilancia.js";
 import { fallandoAhora, marcarReintentado, nombreDe } from "./publicaciones.js";
 import { listaSinRevisar, sinRevisar } from "./revision.js";
+import { listaCaducan } from "./caducidad.js";
 
 const TALLY = "https://api.tally.so";
 
@@ -107,10 +109,10 @@ const pendientes = async (env) => {
     const pregunta = preguntas.find((q) => q.title === formulario.titulo)?.id;
     const lista = faltan.slice(0, MAX_LISTA).map((s) => {
       const titulo = s.responses.find((r) => r.questionId === pregunta)?.answer || "(sin título)";
-      return `• ${diaCorto.format(new Date(s.submittedAt))} · ${escapaHtml(String(titulo).trim())}`;
+      return elemento(String(titulo).trim(), `llegó el ${diaCorto.format(new Date(s.submittedAt))}`);
     });
     if (faltan.length > MAX_LISTA) lista.push(`• …y ${faltan.length - MAX_LISTA} más`);
-    lineas.push(`<b>${formulario.nombre}: ${faltan.length}</b>\n${lista.join("\n")}`);
+    lineas.push(`<b>${formulario.nombre}: ${faltan.length}</b>${LISTA}${lista.join(LISTA)}`);
     botones.push({ text: `📥 Traer ${formulario.boton} (${faltan.length})`, callback_data: `traer:${clave}` });
   }
   const partes = lineas.length ? ["📋 <b>Sin traer al CMS</b>", ...lineas] : ["✅ Todo lo de los formularios está ya en el CMS."];
@@ -120,7 +122,7 @@ const pendientes = async (env) => {
   const filasBotones = botones.length ? [botones] : [];
   if (fichas.length) {
     const lista = listaSinRevisar(fichas);
-    partes.push(`🕰 <b>En el CMS, ocultas sin revisar: ${fichas.length}</b>\n${lista.lineas.join("\n")}`);
+    partes.push(`🕰 <b>En el CMS, ocultas sin revisar: ${fichas.length}</b>${LISTA}${lista.lineas.join(LISTA)}`);
     filasBotones.push(...lista.botones.map((b) => [b]));
   } else {
     partes.push("✅ Nada oculto esperando revisión.");
@@ -146,6 +148,7 @@ const CONSULTAR = [
   ["estado", "Si GitHub y la web funcionan ahora"],
   ["visitas", "Las visitas de lo que va de semana"],
   ["pendientes", "Lo de los formularios sin traer o sin revisar"],
+  ["caducan", "Lo que desaparece de la web en 7 días"],
   ["avisos", "Cuántos tienen los avisos activados"],
   ["chatid", "El id de este chat"],
   ["ayuda", "Esta lista"],
@@ -167,7 +170,9 @@ const ayuda = async () => ({
   ].join("\n\n"),
 });
 
-const ACCIONES = { estado, visitas, pendientes, republicar, avisos, chatid, ayuda, start: ayuda };
+const caducan = async () => listaCaducan();
+
+const ACCIONES = { estado, visitas, pendientes, caducan, republicar, avisos, chatid, ayuda, start: ayuda };
 // Los que se contestan fuera del grupo
 const EN_CUALQUIER_CHAT = new Set(["chatid"]);
 
