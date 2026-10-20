@@ -10,6 +10,15 @@ enabled = false
 # Desde dónde se puede suscribir y dar de baja (separadas por comas)
 [vars]
 ORIGENES = "https://venialboconecta.es,http://localhost:5173"
+# Para el resumen semanal de visitas (no son secretos; el token va aparte, como
+# CF_ANALYTICS_TOKEN). El siteTag no es el token del script de la web: ver resumen.js.
+CF_ACCOUNT_ID = "5ea58d979dd87f6b54083c23e455ebb3"
+CF_SITE_TAG = "3fbf6e812f2d4a2faa040386111c5e89"
+
+# El resumen semanal, los lunes a las 9:00 de Madrid: una de las dos horas UTC, según
+# el horario de verano. El propio Worker descarta la que no toca.
+[triggers]
+crons = ["0 7 * * 1", "0 8 * * 1"]
 
 # Creado con `npx wrangler kv namespace create SUSCRIPCIONES`. En local (`npm run dev`)
 # no se usa: wrangler monta un KV de pruebas en .wrangler/.

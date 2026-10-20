@@ -10,6 +10,8 @@
 // Si Telegram falla se responde 500 y Tally reintenta por su cuenta (a los 5 min, 30 min,
 // 1 h, 6 h y 1 día).
 
+import { aTelegram, escapaHtml } from "./telegram.js";
+
 // La lista de una colección en Pages CMS. La ficha aún no existe cuando llega el aviso
 // (se crea al pulsar el botón de traer), así que se enlaza la lista, no la ficha.
 const CMS = "https://app.pagescms.org/pueblosconectados/venialbo-conecta/main/collection";
@@ -34,9 +36,6 @@ const FORMULARIOS = {
 const MAX_CAMPO = 1500;
 const MAX_MENSAJE = 4000;
 const MAX_CUERPO = 64 * 1024;
-
-const escapaHtml = (texto) =>
-  String(texto).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
 
 const recorta = (texto, max) => (texto.length > max ? `${texto.slice(0, max - 1)}…` : texto);
 
@@ -119,21 +118,6 @@ const mensajeDe = (datos) => {
   let cuantos = campos.length;
   while (cuantos > 0 && montar(cuantos).length > MAX_MENSAJE) cuantos--;
   return montar(cuantos);
-};
-
-const aTelegram = async (env, texto, botones) => {
-  const respuesta = await fetch(`https://api.telegram.org/bot${env.TELEGRAM_TOKEN}/sendMessage`, {
-    method: "POST",
-    headers: { "content-type": "application/json" },
-    body: JSON.stringify({
-      chat_id: env.TELEGRAM_CHAT_ID,
-      text: texto,
-      parse_mode: "HTML",
-      link_preview_options: { is_disabled: true },
-      reply_markup: { inline_keyboard: [botones] },
-    }),
-  });
-  return respuesta.ok;
 };
 
 export const webhookTally = async (request, env, json) => {

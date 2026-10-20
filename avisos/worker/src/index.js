@@ -8,6 +8,11 @@
 //   POST /borrar         la Action   quita las que el servicio de push da por muertas
 //   POST /tally          Tally       una respuesta de formulario, que va a Telegram
 //                                    (en tally.js)
+//   GET  /resumen        a mano      el resumen semanal de visitas (con el token; en
+//                                    resumen.js). Solo lo enseña: ?enviar lo manda al
+//                                    grupo y ?en-curso usa lo que va de semana
+//
+// Y los lunes, el cron de wrangler.toml manda el resumen semanal.
 //
 // Cada suscripción se guarda en KV con el hash de su dirección como clave y la propia
 // suscripción como metadato. Así la lista entera sale de una sola llamada a list(), sin
@@ -15,6 +20,7 @@
 // No se guardan IPs, fechas ni nada que no sea la suscripción.
 
 import { webhookTally } from "./tally.js";
+import { enviarResumen, horaMadrid, resumenSemanal } from "./resumen.js";
 
 // Los servicios de push conocidos. Lo demás se rechaza, para que nadie llene el KV con
 // direcciones inventadas.
@@ -143,10 +149,33 @@ export default {
 
       if (pathname === "/tally") return await webhookTally(request, env, json);
 
+      if (pathname === "/resumen") {
+        if (!conToken(request, env)) return json({ error: "no autorizado" }, 401);
+        if (metodo !== "GET") return json({ error: "método no permitido" }, 405);
+        const { searchParams } = new URL(request.url);
+        const opciones = { enCurso: searchParams.has("en-curso") };
+        try {
+          const texto = searchParams.has("enviar")
+            ? await enviarResumen(env, opciones)
+            : await resumenSemanal(env, opciones);
+          return json({ enviado: searchParams.has("enviar"), texto });
+        } catch (e) {
+          // Cloudflare o Telegram fallaron: aquí sí se dice cuál, que es quien lo lanza a mano
+          return json({ error: String(e.message ?? e) }, 502);
+        }
+      }
+
       return json({ error: "no existe" }, 404);
     } catch {
       // JSON roto o cuerpo demasiado grande. Sin detalles: no hay registros que mirar
       return json({ error: "petición no válida" }, 400);
     }
+  },
+
+  // El cron salta a las 7:00 y a las 8:00 UTC, porque las 9:00 de Madrid son una u otra
+  // según el horario de verano. Solo sigue el que cae a las 9:00.
+  async scheduled(controller, env, ctx) {
+    if (horaMadrid(new Date(controller.scheduledTime)) !== 9) return;
+    ctx.waitUntil(enviarResumen(env));
   },
 };
