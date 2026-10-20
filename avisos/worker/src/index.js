@@ -11,8 +11,11 @@
 //   GET  /resumen        a mano      el resumen semanal de visitas (con el token; en
 //                                    resumen.js). Solo lo enseña: ?enviar lo manda al
 //                                    grupo y ?en-curso usa lo que va de semana
+//   GET  /vigilancia     a mano      lo que vería ahora la vigilancia (con el token; en
+//                                    vigilancia.js). No avisa ni guarda nada
 //
-// Y los lunes, el cron de wrangler.toml manda el resumen semanal.
+// Y el cron de wrangler.toml, cada 5 minutos: la vigilancia de GitHub y de la web, y
+// los lunes a las 9:00 el resumen semanal.
 //
 // Cada suscripción se guarda en KV con el hash de su dirección como clave y la propia
 // suscripción como metadato. Así la lista entera sale de una sola llamada a list(), sin
@@ -21,6 +24,7 @@
 
 import { webhookTally } from "./tally.js";
 import { enviarResumen, horaMadrid, resumenSemanal } from "./resumen.js";
+import { vigilar } from "./vigilancia.js";
 
 // Los servicios de push conocidos. Lo demás se rechaza, para que nadie llene el KV con
 // direcciones inventadas.
@@ -165,6 +169,12 @@ export default {
         }
       }
 
+      if (pathname === "/vigilancia") {
+        if (!conToken(request, env)) return json({ error: "no autorizado" }, 401);
+        if (metodo !== "GET") return json({ error: "método no permitido" }, 405);
+        return json(await vigilar(env, { enviar: false }));
+      }
+
       return json({ error: "no existe" }, 404);
     } catch {
       // JSON roto o cuerpo demasiado grande. Sin detalles: no hay registros que mirar
@@ -172,10 +182,13 @@ export default {
     }
   },
 
-  // El cron salta a las 7:00 y a las 8:00 UTC, porque las 9:00 de Madrid son una u otra
-  // según el horario de verano. Solo sigue el que cae a las 9:00.
+  // Un solo cron, cada 5 minutos (el plan gratuito da pocos por cuenta). La vigilancia
+  // corre siempre; el resumen, solo en el de las 9:00 en punto de un lunes en Madrid.
+  // Así tampoco hay que tocar nada con el cambio de hora.
   async scheduled(controller, env, ctx) {
-    if (horaMadrid(new Date(controller.scheduledTime)) !== 9) return;
-    ctx.waitUntil(enviarResumen(env));
+    const momento = new Date(controller.scheduledTime);
+    ctx.waitUntil(vigilar(env));
+    const esLunes = new Intl.DateTimeFormat("en-US", { timeZone: "Europe/Madrid", weekday: "short" }).format(momento) === "Mon";
+    if (esLunes && horaMadrid(momento) === 9 && momento.getUTCMinutes() === 0) ctx.waitUntil(enviarResumen(env));
   },
 };

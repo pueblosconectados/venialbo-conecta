@@ -21,6 +21,7 @@ La clave privada VAPID está en `.secretos/vapid.json`; la pública, en
 | `POST /borrar` | La Action, con el token | Quita las que den `404`/`410`: `{"endpoints": [...]}` |
 | `POST /tally` | Tally, firmado | Reenvía la respuesta de un formulario a Telegram (ver `tally/README.md`) |
 | `GET /resumen` | A mano, con el token | El resumen semanal de visitas. Solo lo enseña; `?enviar` lo manda al grupo y `?en-curso` usa lo que va de semana |
+| `GET /vigilancia` | A mano, con el token | Lo que vería ahora la vigilancia de GitHub y de la web, sin avisar ni guardar nada |
 
 Solo acepta direcciones de los servicios de push conocidos (Google, Mozilla, Apple y
 Windows), cuerpos de menos de 4 KB y, para suscribir y dar de baja, peticiones desde
@@ -83,8 +84,9 @@ una de cada cuatro cargas según los Core Web Vitals de Google. Si va bien, no d
   en `.secretos/cf-analytics-token`. La cuenta y el `CF_SITE_TAG` van en
   `wrangler.toml`. El siteTag **no es** el token del script de la web: se saca de la API
   agrupando por `siteTag` y `requestHost`.
-- **La hora**: el cron salta a las 7:00 y a las 8:00 UTC, y el Worker solo sigue con el
-  que cae a las 9:00 en Madrid. Así no hay que tocarlo con el cambio de hora.
+- **La hora**: el cron del Worker salta cada 5 minutos (ver la vigilancia, abajo) y el
+  resumen solo sale en el de las 9:00 en punto de un lunes en Madrid. Así no hay que
+  tocarlo con el cambio de hora.
 - **Para probarlo** sin esperar al lunes:
 
   ```bash
@@ -96,3 +98,30 @@ una de cada cuatro cargas según los Core Web Vitals de Google. Si va bien, no d
 - **Las cifras son aproximadas**: quien lleva bloqueador no cuenta. WhatsApp y muchas
   apps no dicen de dónde viene la visita, así que eso sale como «Directo, WhatsApp u
   otras apps».
+
+## La vigilancia de GitHub y de la web
+
+Cada 5 minutos el Worker mira en githubstatus.com si funcionan **GitHub Pages**, que
+sirve la web, y **GitHub Actions**, que publica cada guardado del CMS. También pide
+`https://venialboconecta.es/` para ver si responde. Avisa al grupo de Telegram solo
+cuando algo **cambia**: al caer (🟡 lento, 🟠 caída parcial, 🔴 caída total, con el
+título del incidente), si empeora o mejora, y al volver (🟢, con cuánto ha durado).
+Mientras dura, no repite. Está en `worker/src/vigilancia.js`.
+
+- **La web** solo da aviso tras 2 fallos seguidos (10 minutos), para no saltar por un
+  corte suelto. Esto detecta lo que githubstatus no sabe: el dominio, el DNS o el
+  certificado.
+- **El estado** de la vez anterior va en el KV `ESTADO`, aparte de `SUSCRIPCIONES`:
+  el resumen cuenta todas las claves de ese KV como suscriptores y el envío push las
+  recorre. Solo se escribe cuando cambia algo.
+- **Si githubstatus no contesta**, esa vuelta no se compara nada. **Si Telegram
+  falla**, no se guarda el estado y se vuelve a intentar a los 5 minutos.
+- **Un solo cron** (`*/5 * * * *`) para todo, porque el plan gratuito da pocos por
+  cuenta. Son 288 ejecuciones al día, muy lejos del límite.
+- **Si cae Cloudflare**, cae también el Worker que avisa. Ese caso no está cubierto.
+
+Para ver qué vería ahora, sin avisar ni guardar:
+
+```bash
+curl -H "Authorization: Bearer $(cat .secretos/token-avisos)" https://venialbo-avisos.venialboconecta.workers.dev/vigilancia
+```

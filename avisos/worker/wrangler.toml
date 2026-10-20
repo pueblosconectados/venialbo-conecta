@@ -15,13 +15,21 @@ ORIGENES = "https://venialboconecta.es,http://localhost:5173"
 CF_ACCOUNT_ID = "5ea58d979dd87f6b54083c23e455ebb3"
 CF_SITE_TAG = "3fbf6e812f2d4a2faa040386111c5e89"
 
-# El resumen semanal, los lunes a las 9:00 de Madrid: una de las dos horas UTC, según
-# el horario de verano. El propio Worker descarta la que no toca.
+# Cada 5 minutos: la vigilancia de GitHub y de la web, y el lunes a las 9:00 de Madrid
+# el resumen semanal (lo decide el propio Worker, ver scheduled en index.js). Uno solo,
+# porque el plan gratuito da pocos crons por cuenta.
 [triggers]
-crons = ["0 7 * * 1", "0 8 * * 1"]
+crons = ["*/5 * * * *"]
 
 # Creado con `npx wrangler kv namespace create SUSCRIPCIONES`. En local (`npm run dev`)
 # no se usa: wrangler monta un KV de pruebas en .wrangler/.
 [[kv_namespaces]]
 binding = "SUSCRIPCIONES"
 id = "260e7b45d17b4b32858282d641f09b2e"
+
+# El estado de la vigilancia (si GitHub o la web estaban caídos la vez anterior). Aparte
+# de SUSCRIPCIONES, que el resumen cuenta y el envío push recorre enteras. Creado con
+# `npx wrangler kv namespace create ESTADO`.
+[[kv_namespaces]]
+binding = "ESTADO"
+id = "4d09cf76e6c64019bb1a7ff0a2a6fe15"
