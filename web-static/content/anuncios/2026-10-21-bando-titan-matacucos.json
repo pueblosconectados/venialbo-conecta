@@ -1,0 +1,15 @@
+{
+  "titulo": "Bando Titan Matacucos",
+  "tipo": "informacion",
+  "descripcion": "Calles cortadas al tráfico durante la prueba deportiva",
+  "imagen_url": "/media/imagenes/bando-titan-matacucos.jpg",
+  "documentos": [
+    {
+      "archivo": "/media/documentos/bando-titan-matacucos.pdf",
+      "titulo": "Bando del Ayuntamiento con motivo de la Titán Matacucos"
+    }
+  ],
+  "fecha_publicacion": "2026-10-21T12:41",
+  "fecha_caducidad": "2026-10-25",
+  "activo": true
+}
