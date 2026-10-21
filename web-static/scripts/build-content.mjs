@@ -579,7 +579,7 @@ const anunciosDeVecinos = await Promise.all(
 // con los anuncios, con las cifras agrupadas en `casa`. No caducan: tardan meses en
 // venderse y se quedan hasta que en el CMS se pone el día («Vendida o alquilada el»).
 // Desde entonces salen DIAS_VENDIDA días con el sello y luego se van solas.
-const DIAS_VENDIDA = 15;
+const DIAS_VENDIDA = 7;
 // Las cifras pueden llegar como texto; lo que no sea un número se deja vacío en vez de
 // pintar «NaN €»
 const numero = (valor) => {

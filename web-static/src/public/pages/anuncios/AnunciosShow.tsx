@@ -199,12 +199,27 @@ export function AnunciosShow() {
       {/* Quien publicó el anuncio no puede quitarlo (no hay cuentas): lo pide por el
           formulario de contacto, que lleva el anuncio en el campo oculto "anuncio" para
           que en el correo se sepa cuál es. Lo retira a mano quien lleve el CMS. Los de
-          Información los ponemos nosotros: ahí no hay nadie que tenga que pedirlo. */}
-      {a.tipo !== INFORMACION && (
+          Información los ponemos nosotros: ahí no hay nadie que tenga que pedirlo. Una
+          casa no se quita al momento: se marca como vendida y sale así una semana
+          (DIAS_VENDIDA en build-content.mjs), y conviene que el dueño lo sepa. */}
+      {esCasa && (
         <Typography.Paragraph style={{ marginTop: 24, marginBottom: 0, color: colors.marronSuave }}>
-          {esCasa
-            ? `¿Ya está ${selloVendida(a.tipo).toLowerCase()}?`
-            : "¿Ya no hace falta este anuncio?"}{" "}
+          ¿Ya está {selloVendida(a.tipo).toLowerCase()}?{" "}
+          <a
+            href={`${FORMULARIOS.contacto}?anuncio=${encodeURIComponent(`${a.titulo} (${a.id})`)}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            style={{ color: colors.musgo, fontWeight: 500 }}
+          >
+            Avísanos
+          </a>{" "}
+          y la marcamos como {selloVendida(a.tipo).toLowerCase()}: se queda una semana con
+          ese cartel y después se quita sola.
+        </Typography.Paragraph>
+      )}
+      {a.tipo !== INFORMACION && !esCasa && (
+        <Typography.Paragraph style={{ marginTop: 24, marginBottom: 0, color: colors.marronSuave }}>
+          ¿Ya no hace falta este anuncio?{" "}
           <a
             href={`${FORMULARIOS.contacto}?anuncio=${encodeURIComponent(`${a.titulo} (${a.id})`)}`}
             target="_blank"

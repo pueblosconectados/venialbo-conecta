@@ -32,7 +32,7 @@ export type DatosCasa = {
   superficie?: number | null;
   habitaciones?: number | null;
   banos?: number | null;
-  /** Desde qué día está vendida o alquilada: sale con el sello y se va a los 15 días. */
+  /** Desde qué día está vendida o alquilada: sale con el sello y se va a los 7 días. */
   vendida?: string | null;
   /** El anuncio en Idealista, Fotocasa, Facebook… Ya viene completo de build-content. */
   enlace?: string | null;

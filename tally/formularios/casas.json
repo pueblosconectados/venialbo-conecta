@@ -1,6 +1,6 @@
 {
   "titulo": "Anunciar una casa en venta o alquiler",
-  "intro": "Rellena esto y publicamos tu casa en el tablón de la web. No caduca: sigue publicada hasta que nos avises de que se ha vendido o alquilado.",
+  "intro": "Rellena esto y publicamos tu casa en el tablón de la web. No caduca: sigue publicada hasta que nos avises de que se ha vendido o alquilado. Entonces sale una semana con el cartel «Vendida» o «Alquilada», para que quien la estaba mirando lo sepa, y después se quita.",
   "nota": "Cómo tratamos tus datos lo explicamos en <a href=\"https://venialboconecta.es/privacidad\">venialboconecta.es/privacidad</a>.",
   "aceptar": "He leído y acepto la política de privacidad",
   "campos": [

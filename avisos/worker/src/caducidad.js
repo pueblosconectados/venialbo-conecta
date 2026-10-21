@@ -53,7 +53,7 @@ export const caducables = async (ahora = new Date()) => {
 
 // La pantalla de edición en Pages CMS, para cambiar la fecha y que siga. El fichero se
 // llama como el id. Las casas salen en data/anuncios.json, pero en el CMS tienen su
-// colección (solo caducan las vendidas, a los 15 días)
+// colección (solo caducan las vendidas, a los 7 días)
 const enlaceCms = ({ recurso, id, casa }) => {
   const coleccion = casa ? "casas" : recurso;
   return `${CMS}/${coleccion}/edit/${encodeURIComponent(`web-static/content/${coleccion}/${id}.json`)}`;

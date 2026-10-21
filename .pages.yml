@@ -1091,7 +1091,7 @@ content:
   # Las casas en venta y alquiler. En la web salen dentro del Tablón, en su propio
   # apartado y con la misma dirección (/tablon/<id>): build-content.mjs las junta con
   # los anuncios. Van aparte en el CMS para que un anuncio de un sofá no arrastre los
-  # campos de precio, metros y demás. No caducan: se van a los 15 días de «Vendida».
+  # campos de precio, metros y demás. No caducan: se van a los 7 días de «Vendida».
   - name: casas
     label: Casas en venta y alquiler
     description: >-
@@ -1192,7 +1192,7 @@ content:
         label: Vendida o alquilada el
         description: >-
           Cuando se venda o se alquile, pon el día. Desde entonces sale con el sello
-          «Vendida» o «Alquilada» durante 15 días y después desaparece sola. Mientras
+          «Vendida» o «Alquilada» durante 7 días y después desaparece sola. Mientras
           esté vacío, no se quita nunca.
         type: date
         # Sin esto, Pages CMS pone la fecha de hoy al abrir la ficha y la guarda
