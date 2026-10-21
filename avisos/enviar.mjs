@@ -44,9 +44,15 @@ const horaMadrid = Number(
   new Intl.DateTimeFormat("es-ES", { timeZone: "Europe/Madrid", hour: "numeric", hourCycle: "h23" }).format(ahora),
 );
 const hoyMadrid = new Intl.DateTimeFormat("sv-SE", { timeZone: "Europe/Madrid" }).format(ahora);
+// "2026-10-25 14:05", para comparar con las caducidades que llevan hora
+const ahoraMadrid = new Intl.DateTimeFormat("sv-SE", {
+  timeZone: "Europe/Madrid", dateStyle: "short", timeStyle: "short",
+}).format(ahora);
 
-// Las fechas del CMS van sin hora ("2026-10-25"): valen hasta el final de ese día
-const vigenteHasta = (fecha) => !fecha || fecha.slice(0, 10) >= hoyMadrid;
+// Las fechas del CMS van sin hora ("2026-10-25") y valen hasta el final de ese día;
+// los anuncios con «Hasta las» la llevan ("2026-10-25T14:00") y valen hasta esa hora
+const vigenteHasta = (fecha) =>
+  !fecha || (fecha.length > 10 ? fecha.replace("T", " ").slice(0, 16) > ahoraMadrid : fecha.slice(0, 10) >= hoyMadrid);
 
 // ── Qué se avisa ────────────────────────────────────────────────────────────
 

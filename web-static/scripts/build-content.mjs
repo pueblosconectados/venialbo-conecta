@@ -555,8 +555,13 @@ const sumarDias = (dia, dias) => {
   fecha.setUTCDate(fecha.getUTCDate() + dias);
   return fecha.toISOString().slice(0, 10);
 };
+// Con «Hasta las», la caducidad lleva hora ("2026-10-25T14:00", hora local de quien
+// visita); sin ella sigue siendo el día entero. La hora sin fecha no se usa.
 const caducidadDe = (a) => {
-  if (a.fecha_caducidad || a.tipo === "informacion") return a.fecha_caducidad || null;
+  const hora = leerHora(a.hora_caducidad, `anuncio ${a.id}`);
+  if (hora && !a.fecha_caducidad) console.warn(`  ⚠ anuncio ${a.id}: tiene «Hasta las» pero no «Visible hasta», se ignora la hora`);
+  if (a.fecha_caducidad) return hora ? `${a.fecha_caducidad.slice(0, 10)}T${hora}` : a.fecha_caducidad;
+  if (a.tipo === "informacion") return null;
   const caduca = sumarDias(a.fecha_publicacion ?? "", DIAS_ANUNCIO);
   if (!caduca) return null;
   console.warn(`  ⚠ anuncio ${a.id}: sin fecha de caducidad, caduca el ${caduca}`);

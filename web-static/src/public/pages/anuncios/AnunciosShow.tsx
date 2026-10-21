@@ -105,7 +105,9 @@ export function AnunciosShow() {
       <NoDisponible
         icono={<ClockCircleOutlined style={{ color: colors.dorado }} />}
         titulo="Anuncio caducado"
-        texto={`Este anuncio estuvo disponible hasta el ${formatFecha(a.fecha_caducidad)}.`}
+        texto={`Este anuncio estuvo disponible hasta el ${formatFecha(a.fecha_caducidad)}${
+          a.fecha_caducidad.length > 10 ? ` a las ${a.fecha_caducidad.slice(11, 16)}` : ""
+        }.`}
       />
     );
 
