@@ -34,6 +34,18 @@ actions:
         visibles. Las fotos no se traen, se miran en Tally y se suben a mano.
       button: Traer los anuncios
 
+  - name: casas
+    label: Traer las casas en venta y alquiler
+    workflow: casas.yml
+    ref: current
+    confirm:
+      title: ¿Traer las casas pendientes?
+      message: >-
+        Se crean las casas que han mandado los vecinos por su formulario, siempre
+        ocultas: no se publica nada hasta que las repases aquí y las marques como
+        visibles. Las fotos no se traen, se miran en Tally y se suben a mano.
+      button: Traer las casas
+
   - name: imagenes-huerfanas-pr
     label: Proponer borrar las imágenes sin usar
     workflow: imagenes-huerfanas-pr.yml
@@ -963,7 +975,8 @@ content:
         label: Tipo
         description: >-
           «Información» sale arriba, en su propio apartado: lo útil que la gente tiene que
-          poder consultar. Los demás tipos son anuncios de vecinos.
+          poder consultar. Los demás tipos son anuncios de vecinos. Las casas no van
+          aquí: tienen su sitio en «Casas en venta y alquiler».
         type: select
         required: true
         options:
@@ -1051,6 +1064,120 @@ content:
           Pasado este día desaparece solo de la web. En Información, déjala vacía para
           que no caduque nunca. En los anuncios de vecinos, si se deja vacía, caduca a
           los 30 días de publicarse.
+        type: date
+        options:
+          format: yyyy-MM-dd
+      - name: activo
+        label: Visible en la web
+        type: boolean
+        default: true
+
+  # Las casas en venta y alquiler. En la web salen dentro del Tablón, en su propio
+  # apartado y con la misma dirección (/tablon/<id>): build-content.mjs las junta con
+  # los anuncios. Van aparte en el CMS para que un anuncio de un sofá no arrastre los
+  # campos de precio, metros y demás. No caducan: se van a los 15 días de «Vendida».
+  - name: casas
+    label: Casas en venta y alquiler
+    description: >-
+      Salen en el Tablón, en su propio apartado, y no caducan: siguen hasta que pongas
+      el día en que se vendió o se alquiló. A los 3 meses el bot pregunta en el grupo
+      si siguen.
+    type: collection
+    path: web-static/content/casas
+    subfolders: false
+    format: json
+    filename: "{year}-{month}-{day}-{primary}.json"
+    view:
+      primary: titulo
+      fields: [titulo, tipo, precio, vendida, activo]
+      sort: [fecha_publicacion, titulo]
+      search: [titulo]
+      default:
+        sort: fecha_publicacion
+        order: desc
+    fields:
+      - name: titulo
+        label: Título
+        type: string
+        required: true
+      - name: tipo
+        label: Venta o alquiler
+        type: select
+        required: true
+        default: casa_venta
+        options:
+          values:
+            - name: casa_venta
+              label: Se vende
+            - name: casa_alquiler
+              label: Se alquila
+      - name: precio
+        label: Precio (€)
+        description: Sin puntos ni €, por ejemplo 45000. En alquiler, lo que se paga al mes.
+        type: number
+      - name: superficie
+        label: Superficie (m²)
+        type: number
+      - name: habitaciones
+        label: Habitaciones
+        type: number
+      - name: banos
+        label: Baños
+        type: number
+      - name: descripcion
+        label: Descripción
+        type: rich-text
+        options:
+          format: markdown
+      - name: contacto
+        label: Contacto
+        description: Teléfono, email o cómo localizar a quien la vende.
+        type: string
+      - name: enlace
+        label: Anuncio en otra web
+        description: >-
+          Si la casa ya está en Idealista, Fotocasa, Facebook… pega aquí la dirección y
+          en la ficha sale un botón «Ver el anuncio en…».
+        type: string
+      - name: imagen_url
+        label: Foto principal
+        description: 'La que sale en el tablón y arriba en la ficha. Si al subirla da error 413, pesa más de unos 3 MB: redúcela antes (por ejemplo, mándatela por WhatsApp y guarda la que llega).'
+        type: image
+        options:
+          media: imagenes
+      - name: galeria
+        label: Más fotos
+        description: >-
+          Hasta 3 más. Salen debajo de la descripción. Cada foto que se sube aquí se
+          queda en el repositorio para siempre; si hay muchas, mejor el enlace a otra web.
+        type: object
+        list:
+          max: 3
+        fields:
+          - name: imagen
+            label: Foto
+            description: 'Si al subirla da error 413, pesa más de unos 3 MB: redúcela antes (por ejemplo, mándatela por WhatsApp y guarda la que llega).'
+            type: image
+            required: true
+            options:
+              media: imagenes
+          - name: pie
+            label: Pie de foto
+            description: Opcional. Lo que se lee al ampliarla.
+            type: string
+      - name: fecha_publicacion
+        label: Fecha de publicación
+        type: date
+        required: true
+        options:
+          time: true
+          format: yyyy-MM-dd'T'HH:mm
+      - name: vendida
+        label: Vendida o alquilada el
+        description: >-
+          Cuando se venda o se alquile, pon el día. Desde entonces sale con el sello
+          «Vendida» o «Alquilada» durante 15 días y después desaparece sola. Mientras
+          esté vacío, no se quita nunca.
         type: date
         options:
           format: yyyy-MM-dd

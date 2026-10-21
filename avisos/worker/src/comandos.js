@@ -44,6 +44,7 @@ const TALLY = "https://api.tally.so";
 const FORMULARIOS = {
   negocios: { id: "ZjxqQa", titulo: "Nombre del negocio", nombre: "Altas de negocio", boton: "altas" },
   tablon: { id: "NpzGOW", titulo: "Título del anuncio", nombre: "Anuncios del tablón", boton: "anuncios" },
+  casas: { id: "kbd67J", titulo: "Título del anuncio", nombre: "Casas en venta y alquiler", boton: "casas" },
 };
 const MAX_LISTA = 5;
 

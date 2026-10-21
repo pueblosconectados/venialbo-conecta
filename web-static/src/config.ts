@@ -9,6 +9,7 @@ export const imgUrl = (path?: string | null): string | undefined =>
 export const FORMULARIOS = {
   contacto: "https://tally.so/r/obJXzX",
   tablon: "https://tally.so/r/NpzGOW",
+  casas: "https://tally.so/r/kbd67J",
   negocios: "https://tally.so/r/ZjxqQa",
 };
 

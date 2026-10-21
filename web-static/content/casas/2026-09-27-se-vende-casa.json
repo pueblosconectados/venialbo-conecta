@@ -1,0 +1,14 @@
+{
+  "titulo": "Se vende casa",
+  "tipo": "casa_venta",
+  "precio": 180000,
+  "superficie": 155,
+  "habitaciones": 3,
+  "banos": 2,
+  "descripcion": "Casa en venta de 155 m2, amueblada, en perfecto estado, 3 habitaciones, 2 baños, garaje, parcela, porche, despensas, calefacción a gasoil. 180.000€.",
+  "contacto": "Por WhatsApp al 646278130",
+  "enlace": "https://www.facebook.com/nuria.martinfernandez.14/posts/pfbid029UdekVEwEA31o9KLAenS37FWxmv72ZotQCkjzAanyz4VTXeBLoJr6vBiWdN2Twobl",
+  "imagen_url": "/media/imagenes/782582324290314018132060186256871439030447933n.jpg",
+  "fecha_publicacion": "2026-09-27T11:09",
+  "activo": true
+}

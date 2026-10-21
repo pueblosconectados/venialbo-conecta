@@ -28,6 +28,7 @@ const FORMULARIOS = {
   obJXzX: { titulo: "✉️ Mensaje de contacto" },
   ZjxqQa: { titulo: "🏪 Alta de negocio", traer: "negocios", oculto: "oculta", cms: `${CMS}/negocios` },
   NpzGOW: { titulo: "📌 Anuncio para el tablón", traer: "tablon", oculto: "oculto", cms: `${CMS}/anuncios` },
+  kbd67J: { titulo: "🏠 Casa en venta o alquiler", traer: "casas", oculto: "oculta", cms: `${CMS}/casas` },
 };
 
 // Lo que dice el pie según haya salido la Action de traer

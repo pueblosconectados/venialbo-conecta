@@ -41,7 +41,7 @@ export const caducables = async (ahora = new Date()) => {
         .filter((f) => typeof f.fecha_caducidad === "string" && f.fecha_caducidad)
         .map((f) => {
           const ultimoDia = f.fecha_caducidad.slice(0, 10);
-          return { tipo, recurso, id: f.id, titulo: String(f.titulo ?? f.id).trim(), ultimoDia, dias: diasEntre(hoy, ultimoDia) };
+          return { tipo: f.casa ? "Casa vendida" : tipo, recurso, id: f.id, casa: Boolean(f.casa), titulo: String(f.titulo ?? f.id).trim(), ultimoDia, dias: diasEntre(hoy, ultimoDia) };
         });
     }),
   );
@@ -52,9 +52,12 @@ export const caducables = async (ahora = new Date()) => {
 };
 
 // La pantalla de edición en Pages CMS, para cambiar la fecha y que siga. El fichero se
-// llama como el id.
-const enlaceCms = ({ recurso, id }) =>
-  `${CMS}/${recurso}/edit/${encodeURIComponent(`web-static/content/${recurso}/${id}.json`)}`;
+// llama como el id. Las casas salen en data/anuncios.json, pero en el CMS tienen su
+// colección (solo caducan las vendidas, a los 15 días)
+const enlaceCms = ({ recurso, id, casa }) => {
+  const coleccion = casa ? "casas" : recurso;
+  return `${CMS}/${coleccion}/edit/${encodeURIComponent(`web-static/content/${coleccion}/${id}.json`)}`;
+};
 
 const lineas = (fichas) =>
   fichas.map(

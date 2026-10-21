@@ -1,6 +1,6 @@
 # tally — los formularios, definidos aquí y creados con su API
 
-Los tres formularios del backlog (contacto, tablón y alta de negocios) se definen en
+Los cuatro formularios (contacto, tablón, casas en venta y alquiler, y alta de negocios) se definen en
 `formularios/*.json` y se crean o actualizan en Tally con `crear-formularios.mjs`.
 
 La gracia de hacerlo así y no a mano: el formulario de alta de negocios tiene catorce
@@ -12,7 +12,7 @@ pinchar por la interfaz ni acordarse de qué había.
 
 ```bash
 node tally/crear-formularios.mjs --dry        # enseña el JSON que se enviaría
-node tally/crear-formularios.mjs              # crea (o actualiza) los tres, en borrador
+node tally/crear-formularios.mjs              # crea (o actualiza) todos, en borrador
 node tally/crear-formularios.mjs contacto     # solo uno
 node tally/crear-formularios.mjs --publicar   # publicados en vez de borrador
 ```
@@ -23,7 +23,7 @@ identificadores no son secretos y son lo que enlaza cada definición con su form
 
 ## Pasar las respuestas al CMS
 
-Dos scripts, uno por formulario, con las mismas órdenes. Lo que comparten (la clave, los
+Tres scripts, uno por formulario, con las mismas órdenes. Lo que comparten (la clave, los
 uuid, las llamadas y la cuenta de lo ya importado) vive en `comun.mjs`.
 
 ```bash
@@ -33,7 +33,12 @@ node tally/importar-negocios.mjs --todas         # todas las que falten
 node tally/importar-negocios.mjs WJdlvAa --forzar  # reescribe una ficha que ya existía
 
 node tally/importar-tablon.mjs --todas           # lo mismo para el tablón
+node tally/importar-casas.mjs --todas            # y para las casas
 ```
+
+El de casas es el del tablón con sus campos (precio, metros, habitaciones, baños y el
+enlace a otra web, que llegan ya cada uno en su sitio) y sin caducidad: escribe en
+`web-static/content/casas`, y la casa se quita del tablón cuando se vende.
 
 El del tablón tiene tres cosas propias:
 
@@ -56,10 +61,10 @@ alguien la repase en el CMS y marque *Visible en la web*. Esa revisión es el pu
 todo esto: lo manda un vecino, y alguien tiene que leerlo antes de publicarlo con su
 teléfono.
 
-Se pueden lanzar **sin terminal**, desde los botones *Traer las altas de negocio* y
-*Traer los anuncios del tablón* de la barra lateral del CMS, que disparan
-`.github/workflows/altas-negocio.yml` y `anuncios-tablon.yml`. Los workflows hacen lo
-mismo y commitean, así que a los pocos segundos aparece todo en el CMS, oculto.
+Se pueden lanzar **sin terminal**, desde los botones *Traer las altas de negocio*,
+*Traer los anuncios del tablón* y *Traer las casas en venta y alquiler* de la barra
+lateral del CMS, que disparan `.github/workflows/altas-negocio.yml`,
+`anuncios-tablon.yml` y `casas.yml`. Los workflows hacen lo mismo y commitean, así que a los pocos segundos aparece todo en el CMS, oculto.
 Necesitan el secreto `TALLY_API_KEY` en el repositorio (Settings → Secrets and variables
 → Actions).
 

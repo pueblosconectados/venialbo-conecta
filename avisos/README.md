@@ -173,7 +173,7 @@ algo es `/republicar`.
 ## Traer al CMS sin pulsar nada
 
 Cuando llega una alta de negocio o un anuncio por Tally, el Worker lanza la Action de
-traerlo (`altas-negocio.yml` o `anuncios-tablon.yml`) antes de avisar, y el mensaje dice
+traerlo (`altas-negocio.yml`, `anuncios-tablon.yml` o `casas.yml`) antes de avisar, y el mensaje dice
 que ya va de camino, oculto. Si GitHub no la acepta, el mensaje lo dice y lleva un botón
 «📥 Traer al CMS» para reintentarlo. Lanzarla de más no duplica nada: trae solo lo
 pendiente, y su `concurrency` evita que dos a la vez se pisen. Está en

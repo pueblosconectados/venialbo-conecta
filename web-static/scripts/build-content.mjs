@@ -549,27 +549,67 @@ await escribir("enlaces", enlaces, []);
 // un anuncio de vecinos sin fecha caduca a los DIAS_ANUNCIO de publicarse, como los
 // que llegan por el formulario, para que no se quede en el tablón por un descuido.
 const DIAS_ANUNCIO = 30;
+const sumarDias = (dia, dias) => {
+  const fecha = new Date(`${String(dia).slice(0, 10)}T12:00:00Z`);
+  if (Number.isNaN(fecha.getTime())) return null;
+  fecha.setUTCDate(fecha.getUTCDate() + dias);
+  return fecha.toISOString().slice(0, 10);
+};
 const caducidadDe = (a) => {
   if (a.fecha_caducidad || a.tipo === "informacion") return a.fecha_caducidad || null;
-  const fecha = new Date(`${(a.fecha_publicacion ?? "").slice(0, 10)}T12:00:00Z`);
-  if (Number.isNaN(fecha.getTime())) return null;
-  fecha.setUTCDate(fecha.getUTCDate() + DIAS_ANUNCIO);
-  const caduca = fecha.toISOString().slice(0, 10);
+  const caduca = sumarDias(a.fecha_publicacion ?? "", DIAS_ANUNCIO);
+  if (!caduca) return null;
   console.warn(`  ⚠ anuncio ${a.id}: sin fecha de caducidad, caduca el ${caduca}`);
   return caduca;
 };
-const anuncios = (
-  await Promise.all(
-    (await leerColeccion("anuncios"))
-      .filter((a) => a.activo !== false)
-      .map(async (a) => ({
-        ...a,
-        fecha_caducidad: caducidadDe(a),
-        galeria: (a.galeria ?? []).filter((g) => g?.imagen),
-        documentos: await revisarDocumentos(`anuncio ${a.id}`, a),
-      })),
-  )
-).sort(porFechaDesc);
+const anunciosDeVecinos = await Promise.all(
+  (await leerColeccion("anuncios"))
+    .filter((a) => a.activo !== false)
+    .map(async (a) => ({
+      ...a,
+      fecha_caducidad: caducidadDe(a),
+      galeria: (a.galeria ?? []).filter((g) => g?.imagen),
+      documentos: await revisarDocumentos(`anuncio ${a.id}`, a),
+    })),
+);
+
+// Las casas en venta y alquiler: en el CMS van en su propia colección (content/casas),
+// para que los anuncios normales no arrastren sus campos, pero en la web son parte del
+// Tablón, con su apartado y la misma dirección (/tablon/<id>). Así que aquí se juntan
+// con los anuncios, con las cifras agrupadas en `casa`. No caducan: tardan meses en
+// venderse y se quedan hasta que en el CMS se pone el día («Vendida o alquilada el»).
+// Desde entonces salen DIAS_VENDIDA días con el sello y luego se van solas.
+const DIAS_VENDIDA = 15;
+// Las cifras pueden llegar como texto; lo que no sea un número se deja vacío en vez de
+// pintar «NaN €»
+const numero = (valor) => {
+  const n = typeof valor === "number" ? valor : Number(String(valor ?? "").replace(/\./g, "").replace(",", "."));
+  return valor != null && valor !== "" && Number.isFinite(n) && n > 0 ? n : null;
+};
+const casas = (await leerColeccion("casas"))
+  .filter((c) => c.activo !== false)
+  .map(({ precio, superficie, habitaciones, banos, vendida, enlace, ...c }) => ({
+    ...c,
+    tipo: c.tipo === "casa_alquiler" ? "casa_alquiler" : "casa_venta",
+    casa: {
+      precio: numero(precio),
+      superficie: numero(superficie),
+      habitaciones: numero(habitaciones),
+      banos: numero(banos),
+      vendida: vendida || null,
+      enlace: enlace ? leerDireccion(enlace, `casa ${c.id}`) : null,
+    },
+    fecha_caducidad: vendida ? sumarDias(vendida, DIAS_VENDIDA) : null,
+    galeria: (c.galeria ?? []).filter((g) => g?.imagen),
+    documentos: [],
+  }));
+
+// Comparten dirección: dos con el mismo nombre de fichero se pisarían
+const repetida = casas.find((c) => anunciosDeVecinos.some((a) => a.id === c.id));
+if (repetida) {
+  throw new Error(`content/casas/${repetida.id}.json se llama igual que un anuncio del tablón: cambia el nombre de uno`);
+}
+const anuncios = [...anunciosDeVecinos, ...casas].sort(porFechaDesc);
 // El tablón solo enseña la foto principal, y de los PDF basta saber si hay (el clip)
 await escribir(
   "anuncios",

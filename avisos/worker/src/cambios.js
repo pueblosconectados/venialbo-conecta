@@ -18,6 +18,7 @@ const TIPOS = {
   noticias: "Noticia",
   actividades: "Actividad",
   anuncios: "Anuncio",
+  casas: "Casa",
   avisos: "Aviso",
   negocios: "Negocio",
   servicios: "Servicio",

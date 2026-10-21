@@ -23,6 +23,7 @@ const DIA = 24 * 60 * 60 * 1000;
 const COLECCIONES = {
   negocios: { carpeta: "web-static/content/negocios", titulo: (f) => f.nombre, tipo: "Alta de negocio" },
   anuncios: { carpeta: "web-static/content/anuncios", titulo: (f) => f.titulo, tipo: "Anuncio" },
+  casas: { carpeta: "web-static/content/casas", titulo: (f) => f.titulo, tipo: "Casa" },
 };
 
 const REPO = `repository(owner: "pueblosconectados", name: "venialbo-conecta")`;

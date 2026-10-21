@@ -52,6 +52,7 @@ const RUTA_DE_COLECCION: Record<string, string> = {
   negocios: "/negocios/",
   servicios: "/servicios/",
   anuncios: "/tablon/",
+  casas: "/tablon/",
 };
 
 const aRutaInterna = (href: string): string => {

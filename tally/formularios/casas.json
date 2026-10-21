@@ -1,0 +1,99 @@
+{
+  "titulo": "Anunciar una casa en venta o alquiler",
+  "intro": "Rellena esto y publicamos tu casa en el tablón de la web. No caduca: sigue publicada hasta que nos avises de que se ha vendido o alquilado.",
+  "nota": "Cómo tratamos tus datos lo explicamos en <a href=\"https://venialboconecta.es/privacidad\">venialboconecta.es/privacidad</a>.",
+  "aceptar": "He leído y acepto la política de privacidad",
+  "campos": [
+    {
+      "clave": "tipo",
+      "tipo": "desplegable",
+      "etiqueta": "¿La vendes o la alquilas?",
+      "requerido": true,
+      "opciones": [
+        {
+          "texto": "La vendo",
+          "valor": "casa_venta"
+        },
+        {
+          "texto": "La alquilo",
+          "valor": "casa_alquiler"
+        }
+      ]
+    },
+    {
+      "clave": "titulo",
+      "tipo": "texto",
+      "etiqueta": "Título del anuncio",
+      "requerido": true,
+      "ayuda": "Por ejemplo: Casa con patio en la calle Los Mesones"
+    },
+    {
+      "clave": "precio",
+      "tipo": "numero",
+      "etiqueta": "Precio en euros",
+      "ayuda": "Si es alquiler, lo que se paga al mes"
+    },
+    {
+      "clave": "superficie",
+      "tipo": "numero",
+      "etiqueta": "Metros cuadrados"
+    },
+    {
+      "clave": "habitaciones",
+      "tipo": "numero",
+      "etiqueta": "Habitaciones"
+    },
+    {
+      "clave": "banos",
+      "tipo": "numero",
+      "etiqueta": "Baños"
+    },
+    {
+      "clave": "descripcion",
+      "tipo": "parrafo",
+      "etiqueta": "Cuéntanos cómo es",
+      "ayuda": "Dónde está, qué tiene (patio, garaje, calefacción…), en qué estado está"
+    },
+    {
+      "clave": "enlace",
+      "tipo": "enlace",
+      "etiqueta": "¿Ya la tienes anunciada en otra web?",
+      "ayuda": "Pega aquí el enlace de Idealista, Fotocasa, Facebook… y lo ponemos en el anuncio"
+    },
+    {
+      "clave": "contacto",
+      "tipo": "texto",
+      "etiqueta": "Cómo te pueden localizar",
+      "requerido": true,
+      "ayuda": "Teléfono, o dónde preguntar por ti. Esto sale publicado en el anuncio"
+    },
+    {
+      "clave": "foto",
+      "tipo": "archivo",
+      "etiqueta": "Fotos (opcional, hasta 4)",
+      "restricciones": {
+        "allowedFiles": {
+          "image/*": [
+            ".jpg",
+            ".jpeg",
+            ".png"
+          ]
+        },
+        "hasMaxFileSize": true,
+        "maxFileSize": 8,
+        "maxFileSizeUnit": "MB",
+        "hasMultipleFiles": true,
+        "hasMinFiles": false,
+        "hasMaxFiles": true,
+        "maxFiles": 4
+      }
+    },
+    {
+      "clave": "quien_lo_manda",
+      "tipo": "texto",
+      "etiqueta": "Tu nombre",
+      "requerido": true,
+      "ayuda": "Para saber quién nos lo manda. Esto no se publica"
+    }
+  ]
+}

@@ -38,6 +38,10 @@ const WORKFLOWS = {
     nombre: "Traer los anuncios del tablón",
     efecto: "los anuncios del tablón no se traen al CMS",
   },
+  ".github/workflows/casas.yml": {
+    nombre: "Traer las casas",
+    efecto: "las casas en venta y alquiler no se traen al CMS",
+  },
 };
 
 // El nombre claro de un workflow por su fichero ("web-static-pages.yml"), para los

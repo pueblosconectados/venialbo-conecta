@@ -12,6 +12,7 @@ const API = `https://api.github.com/repos/${REPO}`;
 export const TRAER = {
   negocios: { workflow: "altas-negocio.yml", texto: "las altas de negocio", ocultos: "ocultas" },
   tablon: { workflow: "anuncios-tablon.yml", texto: "los anuncios del tablón", ocultos: "ocultos" },
+  casas: { workflow: "casas.yml", texto: "las casas en venta y alquiler", ocultos: "ocultas" },
 };
 
 const cabeceras = (env) => ({

@@ -1,0 +1,84 @@
+name: Traer las casas en venta y alquiler
+
+# Se lanza a mano: desde el boton "Traer las casas" de Pages CMS (ver actions: en
+# .pages.yml), desde el bot de Telegram, o desde la pestaña Actions de GitHub. Es la
+# de los anuncios del tablon (anuncios-tablon.yml) con el formulario de casas.
+#
+# Crea una casa por cada una que hayan mandado por el formulario de Tally, SIEMPRE con
+# "activo": false, o sea oculta: no sale en la web hasta que alguien la repase en el CMS
+# y la marque como visible. No lleva caducidad: las casas se quitan cuando se venden.
+#
+# Las fotos NO se traen: un binario que manda un desconocido, una vez commiteado, se
+# queda en el historial de git para siempre. El informe dice cuantas hay.
+#
+# Este repositorio es publico y los registros de Actions tambien, asi que el script
+# corre en modo discreto (CI=true): no imprime ni quien manda la ficha ni el enlace
+# firmado de sus fotos.
+on:
+  workflow_dispatch:
+    inputs:
+      payload:
+        description: Payload de Pages CMS (JSON). Vacio si se lanza a mano.
+        required: false
+        type: string
+
+permissions:
+  contents: write
+
+# El mismo grupo que la de los anuncios: las dos escriben respuestas-importadas.json, y
+# a la vez se pisarian al rebasar
+concurrency:
+  group: anuncios-tablon
+  cancel-in-progress: false
+
+jobs:
+  importar:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+
+      - name: Traer las casas pendientes
+        env:
+          TALLY_API_KEY: ${{ secrets.TALLY_API_KEY }}
+        run: |
+          if [ -z "$TALLY_API_KEY" ]; then
+            echo "Falta el secreto TALLY_API_KEY del repositorio." | tee informe.txt
+            echo "Se crea en Settings → Secrets and variables → Actions." | tee -a informe.txt
+            exit 1
+          fi
+          set -o pipefail
+          node tally/importar-casas.mjs --todas | tee informe.txt
+
+      - name: Commitear las casas nuevas
+        run: |
+          if [ -z "$(git status --porcelain web-static/content/casas tally/respuestas-importadas.json)" ]; then
+            echo "No habia ninguna casa nueva que traer"
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add web-static/content/casas tally/respuestas-importadas.json
+          git commit -m "content: casas recibidas por el formulario"
+          # El CMS commitea por su cuenta en main: rebasar antes de empujar
+          git pull --rebase origin main
+          git push origin HEAD:main
+
+      - name: Publicar el informe en el resumen
+        if: always()
+        run: |
+          {
+            echo "## Casas en venta y alquiler"
+            echo
+            echo '```'
+            cat informe.txt 2>/dev/null || echo "(el script no llego a dar salida)"
+            echo '```'
+            echo
+            echo "Las casas entran **ocultas** y no caducan. Repasalas en el CMS, en Casas"
+            echo "en venta y alquiler, y marca *Visible en la web* las que valgan."
+            echo
+            echo "Las fotos no se traen: se miran en Tally y se suben a mano las que valgan."
+          } >> "$GITHUB_STEP_SUMMARY"

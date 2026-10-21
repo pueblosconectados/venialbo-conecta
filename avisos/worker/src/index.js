@@ -19,8 +19,9 @@
 //
 // Y el cron de wrangler.toml, cada 5 minutos: la vigilancia de GitHub y de la web, las
 // Actions que fallen (publicaciones.js), cada día a las 10:00 lo oculto sin revisar
-// (revision.js) y lo que está en su último día de mañana (caducidad.js), y los lunes a
-// las 9:00 el resumen semanal.
+// (revision.js), lo que está en su último día de mañana (caducidad.js) y las casas que
+// cumplen 3, 6, 9… meses publicadas (casas.js), y los lunes a las 9:00 el resumen
+// semanal.
 //
 // Cada suscripción se guarda en KV con el hash de su dirección como clave y la propia
 // suscripción como metadato. Así la lista entera sale de una sola llamada a list(), sin
@@ -34,6 +35,7 @@ import { webhookTelegram } from "./comandos.js";
 import { revisarPublicaciones } from "./publicaciones.js";
 import { recordarSinRevisar, sinRevisar } from "./revision.js";
 import { recordarCaducan } from "./caducidad.js";
+import { recordarCasas } from "./casas.js";
 
 // Los servicios de push conocidos. Lo demás se rechaza, para que nadie llene el KV con
 // direcciones inventadas.
@@ -219,6 +221,7 @@ export default {
     if (horaMadrid(momento) === 10 && enPunto) {
       ctx.waitUntil(recordarSinRevisar(env));
       ctx.waitUntil(recordarCaducan(env));
+      ctx.waitUntil(recordarCasas(env));
     }
   },
 };

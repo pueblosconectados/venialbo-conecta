@@ -10,7 +10,7 @@ import {
   Tag,
   Typography,
 } from "antd";
-import { ClockCircleOutlined, FileSearchOutlined } from "@ant-design/icons";
+import { ClockCircleOutlined, ExportOutlined, FileSearchOutlined } from "@ant-design/icons";
 import { FORMULARIOS, formatFecha, imgUrl } from "../../../config";
 import { haCaducado } from "../../../datos";
 import { colors, softTagStyle } from "../../../theme";
@@ -20,7 +20,16 @@ import { ImagenAmpliable } from "../../components/ImagenAmpliable";
 import { Galeria, type Foto } from "../../components/Galeria";
 import { Documentos, type Documento } from "../../components/Documentos";
 import { juegoDeMiniaturas } from "../../../miniaturas";
-import { INFORMACION, TIPO_LABEL, TIPO_TONE } from "./tipos";
+import {
+  CASAS,
+  INFORMACION,
+  TIPO_LABEL,
+  TIPO_TONE,
+  cifrasCasa,
+  nombrePlataforma,
+  selloVendida,
+  type DatosCasa,
+} from "./tipos";
 
 type Anuncio = {
   id: string;
@@ -34,6 +43,7 @@ type Anuncio = {
   fecha_publicacion: string;
   activo: boolean;
   fecha_caducidad?: string | null;
+  casa?: DatosCasa | null;
 };
 
 // Un anuncio caducado se quita del tablón, pero el enlace puede seguir circulando por
@@ -82,6 +92,9 @@ export function AnunciosShow() {
     );
 
   const a = result;
+  const esCasa = CASAS.has(a.tipo);
+  const cifras = esCasa ? cifrasCasa(a.tipo, a.casa) : [];
+  const vendida = esCasa && Boolean(a.casa?.vendida);
 
   // Sin fecha (Información que no caduca) no hay nada que comprobar
   if (a.fecha_caducidad && haCaducado(a.fecha_caducidad))
@@ -120,12 +133,31 @@ export function AnunciosShow() {
         <Tag style={softTagStyle(TIPO_TONE[a.tipo] ?? "gris")}>
           {TIPO_LABEL[a.tipo] ?? a.tipo}
         </Tag>
+        {vendida && <Tag style={softTagStyle("rojo")}>{selloVendida(a.tipo)}</Tag>}
         {!a.activo && <Tag style={softTagStyle("rojo")}>Expirado</Tag>}
       </div>
       <Typography.Title level={2} style={{ marginTop: 4 }}>{a.titulo}</Typography.Title>
       <Typography.Text style={{ color: colors.marronSuave }}>
         Publicado el {formatFecha(a.fecha_publicacion)}
       </Typography.Text>
+      {cifras.length > 0 && (
+        <div style={{ display: "flex", flexWrap: "wrap", gap: 8, marginTop: 16 }}>
+          {cifras.map((c) => (
+            <span
+              key={c}
+              style={{
+                padding: "6px 12px",
+                background: colors.musgoFondo,
+                border: `1px solid ${colors.borde}`,
+                borderRadius: 10,
+                fontWeight: 500,
+              }}
+            >
+              {c}
+            </span>
+          ))}
+        </div>
+      )}
       <Divider style={{ borderColor: colors.borde }} />
       <ContenidoRico texto={a.descripcion} style={{ lineHeight: 1.7, marginBottom: 16 }} />
       <Documentos documentos={a.documentos} />
@@ -136,6 +168,19 @@ export function AnunciosShow() {
           </Typography.Title>
           <Galeria fotos={a.galeria} titulo={a.titulo} />
         </>
+      )}
+      {/* Mucha gente ya tiene la casa en Idealista o en Facebook, con más fotos: el
+          enlace va tal cual, sin copiar nada de allí */}
+      {esCasa && a.casa?.enlace && (
+        <Button
+          icon={<ExportOutlined />}
+          href={a.casa.enlace}
+          target="_blank"
+          rel="noopener noreferrer"
+          style={{ marginTop: 16 }}
+        >
+          Ver el anuncio en {nombrePlataforma(a.casa.enlace)}
+        </Button>
       )}
       {a.contacto && (
         <div
@@ -157,7 +202,9 @@ export function AnunciosShow() {
           Información los ponemos nosotros: ahí no hay nadie que tenga que pedirlo. */}
       {a.tipo !== INFORMACION && (
         <Typography.Paragraph style={{ marginTop: 24, marginBottom: 0, color: colors.marronSuave }}>
-          ¿Ya no hace falta este anuncio?{" "}
+          {esCasa
+            ? `¿Ya está ${selloVendida(a.tipo).toLowerCase()}?`
+            : "¿Ya no hace falta este anuncio?"}{" "}
           <a
             href={`${FORMULARIOS.contacto}?anuncio=${encodeURIComponent(`${a.titulo} (${a.id})`)}`}
             target="_blank"

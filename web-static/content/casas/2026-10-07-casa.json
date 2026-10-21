@@ -1,6 +1,7 @@
 {
   "titulo": "Se vende casa ",
-  "tipo": "compra_venta",
+  "tipo": "casa_venta",
+  "precio": 40000,
   "descripcion": "40.000€",
   "contacto": "+34653485289",
   "imagen_url": "/media/imagenes/casa-40000-1.jpg",

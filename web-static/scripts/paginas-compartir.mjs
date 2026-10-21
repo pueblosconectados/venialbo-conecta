@@ -188,7 +188,7 @@ const FICHAS = [
   { recurso: "actividades", ruta: "actividades", titulo: (f) => f.titulo, texto: (f) => f.resumen || f.contenido, foto: primeraFoto },
   { recurso: "negocios", ruta: "negocios", titulo: (f) => f.nombre, texto: (f) => f.descripcion || f.categoria_negocio, foto: (f) => f.logo_url, modo: "logo" },
   { recurso: "servicios", ruta: "servicios", titulo: (f) => f.nombre, texto: (f) => f.descripcion, foto: (f) => f.logo_url, modo: "logo" },
-  { recurso: "anuncios", ruta: "tablon", titulo: (f) => f.titulo, texto: (f) => f.descripcion, foto: (f) => f.imagen_url, fuera: (f) => caducado(f.fecha_caducidad), sinSitemap: (f) => f.tipo !== "informacion" },
+  { recurso: "anuncios", ruta: "tablon", titulo: (f) => f.titulo, texto: (f) => f.descripcion, foto: (f) => f.imagen_url, fuera: (f) => caducado(f.fecha_caducidad), sinSitemap: (f) => f.tipo !== "informacion" && !f.casa },
   { recurso: "lugares", ruta: "descubre/lugares", titulo: (f) => f.nombre, texto: (f) => f.resumen || f.contenido, foto: primeraFoto },
   { recurso: "rutas", ruta: "descubre/rutas", titulo: (f) => f.nombre, texto: (f) => f.resumen || f.contenido, foto: primeraFoto },
 ];
@@ -197,7 +197,8 @@ const logo = await fotoOg(LOGO, "logo");
 
 // Las direcciones que van al sitemap. Los anuncios de vecinos del tablón no: duran unos
 // días y Google los tendría en el índice cuando ya han caducado. Los de Información sí
-// (horarios y demás, que duran y se buscan: «horario misa Venialbo»).
+// (horarios y demás, que duran y se buscan: «horario misa Venialbo»), y las casas
+// también: están meses y se buscan («casa en venta Venialbo»).
 const enSitemap = [];
 
 for (const s of SECCIONES) {

@@ -63,6 +63,7 @@ const TIPOS = {
   email: "INPUT_EMAIL",
   telefono: "INPUT_PHONE_NUMBER",
   enlace: "INPUT_LINK",
+  numero: "INPUT_NUMBER",
   parrafo: "TEXTAREA",
   archivo: "FILE_UPLOAD",
 };
