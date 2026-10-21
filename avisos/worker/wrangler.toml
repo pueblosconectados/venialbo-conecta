@@ -33,3 +33,10 @@ id = "260e7b45d17b4b32858282d641f09b2e"
 [[kv_namespaces]]
 binding = "ESTADO"
 id = "4d09cf76e6c64019bb1a7ff0a2a6fe15"
+
+# Si los avisos push llegan y cuánto tardan (src/entregas.js). Creada con
+# `npx wrangler d1 create venialbo-entregas`; las tablas, en entregas.sql.
+[[d1_databases]]
+binding = "ENTREGAS"
+database_name = "venialbo-entregas"
+database_id = "a4f08c41-6355-4846-88d2-fe3cd746580f"

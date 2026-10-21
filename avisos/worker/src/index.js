@@ -16,11 +16,16 @@
 //   POST /telegram       Telegram    los comandos del grupo y los botones (en comandos.js)
 //   GET  /revision       a mano      el recordatorio de lo oculto sin revisar (con el
 //                                    token; en revision.js). No lo manda
+//   POST /envios         la Action   apunta un envío push y a quién se aceptó (con el
+//                                    token; en entregas.js)
+//   POST /recibido       el móvil    el service worker dice que le ha llegado un aviso,
+//                                    o que lo han tocado (en entregas.js)
 //
 // Y el cron de wrangler.toml, cada 5 minutos: la vigilancia de GitHub y de la web, las
 // Actions que fallen (publicaciones.js), cada día a las 10:00 lo oculto sin revisar
 // (revision.js), lo que está en su último día de mañana (caducidad.js) y las casas que
-// cumplen 3, 6, 9… meses publicadas (casas.js), y los lunes a las 9:00 el resumen
+// cumplen 3, 6, 9… meses publicadas (casas.js), y la limpieza de lo medido de los
+// avisos (entregas.js), y los lunes a las 9:00 el resumen
 // semanal.
 //
 // Cada suscripción se guarda en KV con el hash de su dirección como clave y la propia
@@ -36,6 +41,7 @@ import { revisarPublicaciones } from "./publicaciones.js";
 import { recordarSinRevisar, sinRevisar } from "./revision.js";
 import { recordarCaducan } from "./caducidad.js";
 import { recordarCasas } from "./casas.js";
+import { apuntarEnvio, apuntarRecibido, limpiarEntregas } from "./entregas.js";
 
 // Los servicios de push conocidos. Lo demás se rechaza, para que nadie llene el KV con
 // direcciones inventadas.
@@ -49,6 +55,8 @@ const SERVICIOS = [
 // KV deja 1024 bytes de metadatos por clave; una suscripción real ronda los 400
 const MAX_METADATOS = 1024;
 const MAX_CUERPO = 4096;
+// La lista de dispositivos de un envío: 64 caracteres cada uno
+const MAX_CUERPO_ENVIO = 256 * 1024;
 
 const json = (datos, estado = 200, cabeceras = {}) =>
   new Response(JSON.stringify(datos), {
@@ -76,9 +84,9 @@ const cors = (request, env) => {
   };
 };
 
-const leerCuerpo = async (request) => {
+const leerCuerpo = async (request, max = MAX_CUERPO) => {
   const texto = await request.text();
-  if (texto.length > MAX_CUERPO) throw new Error("demasiado grande");
+  if (texto.length > max) throw new Error("demasiado grande");
   return JSON.parse(texto);
 };
 
@@ -162,6 +170,24 @@ export default {
         return json({ error: "método no permitido" }, 405);
       }
 
+      // Desde el service worker, sin content-type: así no hay petición previa de CORS.
+      // Siempre 204, también si no cuadra: al móvil no le sirve de nada saberlo
+      if (pathname === "/recibido") {
+        const cabeceras = cors(request, env);
+        if (!cabeceras) return json({ error: "origen no permitido" }, 403);
+        if (metodo === "OPTIONS") return new Response(null, { status: 204, headers: cabeceras });
+        if (metodo !== "POST") return json({ error: "método no permitido" }, 405, cabeceras);
+        await apuntarRecibido(await leerCuerpo(request), env, sha256);
+        return new Response(null, { status: 204, headers: cabeceras });
+      }
+
+      if (pathname === "/envios") {
+        if (!conToken(request, env)) return json({ error: "no autorizado" }, 401);
+        if (metodo !== "POST") return json({ error: "método no permitido" }, 405);
+        const resultado = await apuntarEnvio(await leerCuerpo(request, MAX_CUERPO_ENVIO), env);
+        return json(resultado, resultado.error ? 400 : 200);
+      }
+
       if (pathname === "/tally") return await webhookTally(request, env, json);
 
       if (pathname === "/resumen") {
@@ -222,6 +248,7 @@ export default {
       ctx.waitUntil(recordarSinRevisar(env));
       ctx.waitUntil(recordarCaducan(env));
       ctx.waitUntil(recordarCasas(env));
+      ctx.waitUntil(limpiarEntregas(env));
     }
   },
 };

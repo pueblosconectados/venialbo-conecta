@@ -24,6 +24,8 @@ La clave privada VAPID está en `.secretos/vapid.json`; la pública, en
 | `GET /vigilancia` | A mano, con el token | Lo que vería ahora la vigilancia de GitHub y de la web, sin avisar ni guardar nada |
 | `POST /telegram` | Telegram, con su clave | Los comandos del grupo y los botones «📥 Traer» |
 | `GET /revision` | A mano, con el token | Lo oculto sin revisar y el recordatorio que saldría, sin mandarlo |
+| `POST /envios` | La Action, con el token | Apunta un envío push y a qué dispositivos lo aceptó el servicio de push (ver «Si los avisos llegan») |
+| `POST /recibido` | El service worker de la web | Dice que un aviso ha llegado al móvil, o que lo han tocado |
 
 Solo acepta direcciones de los servicios de push conocidos (Google, Mozilla, Apple y
 Windows), cuerpos de menos de 4 KB y, para suscribir y dar de baja, peticiones desde
@@ -69,6 +71,48 @@ npx wrangler secret put TELEGRAM_CHAT_ID    # el grupo; en los grupos es negativ
 npm run deploy
 node ../../tally/crear-webhooks.mjs         # con TALLY_API_KEY_FILE=../../.secretos/api-key
 ```
+
+## Si los avisos llegan
+
+El servicio de push (Google, Apple…) solo dice que ha **aceptado** el aviso. Lo que pasa
+después en el móvil no se sabía: Android aplaza los de prioridad normal mientras el
+móvil está en reposo, algunos fabricantes matan Chrome para ahorrar batería y hay quien
+tiene las notificaciones bloqueadas. Ahora se mide. Está en `worker/src/entregas.js`.
+
+- **Cómo**: cada envío lleva un `id` (`entregas.mjs`, lo usan `enviar.mjs` y
+  `aviso-a-mano.mjs`). Antes de mandar, la Action lo apunta en el Worker (`POST /envios`)
+  y al terminar dice a qué dispositivos lo aceptó el servicio de push. El service
+  worker de la web (`web-static/public/sw.js`) llama a `POST /recibido` al recibirlo y
+  al tocarlo. Las horas son todas del Worker, no del móvil.
+- **`/avisos`** en el grupo enseña los últimos 5: a cuántos llegó de los aceptados,
+  cuánto tardó (la mitad, 9 de cada 10 y el último) y cuántos lo abrieron. También
+  cuántos dispositivos no han recibido **ninguno** de sus últimos 3 o más.
+- **Cómo leerlo**: si los de prioridad normal tardan horas y los urgentes no, es Android
+  aplazándolos. Si un dispositivo no recibe nada nunca, es ese móvil (notificaciones
+  bloqueadas, ahorro de batería, Chrome desinstalado sin darse de baja). Mientras no
+  pasen 12 horas (el TTL), lo que falta aún puede llegar.
+- **Los primeros días cuenta de menos**: cada móvil tiene que actualizar su service
+  worker, y lo hace al entrar en la web o, como mucho, tras recibir un aviso si hace más
+  de 24 h que no lo mira.
+- **En D1** (`ENTREGAS`, base `venialbo-entregas`), no en KV: KV da 1000 escrituras al
+  día en el plan gratuito y no vale para contar desde muchos móviles a la vez. Las
+  tablas están en `worker/entregas.sql`. Se borra lo de más de 90 días cada día a las
+  10:00.
+- **Privacidad**: el dispositivo es el sha256 de su suscripción, la misma clave que ya
+  tiene en `SUSCRIPCIONES`; no se guarda nada más. Solo cuentan los dispositivos que
+  la Action dio por aceptados, así que un `/recibido` inventado no suma.
+
+Cómo se creó (una vez):
+
+```bash
+cd avisos/worker
+npx wrangler d1 create venialbo-entregas            # copia el id a wrangler.toml
+npx wrangler d1 execute ENTREGAS --remote --file entregas.sql
+npm run deploy
+```
+
+En local, `npx wrangler d1 execute ENTREGAS --local --file entregas.sql` antes de
+`npm run dev`.
 
 ## El resumen semanal de visitas
 
@@ -145,7 +189,7 @@ algo es `/republicar`.
 | `/cambios` | Los últimos 5 guardados en el CMS: qué ficha, quién y cuándo (➕ creado, ✏️ cambiado, 🗑 borrado) |
 | `/buscar <texto>` | Busca en todo lo que se ve en la web: el teléfono de un negocio, el contacto de un anuncio… con botones a la ficha en la web y en el CMS |
 | `/republicar` | Vuelve a lanzar la publicación de la web, para cuando ha fallado por algo pasajero |
-| `/avisos` | Cuántos dispositivos tienen las push activadas |
+| `/avisos` | Cuántos dispositivos tienen las push activadas, y si les llegaron los últimos 5 avisos y cuánto tardaron |
 | `/chatid` | El id del chat donde se escribe |
 | `/ayuda` | La lista |
 

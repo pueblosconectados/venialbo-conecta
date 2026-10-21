@@ -11,7 +11,8 @@
 //   /cambios     los últimos guardados en el CMS, con quién y cuándo (cambios.js)
 //   /buscar x    busca en todo lo que se ve en la web (buscar.js)
 //   /republicar  vuelve a lanzar la publicación de la web
-//   /avisos      cuántos dispositivos tienen las push activadas
+//   /avisos      cuántos dispositivos tienen las push activadas, y si los últimos
+//                avisos les llegaron y cuánto tardaron (entregas.js)
 //   /chatid      el id de este chat
 //   /ayuda       la lista
 //
@@ -36,6 +37,7 @@ import { listaSinRevisar, sinRevisar } from "./revision.js";
 import { listaCaducan } from "./caducidad.js";
 import { ultimosCambios } from "./cambios.js";
 import { buscar } from "./buscar.js";
+import { resumenEntregas } from "./entregas.js";
 
 const TALLY = "https://api.tally.so";
 
@@ -79,7 +81,12 @@ const visitas = async (env) => ({ texto: await resumenSemanal(env, { enCurso: tr
 
 const avisos = async (env) => {
   const total = await suscriptores(env);
-  return { texto: `🔔 ${total} ${total === 1 ? "dispositivo tiene" : "dispositivos tienen"} los avisos activados` };
+  return {
+    texto: [
+      `🔔 ${total} ${total === 1 ? "dispositivo tiene" : "dispositivos tienen"} los avisos activados`,
+      await resumenEntregas(env),
+    ].join(LISTA),
+  };
 };
 
 // Todas las respuestas completas de un formulario, de todas las páginas
@@ -156,7 +163,7 @@ const CONSULTAR = [
   ["caducan", "Lo que desaparece de la web en 7 días"],
   ["cambios", "Lo último que se ha guardado en el CMS, y quién"],
   ["buscar", "Busca en la web: /buscar panadería"],
-  ["avisos", "Cuántos tienen los avisos activados"],
+  ["avisos", "Cuántos tienen los avisos y si les llegan"],
   ["chatid", "El id de este chat"],
   ["ayuda", "Esta lista"],
 ];

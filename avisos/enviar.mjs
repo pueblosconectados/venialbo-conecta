@@ -26,6 +26,7 @@ import { readFile, writeFile } from "node:fs/promises";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import webpush from "web-push";
+import { apuntarAceptados, apuntarEnvio, nuevoId } from "./entregas.mjs";
 
 const RAIZ = join(dirname(fileURLToPath(import.meta.url)), "..");
 const DATOS = join(RAIZ, "web-static", "public", "data");
@@ -155,8 +156,11 @@ const enviar = async (mensaje, urgente) => {
     // Si el móvil está apagado, cuánto tiempo guarda el aviso el servicio de push
     TTL: 12 * 3600,
   };
-  const cuerpo = JSON.stringify(mensaje);
-  let bien = 0;
+  // El id vuelve del móvil al recibirlo: así se sabe si llegó (entregas.mjs)
+  const id = nuevoId();
+  await apuntarEnvio(token, id, `${mensaje.titulo}: ${mensaje.cuerpo}`, urgente);
+  const cuerpo = JSON.stringify({ ...mensaje, id });
+  const aceptados = [];
   const muertas = [];
   const fallos = [];
   // De 20 en 20, para no abrir cientos de conexiones a la vez
@@ -165,7 +169,7 @@ const enviar = async (mensaje, urgente) => {
       suscripciones.slice(i, i + 20).map(async (sub) => {
         try {
           await webpush.sendNotification(sub, cuerpo, opciones);
-          bien++;
+          aceptados.push(sub.endpoint);
         } catch (e) {
           // 404 o 410: el móvil ya no la tiene (permiso retirado, datos borrados…)
           if (e.statusCode === 404 || e.statusCode === 410) muertas.push(sub.endpoint);
@@ -174,6 +178,9 @@ const enviar = async (mensaje, urgente) => {
       }),
     );
   }
+
+  await apuntarAceptados(token, id, aceptados);
+  const bien = aceptados.length;
 
   if (muertas.length) {
     const b = await fetch(`${WORKER}/borrar`, {

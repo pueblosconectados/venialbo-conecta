@@ -13,6 +13,7 @@ import { createInterface } from "node:readline/promises";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import webpush from "web-push";
+import { apuntarAceptados, apuntarEnvio, nuevoId } from "./entregas.mjs";
 
 const RAIZ = join(dirname(fileURLToPath(import.meta.url)), "..");
 const WORKER = "https://venialbo-avisos.venialboconecta.workers.dev";
@@ -41,20 +42,25 @@ if (respuesta.trim().toLowerCase() !== "s") {
   process.exit(0);
 }
 
-const mensaje = JSON.stringify({ titulo, cuerpo, url });
-let bien = 0;
+const id = nuevoId();
+await apuntarEnvio(token, id, `${titulo}: ${cuerpo}`, URGENTE);
+const mensaje = JSON.stringify({ titulo, cuerpo, url, id });
+const aceptados = [];
 const muertas = [];
 const fallos = [];
 for (const sub of suscripciones) {
   try {
     await webpush.sendNotification(sub, mensaje, { TTL: 12 * 3600, urgency: URGENTE ? "high" : "normal" });
-    bien++;
+    aceptados.push(sub.endpoint);
   } catch (e) {
     // 404 o 410: la suscripción ya no existe (permiso retirado, datos borrados…)
     if (e.statusCode === 404 || e.statusCode === 410) muertas.push(sub.endpoint);
     else fallos.push(e.statusCode ?? e.code ?? "sin respuesta");
   }
 }
+
+await apuntarAceptados(token, id, aceptados);
+const bien = aceptados.length;
 
 if (muertas.length) {
   await fetch(`${WORKER}/borrar`, {
