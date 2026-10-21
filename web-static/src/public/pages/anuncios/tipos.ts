@@ -6,6 +6,12 @@ import type { TagTone } from "../../../theme";
 export const INFORMACION = "informacion";
 export const CASAS = new Set(["casa_venta", "casa_alquiler"]);
 
+/** Las pestañas del Tablón; van en la dirección (`/tablon?ver=casas`). */
+export type Apartado = "informacion" | "casas" | "vecinos";
+
+export const apartadoDe = (tipo: string): Apartado =>
+  tipo === INFORMACION ? "informacion" : CASAS.has(tipo) ? "casas" : "vecinos";
+
 export const TIPO_LABEL: Record<string, string> = {
   informacion: "Información",
   casa_venta: "Se vende",

@@ -23,6 +23,7 @@ import { juegoDeMiniaturas } from "../../../miniaturas";
 import {
   CASAS,
   INFORMACION,
+  apartadoDe,
   TIPO_LABEL,
   TIPO_TONE,
   cifrasCasa,
@@ -95,6 +96,8 @@ export function AnunciosShow() {
   const esCasa = CASAS.has(a.tipo);
   const cifras = esCasa ? cifrasCasa(a.tipo, a.casa) : [];
   const vendida = esCasa && Boolean(a.casa?.vendida);
+  // Volver a la pestaña de la que se vino, no a la primera
+  const alTablon = `/tablon?ver=${apartadoDe(a.tipo)}`;
 
   // Sin fecha (Información que no caduca) no hay nada que comprobar
   if (a.fecha_caducidad && haCaducado(a.fecha_caducidad))
@@ -109,7 +112,7 @@ export function AnunciosShow() {
   return (
     <div style={{ maxWidth: 800, margin: "0 auto" }}>
       <CabeceraFicha titulo={a.titulo} migas={[
-          { title: <Link to="/tablon">Tablón</Link> },
+          { title: <Link to={alTablon}>Tablón</Link> },
           { title: a.titulo },
         ]} />
       {a.imagen_url && (
@@ -231,7 +234,7 @@ export function AnunciosShow() {
         </Typography.Paragraph>
       )}
       <div style={{ marginTop: 24 }}>
-        <Link to="/tablon" style={{ color: colors.musgo, fontWeight: 500 }}>
+        <Link to={alTablon} style={{ color: colors.musgo, fontWeight: 500 }}>
           ← Volver al tablón
         </Link>
       </div>
