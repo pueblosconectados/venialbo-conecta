@@ -220,6 +220,8 @@ content:
           Solo si dura varios días, o si es un curso con clases semanales: el día de
           la última. En la web sale "del 3 al 24 de marzo".
         type: date
+        # Sin esto, Pages CMS pone la fecha de hoy al abrir la ficha y la guarda
+        default: ""
         options:
           format: yyyy-MM-dd
       - name: repeticion
@@ -319,6 +321,8 @@ content:
           Opcional. Hasta este día (incluido) la tarjeta y la ficha llevan el distintivo
           «¡Nuevo!». Por ejemplo, pasado mañana. Vacío, no sale.
         type: date
+        # Sin esto, Pages CMS pone la fecha de hoy al abrir la ficha y la guarda
+        default: ""
         options:
           format: yyyy-MM-dd
       - name: resumen
@@ -440,6 +444,8 @@ content:
         label: Hasta
         description: Opcional. Solo si son varios días seguidos, el último.
         type: date
+        # Sin esto, Pages CMS pone la fecha de hoy al abrir la ficha y la guarda
+        default: ""
         options:
           format: yyyy-MM-dd
       - name: anual
@@ -517,6 +523,8 @@ content:
           Opcional. Hasta este día (incluido) la tarjeta y la ficha llevan el distintivo
           «¡Nuevo!». Por ejemplo, pasado mañana. Vacío, no sale.
         type: date
+        # Sin esto, Pages CMS pone la fecha de hoy al abrir la ficha y la guarda
+        default: ""
         options:
           format: yyyy-MM-dd
       - name: resumen
@@ -641,6 +649,8 @@ content:
           Opcional. Hasta este día (incluido) la tarjeta y la ficha llevan el distintivo
           «¡Nuevo!». Por ejemplo, pasado mañana. Vacío, no sale.
         type: date
+        # Sin esto, Pages CMS pone la fecha de hoy al abrir la ficha y la guarda
+        default: ""
         options:
           format: yyyy-MM-dd
       - name: resumen
@@ -829,6 +839,8 @@ content:
           Opcional. Hasta este día (incluido) la tarjeta y la ficha llevan el distintivo
           «¡Nuevo!». Por ejemplo, pasado mañana. Vacío, no sale.
         type: date
+        # Sin esto, Pages CMS pone la fecha de hoy al abrir la ficha y la guarda
+        default: ""
         options:
           format: yyyy-MM-dd
 
@@ -946,6 +958,8 @@ content:
           Opcional. Hasta este día (incluido) la tarjeta y la ficha llevan el distintivo
           «¡Nuevo!». Por ejemplo, pasado mañana. Vacío, no sale.
         type: date
+        # Sin esto, Pages CMS pone la fecha de hoy al abrir la ficha y la guarda
+        default: ""
         options:
           format: yyyy-MM-dd
 
@@ -1065,6 +1079,8 @@ content:
           que no caduque nunca. En los anuncios de vecinos, si se deja vacía, caduca a
           los 30 días de publicarse.
         type: date
+        # Sin esto, Pages CMS pone la fecha de hoy al abrir la ficha y la guarda
+        default: ""
         options:
           format: yyyy-MM-dd
       - name: activo
@@ -1179,6 +1195,8 @@ content:
           «Vendida» o «Alquilada» durante 15 días y después desaparece sola. Mientras
           esté vacío, no se quita nunca.
         type: date
+        # Sin esto, Pages CMS pone la fecha de hoy al abrir la ficha y la guarda
+        default: ""
         options:
           format: yyyy-MM-dd
       - name: activo
