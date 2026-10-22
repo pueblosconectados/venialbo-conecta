@@ -221,7 +221,10 @@ body {
 }
 .boton:hover { transform: translateY(-2px); }
 .boton:focus-visible, .baja:focus-visible { outline: 3px solid var(--dorado); outline-offset: 3px; }
-.qr { background: var(--crema); padding: 14px; border-radius: 18px; text-align: center; color: var(--tinta-suave); font-size: 0.8rem; }
+.qr {
+  background: var(--crema); padding: 14px 14px 10px; border-radius: 18px; color: var(--tinta-suave); font-size: 0.8rem;
+  width: fit-content; justify-self: start; display: grid; justify-items: center; gap: 8px;
+}
 .qr #codigo { width: 168px; height: 168px; }
 .qr #codigo img, .qr #codigo canvas { width: 168px; height: 168px; }
 .pie { font-size: 0.85rem; opacity: 0.75; display: flex; flex-wrap: wrap; gap: 0.4rem 1.5rem; align-items: center; }
