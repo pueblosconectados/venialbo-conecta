@@ -1,7 +1,7 @@
 {
   "nombre": "Reparto de Gas - Repsol",
   "tipo": "venta_reparto",
-  "descripcion": "El reparto en Venialbo aparece en la ruta de los LUNES",
+  "descripcion": "El reparto en Venialbo aparece en la ruta de los lunes",
   "logo_url": "/media/imagenes/repsol-gas.png",
   "enlaces": [
     {
