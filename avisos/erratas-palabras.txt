@@ -1,0 +1,35 @@
+# Lo que el corrector de erratas (erratas.mjs) no debe señalar: palabras del pueblo y
+# nombres propios que LanguageTool no conoce. Una por línea, sin distinguir mayúsculas.
+# También vale un fragmento de varias palabras tal cual lo señala («la Titán»).
+# Lo que hay detrás de # no cuenta.
+
+# Del pueblo y de la zona
+Venialbo
+Venialbense
+VenialboConecta
+charaiz          # estanque o embalse de agua (diccionario de 1933-1936)
+charaíz          # también se escribe así
+merinas          # las talanqueras
+talanqueras
+Bodonal
+Lucera
+Matacucos
+la Titán         # la prueba: en femenino a propósito
+Talanda
+Villalazán
+Tamame
+
+# Asociaciones, siglas y marcas
+AVAE
+CyL
+SACYL
+Cl@ve
+CIT
+Biodanza
+completito       # «Fin de semana completito»
+Trasgu           # El Trasgu, el bar asturiano
+
+# Personas
+Moralejo
+Alfageme
+Cacia            # Miguel y Cacia, el grupo

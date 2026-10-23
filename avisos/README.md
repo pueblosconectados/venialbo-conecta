@@ -5,6 +5,11 @@ hace falta fuera de la web estática:
 
 - `worker/` — el Cloudflare Worker que guarda las suscripciones (fase 2).
 - `enviar.mjs` — el envío automático, que lanza `.github/workflows/avisos.yml` (fase 3).
+- `erratas.mjs` — la revisión de ortografía de lo guardado en el CMS, que lanza
+  `.github/workflows/erratas.yml` y manda las posibles faltas al grupo de Telegram.
+  Las palabras que no debe señalar van en `erratas-palabras.txt`. Para probar:
+  `node avisos/erratas.mjs --todo --dry` (todo el contenido) o
+  `node avisos/erratas.mjs <desde> <hasta> --dry` (lo cambiado entre dos commits).
 - `aviso-a-mano.mjs` — un aviso suelto a todos los suscritos, con confirmación:
   `node avisos/aviso-a-mano.mjs "Título" "Texto" [/ruta] [--urgente]`.
 
@@ -25,6 +30,7 @@ La clave privada VAPID está en `.secretos/vapid.json`; la pública, en
 | `POST /telegram` | Telegram, con su clave | Los comandos del grupo y los botones «📥 Traer» |
 | `GET /revision` | A mano, con el token | Lo oculto sin revisar y el recordatorio que saldría, sin mandarlo |
 | `POST /envios` | La Action, con el token | Apunta un envío push y a qué dispositivos lo aceptó el servicio de push (ver «Si los avisos llegan») |
+| `POST /erratas` | La Action, con el token | Manda al grupo las posibles faltas de lo último guardado (ver `erratas.mjs`). Los botones solo pueden llevar al CMS |
 | `POST /recibido` | El service worker de la web | Dice que un aviso ha llegado al móvil, o que lo han tocado |
 
 Solo acepta direcciones de los servicios de push conocidos (Google, Mozilla, Apple y

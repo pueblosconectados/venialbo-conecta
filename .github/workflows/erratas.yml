@@ -1,0 +1,37 @@
+name: Erratas
+
+# Revisa la ortografía de lo que se acaba de guardar en el CMS (avisos/erratas.mjs, con
+# LanguageTool) y manda las posibles faltas al grupo de Telegram, con un botón a cada
+# ficha en el CMS. Solo mira los campos de texto que han cambiado en este push. Va aparte
+# de la publicación: si falla o LanguageTool no responde, la web se publica igual.
+#
+# Necesita el secreto AVISOS_TOKEN (el mismo de los avisos push): el mensaje sale por el
+# Worker, que es quien tiene el bot de Telegram.
+on:
+  push:
+    branches: [main]
+    paths:
+      - "web-static/content/**"
+
+permissions:
+  contents: read
+
+jobs:
+  revisar:
+    runs-on: ubuntu-latest
+    steps:
+      # Con la historia, para comparar con lo de antes del push; sin los ficheros (las
+      # imágenes pesan), que git trae cuando hacen falta
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+          filter: blob:none
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+
+      - name: Revisar
+        env:
+          AVISOS_TOKEN: ${{ secrets.AVISOS_TOKEN }}
+        run: node avisos/erratas.mjs ${{ github.event.before }} ${{ github.sha }}

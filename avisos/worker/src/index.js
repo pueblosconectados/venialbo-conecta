@@ -18,6 +18,8 @@
 //                                    token; en revision.js). No lo manda
 //   POST /envios         la Action   apunta un envío push y a quién se aceptó (con el
 //                                    token; en entregas.js)
+//   POST /erratas        la Action   las posibles faltas de lo último guardado, que van
+//                                    a Telegram (con el token; en erratas.js)
 //   POST /recibido       el móvil    el service worker dice que le ha llegado un aviso,
 //                                    o que lo han tocado (en entregas.js)
 //
@@ -42,6 +44,7 @@ import { recordarSinRevisar, sinRevisar } from "./revision.js";
 import { recordarCaducan } from "./caducidad.js";
 import { recordarCasas } from "./casas.js";
 import { apuntarEnvio, apuntarRecibido, limpiarEntregas } from "./entregas.js";
+import { mandarErratas } from "./erratas.js";
 
 // Los servicios de push conocidos. Lo demás se rechaza, para que nadie llene el KV con
 // direcciones inventadas.
@@ -57,6 +60,8 @@ const MAX_METADATOS = 1024;
 const MAX_CUERPO = 4096;
 // La lista de dispositivos de un envío: 64 caracteres cada uno
 const MAX_CUERPO_ENVIO = 256 * 1024;
+// El mensaje de las erratas: hasta 4096 caracteres para Telegram, más los botones
+const MAX_CUERPO_ERRATAS = 16 * 1024;
 
 const json = (datos, estado = 200, cabeceras = {}) =>
   new Response(JSON.stringify(datos), {
@@ -185,6 +190,13 @@ export default {
         if (!conToken(request, env)) return json({ error: "no autorizado" }, 401);
         if (metodo !== "POST") return json({ error: "método no permitido" }, 405);
         const resultado = await apuntarEnvio(await leerCuerpo(request, MAX_CUERPO_ENVIO), env);
+        return json(resultado, resultado.error ? 400 : 200);
+      }
+
+      if (pathname === "/erratas") {
+        if (!conToken(request, env)) return json({ error: "no autorizado" }, 401);
+        if (metodo !== "POST") return json({ error: "método no permitido" }, 405);
+        const resultado = await mandarErratas(await leerCuerpo(request, MAX_CUERPO_ERRATAS), env);
         return json(resultado, resultado.error ? 400 : 200);
       }
 
