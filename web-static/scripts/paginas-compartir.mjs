@@ -178,6 +178,7 @@ const SECCIONES = [
   { ruta: "tablon", titulo: "Tablón", descripcion: "Horarios, avisos útiles y anuncios entre vecinos de Venialbo." },
   { ruta: "pueblos-conectados", titulo: "Pueblos Conectados", descripcion: "Un proyecto colaborativo entre Venialbo (Zamora) y Aldearrubia (Salamanca).", imagen: "/pueblos-conectados.webp" },
   { ruta: "enlaces", titulo: "Enlaces de interés", descripcion: "Otras páginas donde se habla de Venialbo: sus canales y páginas en las redes, y más." },
+  { ruta: "buscar", titulo: "Buscar", descripcion: "Busca en VenialboConecta: negocios, servicios, anuncios, noticias, actividades y lugares de Venialbo." },
   { ruta: "privacidad", titulo: "Privacidad", descripcion: "Qué pasa con tus datos en VenialboConecta." },
 ];
 const descripcionDe = Object.fromEntries(SECCIONES.map((s) => [s.ruta, s.descripcion]));

@@ -656,3 +656,47 @@ const avisos = (await leerColeccion("avisos"))
   })
   .sort((a, b) => nivelDe(a) - nivelDe(b) || (b.id ?? "").localeCompare(a.id ?? ""));
 await escribir("avisos", avisos, avisos);
+
+// El buscador de la web (/buscar): una entrada por ficha visible, con todo su texto ya
+// preparado para comparar, también el cuerpo que los listados quitan. Las reglas, las
+// mismas que el /buscar del bot (avisos/worker/src/buscar.js): sin tildes ni
+// mayúsculas, y sin rutas de imágenes ni enlaces, que dan coincidencias absurdas.
+// La caducidad va aparte: se mira al buscar, como en los listados.
+const normaliza = (texto) =>
+  String(texto)
+    .normalize("NFD")
+    .replace(/[̀-ͯ]/g, "")
+    .toLowerCase();
+const textoDe = (valor) => {
+  if (typeof valor === "string") return /^(\/media\/|https?:\/\/)/.test(valor) ? "" : sinMarkdown(valor);
+  if (Array.isArray(valor)) return valor.map(textoDe).join(" ");
+  if (valor && typeof valor === "object") return Object.values(valor).map(textoDe).join(" ");
+  return "";
+};
+// Lo que se enseña debajo del título en el resultado: una línea, sin marcas
+const linea = (...textos) => {
+  const t = sinMarkdown(textos.find((x) => typeof x === "string" && x.trim()) ?? "").replace(/\s+/g, " ");
+  return t.length > 140 ? `${t.slice(0, 139)}…` : t;
+};
+const primeraImagen = (f) => f.imagen_url || f.galeria?.find((g) => g?.imagen)?.imagen || null;
+const entrada = (recurso, f, titulo, resumen, imagen) => ({
+  recurso,
+  id: f.id,
+  titulo: String(titulo ?? "").trim(),
+  resumen,
+  imagen: imagen ?? null,
+  fecha_caducidad: f.fecha_caducidad ?? null,
+  // Sin los campos internos, que no son texto de la ficha
+  texto: normaliza(textoDe(quitar(f, "id", "activo", "activa", "destacada", "novedad_hasta", "fecha_caducidad"))),
+});
+const buscador = [
+  ...negocios.map((f) => entrada("negocios", f, f.nombre, linea(f.categoria_negocio, f.descripcion), f.logo_url)),
+  ...servicios.map((f) => entrada("servicios", f, f.nombre, linea(f.tipo, f.descripcion), f.logo_url)),
+  ...anuncios.map((f) => entrada("anuncios", f, f.titulo, linea(f.descripcion), primeraImagen(f))),
+  ...noticias.map((f) => entrada("noticias", f, f.titulo, linea(f.resumen, f.contenido), f.imagen_url)),
+  ...actividades.map((f) => entrada("actividades", f, f.titulo, linea(f.resumen, f.contenido), primeraImagen(f))),
+  ...lugares.map((f) => entrada("lugares", f, f.nombre, linea(f.resumen, f.contenido), primeraImagen(f))),
+  ...rutas.map((f) => entrada("rutas", f, f.nombre, linea(f.resumen, f.contenido), primeraImagen(f))),
+];
+await writeJson(join(DATA_DIR, "buscador.json"), buscador);
+console.log(`buscador: ${buscador.length}`);

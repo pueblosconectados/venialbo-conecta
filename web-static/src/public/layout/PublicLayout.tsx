@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { Outlet, Link, useLocation } from "react-router";
 import { Layout, Menu, Button, Drawer, Grid, Typography } from "antd";
-import { MenuOutlined } from "@ant-design/icons";
+import { MenuOutlined, SearchOutlined } from "@ant-design/icons";
 import { FORMULARIOS } from "../../config";
 import { colors, fonts } from "../../theme";
 import { BannerAvisos } from "../components/BannerAvisos";
@@ -53,7 +53,8 @@ export function PublicLayout() {
     color: colors.musgo,
     fontFamily: fonts.serif,
     fontWeight: 700,
-    fontSize: 22,
+    // En el móvil, algo más pequeño: junto a la lupa y el menú no cabía en 360 px
+    fontSize: screens.md ? 22 : 20,
     letterSpacing: "-0.02em",
     flexShrink: 0,
   };
@@ -67,7 +68,8 @@ export function PublicLayout() {
           zIndex: 100,
           display: "flex",
           alignItems: "center",
-          gap: 24,
+          gap: screens.md ? 24 : 12,
+          padding: screens.md ? undefined : "0 16px",
           background: colors.blanco,
           borderBottom: `1px solid ${colors.borde}`,
           boxShadow: "0 1px 4px rgba(61, 47, 31, 0.04)",
@@ -79,7 +81,7 @@ export function PublicLayout() {
           <span>Venialbo<span style={{ color: colors.terracota }}>Conecta</span></span>
         </Link>
 
-        {screens.md ? (
+        {screens.md && (
           <Menu
             mode="horizontal"
             selectedKeys={[seccionActual]}
@@ -93,15 +95,28 @@ export function PublicLayout() {
               fontWeight: 500,
             }}
           />
-        ) : (
-          <div style={{ marginLeft: "auto" }}>
+        )}
+        {/* La lupa, a la vista también en el móvil: el buscador no cabe en la cabecera,
+            así que lleva a su página */}
+        <div style={{ marginLeft: screens.md ? -16 : "auto", display: "flex", alignItems: "center" }}>
+          {/* Sin display: flex, el enlace hereda la altura de línea de la cabecera (68 px)
+              y deja el botón del menú pegado arriba */}
+          <Link to="/buscar" aria-label="Buscar" style={{ display: "flex" }}>
             <Button
               type="text"
+              tabIndex={-1}
+              icon={<SearchOutlined style={{ color: colors.musgo, fontSize: 20 }} />}
+            />
+          </Link>
+          {!screens.md && (
+            <Button
+              type="text"
+              aria-label="Menú"
               icon={<MenuOutlined style={{ color: colors.musgo, fontSize: 20 }} />}
               onClick={() => setDrawerOpen(true)}
             />
-          </div>
-        )}
+          )}
+        </div>
       </Header>
 
       <Drawer
