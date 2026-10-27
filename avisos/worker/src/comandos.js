@@ -13,6 +13,8 @@
 //   /republicar  vuelve a lanzar la publicación de la web
 //   /avisos      cuántos dispositivos tienen las push activadas, y si los últimos
 //                avisos les llegaron y cuánto tardaron (entregas.js)
+//   /renovaciones  cuándo caducan los tokens del Worker y lo apuntado a mano, como el
+//                dominio (renovaciones.js)
 //   /chatid      el id de este chat
 //   /ayuda       la lista
 //
@@ -38,6 +40,7 @@ import { listaCaducan } from "./caducidad.js";
 import { ultimosCambios } from "./cambios.js";
 import { buscar } from "./buscar.js";
 import { resumenEntregas } from "./entregas.js";
+import { listaRenovaciones } from "./renovaciones.js";
 
 const TALLY = "https://api.tally.so";
 
@@ -164,6 +167,7 @@ const CONSULTAR = [
   ["cambios", "Lo último que se ha guardado en el CMS, y quién"],
   ["buscar", "Busca en la web: /buscar panadería"],
   ["avisos", "Cuántos tienen los avisos y si les llegan"],
+  ["renovaciones", "Cuándo caducan los tokens y el dominio"],
   ["chatid", "El id de este chat"],
   ["ayuda", "Esta lista"],
 ];
@@ -191,7 +195,9 @@ const cambios = async (env) => ultimosCambios(env);
 // Lo que va detrás del comando: "/buscar bar toca" → "bar toca"
 const buscarEnWeb = async (_env, _mensaje, argumentos) => buscar(argumentos);
 
-const ACCIONES = { estado, visitas, pendientes, caducan, cambios, buscar: buscarEnWeb, republicar, avisos, chatid, ayuda, start: ayuda };
+const renovaciones = async (env) => listaRenovaciones(env);
+
+const ACCIONES = { estado, visitas, pendientes, caducan, cambios, buscar: buscarEnWeb, republicar, avisos, renovaciones, chatid, ayuda, start: ayuda };
 // Los que se contestan fuera del grupo
 const EN_CUALQUIER_CHAT = new Set(["chatid"]);
 

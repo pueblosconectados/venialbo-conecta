@@ -26,7 +26,8 @@
 // Y el cron de wrangler.toml, cada 5 minutos: la vigilancia de GitHub y de la web, las
 // Actions que fallen (publicaciones.js), cada día a las 10:00 lo oculto sin revisar
 // (revision.js), lo que está en su último día de mañana (caducidad.js) y las casas que
-// cumplen 3, 6, 9… meses publicadas (casas.js), y la limpieza de lo medido de los
+// cumplen 3, 6, 9… meses publicadas (casas.js), lo que hay que renovar pronto, como los
+// tokens (renovaciones.js), y la limpieza de lo medido de los
 // avisos (entregas.js), y los lunes a las 9:00 el resumen
 // semanal.
 //
@@ -45,6 +46,7 @@ import { recordarCaducan } from "./caducidad.js";
 import { recordarCasas } from "./casas.js";
 import { apuntarEnvio, apuntarRecibido, limpiarEntregas } from "./entregas.js";
 import { mandarErratas } from "./erratas.js";
+import { recordarRenovaciones } from "./renovaciones.js";
 
 // Los servicios de push conocidos. Lo demás se rechaza, para que nadie llene el KV con
 // direcciones inventadas.
@@ -260,6 +262,7 @@ export default {
       ctx.waitUntil(recordarSinRevisar(env));
       ctx.waitUntil(recordarCaducan(env));
       ctx.waitUntil(recordarCasas(env));
+      ctx.waitUntil(recordarRenovaciones(env));
       ctx.waitUntil(limpiarEntregas(env));
     }
   },

@@ -196,6 +196,7 @@ algo es `/republicar`.
 | `/buscar <texto>` | Busca en todo lo que se ve en la web: el teléfono de un negocio, el contacto de un anuncio… con botones a la ficha en la web y en el CMS |
 | `/republicar` | Vuelve a lanzar la publicación de la web, para cuando ha fallado por algo pasajero |
 | `/avisos` | Cuántos dispositivos tienen las push activadas, y si les llegaron los últimos 5 avisos y cuánto tardaron |
+| `/renovaciones` | Cuándo caducan el token de GitHub, el de Cloudflare y lo apuntado a mano (el dominio), con botón para renovar lo que está cerca |
 | `/chatid` | El id del chat donde se escribe |
 | `/ayuda` | La lista |
 
@@ -288,6 +289,25 @@ hay nada, no escribe. Está en `worker/src/caducidad.js`.
   días, `caducidadDe` en `build-content.mjs`). No hace falta token.
 - **La fecha es el último día que se ve**: `haCaducado` (en `web-static/src/datos.ts`)
   lo deja hasta las 23:59 de ese día.
+
+## Lo que hay que renovar
+
+Cada día a las 10:00 el Worker mira cuándo caducan sus tokens y avisa en el grupo
+cuando a uno le quedan **15 días** y otra vez cuando le quedan **3**, con lo que hay que
+hacer y un botón a donde se renueva. Cuando la fecha cambia (se ha renovado), lo dice
+una vez. `/renovaciones` lo lista todo. Está en `worker/src/renovaciones.js`.
+
+- **GitHub** da la caducidad del token de grano fino en la cabecera
+  `github-authentication-token-expiration` de cualquier respuesta; sin cabecera, no
+  caduca. Antes solo se sabía cuando ya lo rechazaba (eso lo sigue avisando
+  `publicaciones.js`), y para entonces la importación de Tally ya había dejado de ir.
+- **Cloudflare** la da en `expires_on` de `/user/tokens/verify`. El
+  `CF_ANALYTICS_TOKEN` de ahora no caduca, pero si se cambia por uno que sí, se verá.
+- **Lo demás, a mano**: la variable `RENOVACIONES` de `wrangler.toml`, una lista JSON
+  `[{ "nombre", "fecha": "AAAA-MM-DD", "enlace" }]`. Es para el dominio (los `.es` no
+  tienen RDAP, no se puede preguntar). Al renovar, se cambia la fecha y se despliega.
+- **El estado** va en el KV `ESTADO`, clave `renovaciones`: el último umbral avisado
+  para cada fecha, para no repetir.
 
 ## Los últimos cambios
 

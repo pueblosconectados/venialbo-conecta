@@ -73,6 +73,20 @@ export const graphql = async (env, query) => {
   return data;
 };
 
+// Cuándo caduca el propio token (lo usa renovaciones.js): { fecha } en ms, o null si no
+// caduca; { rechazado: true } si GitHub ya no lo acepta. Va en una cabecera de cualquier
+// respuesta, como "2026-11-20 08:00:00 UTC".
+export const caducidadToken = async (env) => {
+  const respuesta = await fetch(API, { headers: cabeceras(env) });
+  if (respuesta.status === 401 || respuesta.status === 403) return { rechazado: true };
+  if (!respuesta.ok) throw new Error(`GitHub: HTTP ${respuesta.status} al mirar el token`);
+  const cabecera = respuesta.headers.get("github-authentication-token-expiration");
+  if (!cabecera) return { fecha: null };
+  const fecha = Date.parse(cabecera.replace(" ", "T").replace(" UTC", "Z").replace(/ ([+-]\d\d)(\d\d)$/, "$1:$2"));
+  if (Number.isNaN(fecha)) throw new Error(`GitHub: no entiendo la caducidad «${cabecera}»`);
+  return { fecha };
+};
+
 // Los últimos commits de main, del más nuevo al más viejo (los usa cambios.js). Con
 // 100 da para ver lo último del CMS aunque entre medias haya commits de las Actions.
 export const listarCommits = async (env) => {

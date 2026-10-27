@@ -14,6 +14,10 @@ ORIGENES = "https://venialboconecta.es,http://localhost:5173"
 # CF_ANALYTICS_TOKEN). El siteTag no es el token del script de la web: ver resumen.js.
 CF_ACCOUNT_ID = "5ea58d979dd87f6b54083c23e455ebb3"
 CF_SITE_TAG = "3fbf6e812f2d4a2faa040386111c5e89"
+# Lo que caduca y no se puede preguntar a nadie, para el aviso y /renovaciones
+# (renovaciones.js): [{ "nombre": "…", "fecha": "AAAA-MM-DD", "enlace": "https://…" }].
+# Al renovarlo, se cambia la fecha y se vuelve a desplegar.
+RENOVACIONES = '[{ "nombre": "Dominio venialboconecta.es", "fecha": "2027-09-21" }]'
 
 # Cada 5 minutos: la vigilancia de GitHub y de la web, y el lunes a las 9:00 de Madrid
 # el resumen semanal (lo decide el propio Worker, ver scheduled en index.js). Uno solo,
