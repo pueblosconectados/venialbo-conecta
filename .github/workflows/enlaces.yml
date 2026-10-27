@@ -1,0 +1,40 @@
+name: Enlaces
+
+# Cada lunes comprueba los enlaces de lo que se ve en la web (avisos/enlaces.mjs) y manda
+# los que fallan al Worker, que avisa al grupo de Telegram de los que fallan dos semanas
+# seguidas. Va aparte de la publicación: no la toca.
+#
+# Necesita el secreto AVISOS_TOKEN (el mismo de los avisos push): el mensaje sale por el
+# Worker, que es quien tiene el bot de Telegram y guarda lo que falló la vez anterior.
+on:
+  schedule:
+    # Lunes a las 6:23 UTC (7:23 u 8:23 en Madrid), antes de que se mire el grupo. El
+    # minuto raro, porque a las en punto GitHub va cargado y retrasa los cron.
+    - cron: "23 6 * * 1"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  comprobar:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      # Solo el contenido y el script; de las imágenes basta la lista (git ls-files),
+      # que está entera aunque no se bajen
+      - uses: actions/checkout@v5
+        with:
+          filter: blob:none
+          sparse-checkout: |
+            web-static/content
+            avisos
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+
+      - name: Comprobar
+        env:
+          AVISOS_TOKEN: ${{ secrets.AVISOS_TOKEN }}
+        run: node avisos/enlaces.mjs

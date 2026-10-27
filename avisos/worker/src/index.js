@@ -20,6 +20,9 @@
 //                                    token; en entregas.js)
 //   POST /erratas        la Action   las posibles faltas de lo último guardado, que van
 //                                    a Telegram (con el token; en erratas.js)
+//   POST /enlaces        la Action   los enlaces que fallan en la comprobación semanal,
+//                                    para avisar de los que fallan dos veces seguidas
+//                                    (con el token; en enlaces.js)
 //   POST /recibido       el móvil    el service worker dice que le ha llegado un aviso,
 //                                    o que lo han tocado (en entregas.js)
 //
@@ -27,7 +30,8 @@
 // Actions que fallen (publicaciones.js), cada día a las 10:00 lo oculto sin revisar
 // (revision.js), lo que está en su último día de mañana (caducidad.js) y las casas que
 // cumplen 3, 6, 9… meses publicadas (casas.js), lo que hay que renovar pronto, como los
-// tokens (renovaciones.js), y la limpieza de lo medido de los
+// tokens (renovaciones.js), el primer lunes de cada mes el repaso de las fichas viejas
+// y cojas (repaso.js), y la limpieza de lo medido de los
 // avisos (entregas.js), y los lunes a las 9:00 el resumen
 // semanal.
 //
@@ -47,6 +51,8 @@ import { recordarCasas } from "./casas.js";
 import { apuntarEnvio, apuntarRecibido, limpiarEntregas } from "./entregas.js";
 import { mandarErratas } from "./erratas.js";
 import { recordarRenovaciones } from "./renovaciones.js";
+import { recordarRepaso } from "./repaso.js";
+import { apuntarEnlaces } from "./enlaces.js";
 
 // Los servicios de push conocidos. Lo demás se rechaza, para que nadie llene el KV con
 // direcciones inventadas.
@@ -64,6 +70,8 @@ const MAX_CUERPO = 4096;
 const MAX_CUERPO_ENVIO = 256 * 1024;
 // El mensaje de las erratas: hasta 4096 caracteres para Telegram, más los botones
 const MAX_CUERPO_ERRATAS = 16 * 1024;
+// Los enlaces que fallan, con sus fichas
+const MAX_CUERPO_ENLACES = 128 * 1024;
 
 const json = (datos, estado = 200, cabeceras = {}) =>
   new Response(JSON.stringify(datos), {
@@ -202,6 +210,13 @@ export default {
         return json(resultado, resultado.error ? 400 : 200);
       }
 
+      if (pathname === "/enlaces") {
+        if (!conToken(request, env)) return json({ error: "no autorizado" }, 401);
+        if (metodo !== "POST") return json({ error: "método no permitido" }, 405);
+        const resultado = await apuntarEnlaces(await leerCuerpo(request, MAX_CUERPO_ENLACES), env);
+        return json(resultado, resultado.error ? 400 : 200);
+      }
+
       if (pathname === "/tally") return await webhookTally(request, env, json);
 
       if (pathname === "/resumen") {
@@ -263,6 +278,9 @@ export default {
       ctx.waitUntil(recordarCaducan(env));
       ctx.waitUntil(recordarCasas(env));
       ctx.waitUntil(recordarRenovaciones(env));
+      // El primer lunes del mes
+      if (esLunes && Number(new Intl.DateTimeFormat("en-US", { timeZone: "Europe/Madrid", day: "numeric" }).format(momento)) <= 7)
+        ctx.waitUntil(recordarRepaso(env));
       ctx.waitUntil(limpiarEntregas(env));
     }
   },

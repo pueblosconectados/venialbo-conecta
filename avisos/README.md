@@ -196,6 +196,7 @@ algo es `/republicar`.
 | `/buscar <texto>` | Busca en todo lo que se ve en la web: el teléfono de un negocio, el contacto de un anuncio… con botones a la ficha en la web y en el CMS |
 | `/republicar` | Vuelve a lanzar la publicación de la web, para cuando ha fallado por algo pasajero |
 | `/avisos` | Cuántos dispositivos tienen las push activadas, y si les llegaron los últimos 5 avisos y cuánto tardaron |
+| `/repaso` | Las fichas sin revisar desde hace 6 meses, las cojas y los enlaces rotos, con botones para darlas por buenas |
 | `/renovaciones` | Cuándo caducan el token de GitHub, el de Cloudflare y lo apuntado a mano (el dominio), con botón para renovar lo que está cerca |
 | `/chatid` | El id del chat donde se escribe |
 | `/ayuda` | La lista |
@@ -289,6 +290,47 @@ hay nada, no escribe. Está en `worker/src/caducidad.js`.
   días, `caducidadDe` en `build-content.mjs`). No hace falta token.
 - **La fecha es el último día que se ve**: `haCaducado` (en `web-static/src/datos.ts`)
   lo deja hasta las 23:59 de ese día.
+
+## El repaso del contenido
+
+Para que el contenido no envejezca. El primer lunes de cada mes a las 10:00 el Worker
+manda al grupo dos listas, si tienen algo, y `/repaso` las enseña cuando se quiera,
+junto con los enlaces rotos. Está en `worker/src/repaso.js`.
+
+- **Fichas sin revisar**: negocios y servicios que nadie ha guardado en 6 meses (por el
+  último commit del fichero, con GraphQL como `revision.js`). Son los que tienen
+  teléfonos y horarios. «✅ Sigue igual» la da por revisada otros 6 meses sin hacer un
+  commit: se apunta en el KV `ESTADO`, clave `repaso`.
+- **Fichas cojas**: publicadas pero sin algo que deberían tener (`FALTAS` en
+  `repaso.js`): negocios sin foto, teléfono, dirección, horario o descripción; servicios
+  sin foto, sin ninguna forma de contacto o sin descripción (no se les pide horario ni
+  dirección: el bibliobús no tiene); lugares sin foto, coordenadas o texto; rutas sin
+  foto, punto de salida, GPX ni Wikiloc, duración o descripción; actividades sin foto o
+  texto, o celebradas hace entre 3 y 45 días sin fotos ni vídeo (las que se repiten, no);
+  noticias de los últimos 30 días sin foto. «👌 Así está bien» la quita mientras le falte
+  lo mismo; si le falta otra cosa, vuelve a salir.
+- **Los botones** llevan una huella de la ruta del fichero (la ruta entera no cabe en
+  los 64 bytes de `callback_data`) y el Worker vuelve a leer las fichas para saber cuál
+  es. Quien lo pulsa queda dicho en el grupo.
+
+## Los enlaces rotos
+
+Cada lunes a las 6:23 UTC la Action `enlaces.yml` comprueba los enlaces de lo que se ve
+en la web (`avisos/enlaces.mjs`; en local, `node avisos/enlaces.mjs --dry`) y manda los
+que fallan a `POST /enlaces`. El Worker avisa al grupo de los que fallan **dos semanas
+seguidas**, con un botón a cada ficha en el CMS, y una vez más cuando dejan de fallar.
+Está en `worker/src/enlaces.js`; el estado, en el KV `ESTADO`, clave `enlaces`.
+
+- **Qué se mira**: las direcciones de los campos y las de dentro del texto, de las
+  fichas visibles y sin caducar; los archivos propios (`/media/…`), que estén en el repo
+  (`git ls-files`, sin bajar las imágenes); y los vídeos de YouTube por su oEmbed, porque
+  la página de un vídeo borrado da 200 igual.
+- **Qué no** (comprobado el 2026-10-27): Facebook contesta 400 a cualquier robot,
+  Instagram 200 a todo (la pantalla de entrar) y Wikiloc tiene la protección de
+  Cloudflare. Se saltan, igual que cualquier web que pida el «Just a moment…».
+- **Las redirecciones se siguen a mano, guardando las cookies**: la sede electrónica
+  (`venialbo.sedelectronica.es`) entra en bucle sin ellas.
+- Con el contenido de hoy: 175 enlaces, 145 bien, 30 sin poder comprobar, en 7 s.
 
 ## Lo que hay que renovar
 

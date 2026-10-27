@@ -13,6 +13,8 @@
 //   /republicar  vuelve a lanzar la publicación de la web
 //   /avisos      cuántos dispositivos tienen las push activadas, y si los últimos
 //                avisos les llegaron y cuánto tardaron (entregas.js)
+//   /repaso      las fichas sin revisar desde hace meses, las cojas y los enlaces rotos
+//                (repaso.js y enlaces.js), con botones para darlas por buenas
 //   /renovaciones  cuándo caducan los tokens del Worker y lo apuntado a mano, como el
 //                dominio (renovaciones.js)
 //   /chatid      el id de este chat
@@ -41,6 +43,7 @@ import { ultimosCambios } from "./cambios.js";
 import { buscar } from "./buscar.js";
 import { resumenEntregas } from "./entregas.js";
 import { listaRenovaciones } from "./renovaciones.js";
+import { marcar, mensajesRepaso } from "./repaso.js";
 
 const TALLY = "https://api.tally.so";
 
@@ -167,6 +170,7 @@ const CONSULTAR = [
   ["cambios", "Lo último que se ha guardado en el CMS, y quién"],
   ["buscar", "Busca en la web: /buscar panadería"],
   ["avisos", "Cuántos tienen los avisos y si les llegan"],
+  ["repaso", "Fichas viejas, cojas y enlaces rotos"],
   ["renovaciones", "Cuándo caducan los tokens y el dominio"],
   ["chatid", "El id de este chat"],
   ["ayuda", "Esta lista"],
@@ -197,7 +201,16 @@ const buscarEnWeb = async (_env, _mensaje, argumentos) => buscar(argumentos);
 
 const renovaciones = async (env) => listaRenovaciones(env);
 
-const ACCIONES = { estado, visitas, pendientes, caducan, cambios, buscar: buscarEnWeb, republicar, avisos, renovaciones, chatid, ayuda, start: ayuda };
+// Cada parte va en su mensaje, con sus botones: se mandan al grupo en orden y no se
+// contesta al comando (la respuesta del webhook llegaría después que los demás)
+const repasar = async (env) => {
+  const mensajes = await mensajesRepaso(env);
+  if (!mensajes.length) return { texto: "✅ Nada que repasar: ni fichas viejas, ni cojas, ni enlaces rotos." };
+  for (const { texto, botones } of mensajes) await aTelegram(env, texto, botones);
+  return null;
+};
+
+const ACCIONES = { estado, visitas, pendientes, caducan, cambios, buscar: buscarEnWeb, republicar, avisos, repaso: repasar, renovaciones, chatid, ayuda, start: ayuda };
 // Los que se contestan fuera del grupo
 const EN_CUALQUIER_CHAT = new Set(["chatid"]);
 
@@ -222,6 +235,19 @@ const pulsacion = async (env, consulta) => {
     await marcarReintentado(env, cual);
     await aTelegram(env, `🔁 ${quien} ha relanzado «${escapaHtml(nombreDe(cual))}». Si vuelve a fallar, os aviso.`);
     return responder("🔁 Lanzado de nuevo.");
+  }
+
+  // «✅ Sigue igual» y «👌 Así está bien» del repaso (repaso.js)
+  if ((accion === "igual" || accion === "bien") && /^[0-9a-f]{12}$/.test(cual ?? "")) {
+    const marcada = await marcar(env, accion, cual);
+    if (!marcada) return responder("Esa ficha ya no está publicada.", true);
+    const titulo = escapaHtml(marcada.titulo);
+    if (accion === "igual") {
+      await aTelegram(env, `✅ ${quien} ha revisado «${titulo}»: sigue igual. No vuelve a salir hasta ${marcada.vuelve}.`);
+      return responder("✅ Apuntado.");
+    }
+    await aTelegram(env, `👌 ${quien} ha dado por buena «${titulo}» tal como está.`);
+    return responder("👌 Apuntado: deja de salir en el repaso.");
   }
 
   if (accion !== "traer" || !TRAER[cual]) return responder("No sé qué hacer con este botón.");
@@ -274,7 +300,8 @@ export const webhookTelegram = async (request, env) => {
 
   try {
     const argumentos = texto.replace(/^\S+\s*/, "");
-    return responderJson(contestar(mensaje, await accion(env, mensaje, argumentos)));
+    const respuesta = await accion(env, mensaje, argumentos);
+    return responderJson(respuesta ? contestar(mensaje, respuesta) : null);
   } catch (e) {
     return responderJson(contestar(mensaje, { texto: `⚠️ No he podido: ${escapaHtml(String(e.message ?? e))}` }));
   }
