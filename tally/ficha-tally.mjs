@@ -27,8 +27,9 @@ import { createRequire } from "node:module";
 import { basename, join } from "node:path";
 import { RAIZ, idDelFormulario, leerClave, leerFichas, leerImportadas, pedirJson } from "./comun.mjs";
 
-// sharp está en las dependencias de la web; no se instala dos veces
-const sharp = createRequire(join(RAIZ, "web-static", "package.json"))("sharp");
+// sharp está en las dependencias de la web; no se instala dos veces. Se carga solo al
+// subir fotos: para publicar o descartar, la Action no instala nada (ficha-tally.yml)
+const cargarSharp = () => createRequire(join(RAIZ, "web-static", "package.json"))("sharp");
 
 const WORKER = "https://venialbo-avisos.venialboconecta.workers.dev";
 const RESULTADO = join(RAIZ, "resultado.json");
@@ -85,6 +86,7 @@ const subirFotos = async (formulario, respuesta, ruta, ficha) => {
   const fotos = await fotosDe(formulario, respuesta);
   if (!fotos.length) return { estado: "nada", mensaje: "La respuesta no trae fotos." };
 
+  const sharp = cargarSharp();
   // Los negocios tienen una sola foto
   const elegidas = galeria ? fotos : fotos.slice(0, 1);
   const nuevas = [];
