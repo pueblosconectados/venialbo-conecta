@@ -120,6 +120,27 @@ npm run deploy
 En local, `npx wrangler d1 execute ENTREGAS --local --file entregas.sql` antes de
 `npm run dev`.
 
+## El texto para difundir por WhatsApp y Facebook
+
+Cuando `enviar.mjs` avisa de algo nuevo, al grupo de los admin le llega un mensaje por
+novedad con el texto listo para compartir (`difusion.mjs`, que pasa por `POST /difundir`
+del Worker, `worker/src/difusion.js`):
+
+- **«📲 Enviar por WhatsApp»** abre WhatsApp (`wa.me/?text=`) con el texto ya escrito: el
+  título en negrita, la fecha si es una actividad, dos líneas y el enlace, que saca la
+  vista previa con foto (`paginas-compartir.mjs`).
+- **«📋 Copiar para Facebook»** copia la versión sin marcas y con `#Venialbo #Zamora`. Va
+  en un botón `copy_text` de Telegram, que admite 256 caracteres: se recorta el resumen
+  (y si no basta, el título).
+
+Va a la vez que el push, con su mismo horario (de 22:00 a 9:00 espera), pero uno por
+novedad aunque el push las junte. Si falla, el push ya está mandado y apuntado: no se
+repite. Para sacarlo a mano de algo ya publicado:
+
+```bash
+node avisos/difusion.mjs noticias/<id> [actividades/<id>…] [--dry]
+```
+
 ## El resumen semanal de visitas
 
 Los lunes a las 9:00 (hora de Madrid) el Worker manda al grupo de Telegram cómo fue la

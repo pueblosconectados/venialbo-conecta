@@ -16,6 +16,9 @@
 // manda nada: lo publicado de noche se queda pendiente y sale en la pasada de las 9:00.
 // Si en una publicación entran varias cosas, van juntas en un solo aviso.
 //
+// Además, al grupo de los admin le llega el texto listo para difundir cada novedad por
+// WhatsApp y Facebook (difusion.mjs).
+//
 // Hasta el 2026-10-19 noticias, actividades y anuncios iban en un resumen a las 19:00. Se
 // cambió porque se publica poco: no hay tanto que agrupar.
 //
@@ -28,6 +31,7 @@ import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import webpush from "web-push";
 import { apuntarAceptados, apuntarEnvio, nuevoId } from "./entregas.mjs";
+import { difundir, textosDe } from "./difusion.mjs";
 
 const RAIZ = join(dirname(fileURLToPath(import.meta.url)), "..");
 const DATOS = join(RAIZ, "web-static", "public", "data");
@@ -274,9 +278,17 @@ for (const { recurso, fila } of novedades) console.log(`  · ${recurso}: ${fila.
 const mensaje = mensajeDe(novedades);
 console.log(`Aviso: «${mensaje.titulo}» — ${mensaje.cuerpo} → ${mensaje.url}`);
 
+// Uno por novedad, aunque el push vaya junto: cada cosa se comparte por su lado
+const paraDifundir = await Promise.all(
+  novedades.map(({ recurso, fila }) => textosDe(recurso, fila, { fotos: recurso === "actividades" && celebrada(fila) })),
+);
+
 if (DRY) {
+  for (const m of paraDifundir) console.log(`── Para difundir (WhatsApp)\n${m.whatsapp}`);
   console.log("--dry: no se manda ni se apunta nada");
   process.exit(0);
 }
 await enviar(mensaje, novedades.some(({ recurso }) => RECURSOS[recurso].urgente));
 await guardar(ya);
+// Después de apuntar: si esto falla, no se repite el push
+await difundir((await secretos()).token, paraDifundir).catch((e) => console.warn(`  ⚠ Texto para difundir: ${e.message}`));

@@ -23,6 +23,8 @@
 //   POST /enlaces        la Action   los enlaces que fallan en la comprobación semanal,
 //                                    para avisar de los que fallan dos veces seguidas
 //                                    (con el token; en enlaces.js)
+//   POST /difundir       la Action   el texto para compartir lo nuevo por WhatsApp y
+//                                    Facebook, al grupo (con el token; en difusion.js)
 //   POST /fichas         la Action   lo que ha hecho un botón de publicar, descartar o
 //                                    subir fotos (con el token; en fichas.js)
 //   POST /recibido       el móvil    el service worker dice que le ha llegado un aviso,
@@ -56,6 +58,7 @@ import { recordarRenovaciones } from "./renovaciones.js";
 import { recordarRepaso } from "./repaso.js";
 import { apuntarEnlaces } from "./enlaces.js";
 import { contarResultado } from "./fichas.js";
+import { mandarDifusion } from "./difusion.js";
 
 // Los servicios de push conocidos. Lo demás se rechaza, para que nadie llene el KV con
 // direcciones inventadas.
@@ -73,6 +76,8 @@ const MAX_CUERPO = 4096;
 const MAX_CUERPO_ENVIO = 256 * 1024;
 // El mensaje de las erratas: hasta 4096 caracteres para Telegram, más los botones
 const MAX_CUERPO_ERRATAS = 16 * 1024;
+// Los textos para difundir: hasta 10, de 1.300 caracteres cada uno
+const MAX_CUERPO_DIFUSION = 32 * 1024;
 // Los enlaces que fallan, con sus fichas
 const MAX_CUERPO_ENLACES = 128 * 1024;
 
@@ -221,6 +226,13 @@ export default {
       }
 
       if (pathname === "/tally") return await webhookTally(request, env, json, ctx);
+
+      if (pathname === "/difundir") {
+        if (!conToken(request, env)) return json({ error: "no autorizado" }, 401);
+        if (metodo !== "POST") return json({ error: "método no permitido" }, 405);
+        const resultado = await mandarDifusion(await leerCuerpo(request, MAX_CUERPO_DIFUSION), env);
+        return json(resultado, resultado.error ? 400 : 200);
+      }
 
       if (pathname === "/fichas") {
         if (!conToken(request, env)) return json({ error: "no autorizado" }, 401);
