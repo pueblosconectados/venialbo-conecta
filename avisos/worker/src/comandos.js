@@ -44,6 +44,7 @@ import { buscar } from "./buscar.js";
 import { resumenEntregas } from "./entregas.js";
 import { listaRenovaciones } from "./renovaciones.js";
 import { marcar, mensajesRepaso } from "./repaso.js";
+import { esBotonFicha, pulsacionFicha } from "./fichas.js";
 
 const TALLY = "https://api.tally.so";
 
@@ -141,7 +142,7 @@ const pendientes = async (env) => {
   if (fichas.length) {
     const lista = listaSinRevisar(fichas);
     partes.push(`🕰 <b>En el CMS, ocultas sin revisar: ${fichas.length}</b>${LISTA}${lista.lineas.join(LISTA)}`);
-    filasBotones.push(...lista.botones.map((b) => [b]));
+    filasBotones.push(...lista.filas);
   } else {
     partes.push("✅ Nada oculto esperando revisión.");
   }
@@ -235,6 +236,14 @@ const pulsacion = async (env, consulta) => {
     await marcarReintentado(env, cual);
     await aTelegram(env, `🔁 ${quien} ha relanzado «${escapaHtml(nombreDe(cual))}». Si vuelve a fallar, os aviso.`);
     return responder("🔁 Lanzado de nuevo.");
+  }
+
+  // Publicar, descartar y subir las fotos de lo que llega por Tally (fichas.js). La
+  // respuesta va en tres partes: "pub:t:<id>"
+  if (esBotonFicha(accion)) {
+    const [, , respuesta] = String(consulta.data).split(":");
+    const [texto, alerta] = await pulsacionFicha(env, consulta, accion, cual, respuesta, quien);
+    return responder(texto, alerta);
   }
 
   // «✅ Sigue igual» y «👌 Así está bien» del repaso (repaso.js)

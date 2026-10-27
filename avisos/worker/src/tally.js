@@ -12,11 +12,15 @@
 // acepta, el mensaje lleva un botón «📥 Traer al CMS» para reintentarlo desde Telegram
 // (lo atiende comandos.js).
 //
+// Las altas, anuncios y casas llevan además «✅ Publicar» y «🗑 Descartar», y si traen
+// fotos se mandan al grupo debajo del aviso, con «📷 Subir estas fotos» (fichas.js).
+//
 // Si Telegram falla se responde 500 y Tally reintenta por su cuenta (a los 5 min, 30 min,
 // 1 h, 6 h y 1 día). Volver a lanzar la Action no duplica nada: trae solo lo pendiente.
 
 import { lanzarTraer } from "./github.js";
-import { aTelegram, escapaHtml } from "./telegram.js";
+import { escapaHtml, filas, llamarTelegram } from "./telegram.js";
+import { botonesFicha, mandarFotos } from "./fichas.js";
 
 // La lista de una colección en Pages CMS. La ficha aún no existe cuando llega el aviso
 // (se crea al pulsar el botón de traer), así que se enlaza la lista, no la ficha.
@@ -80,9 +84,9 @@ const lineaDe = (campo) => {
   let texto;
   if (type === "FILE_UPLOAD" || type === "SIGNATURE") {
     if (!Array.isArray(value) || !value.length) return null;
-    // Las fotos no se descargan ni se enlazan (el enlace va firmado y abre la foto a
-    // quien lo tenga): se miran en Tally
-    texto = `📎 ${value.length} ${value.length === 1 ? "archivo" : "archivos"}, ver en Tally`;
+    // El enlace no se pone (va firmado y abre la foto a quien lo tenga): las fotos van
+    // debajo, como álbum (fichas.js)
+    texto = `📷 ${value.length} ${value.length === 1 ? "foto, va" : "fotos, van"} aquí debajo`;
   } else if (Array.isArray(value)) {
     if (!value.length) return null;
     const nombres = new Map((options ?? []).map((o) => [o.id, o.text]));
@@ -98,15 +102,24 @@ const lineaDe = (campo) => {
 
 const formularioDe = ({ formId, formName }) => FORMULARIOS[formId] ?? { titulo: `📝 ${formName}` };
 
+// El id de la respuesta, el mismo que da la API de Tally (y que guardan los importadores)
+const respuestaDe = (datos) => datos.submissionId ?? datos.responseId;
+
 // Los enlaces van como botones debajo del mensaje, no como URL sueltas en el texto. Si
-// no se pudo traer, una fila más con el botón de reintentar.
+// no se pudo traer, una fila más con el botón de reintentar; y en lo que se trae al CMS,
+// otra con publicar y descartar.
 const botonesDe = (datos, lanzado) => {
   const { cms, traer } = formularioDe(datos);
   const enlaces = [
     ...(cms ? [{ text: "📝 Abrir en el CMS", url: cms }] : []),
     { text: "Ver en Tally", url: `https://tally.so/forms/${datos.formId}/submissions` },
   ];
-  return traer && !lanzado ? [enlaces, [{ text: "📥 Traer al CMS", callback_data: `traer:${traer}` }]] : [enlaces];
+  if (!traer) return [enlaces];
+  return [
+    enlaces,
+    ...(lanzado ? [] : [[{ text: "📥 Traer al CMS", callback_data: `traer:${traer}` }]]),
+    ...(respuestaDe(datos) ? [botonesFicha(traer, respuestaDe(datos))] : []),
+  ];
 };
 
 const mensajeDe = (datos, lanzado) => {
@@ -128,7 +141,7 @@ const mensajeDe = (datos, lanzado) => {
   return montar(cuantos);
 };
 
-export const webhookTally = async (request, env, json) => {
+export const webhookTally = async (request, env, json, ctx) => {
   if (request.method !== "POST") return json({ error: "método no permitido" }, 405);
   const cuerpo = await request.text();
   if (cuerpo.length > MAX_CUERPO) return json({ error: "demasiado grande" }, 413);
@@ -142,7 +155,18 @@ export const webhookTally = async (request, env, json) => {
   const { data } = evento;
   const { traer } = formularioDe(data);
   const lanzado = traer ? await lanzarTraer(env, traer).catch(() => false) : null;
-  if (!(await aTelegram(env, mensajeDe(data, lanzado), botonesDe(data, lanzado))))
-    return json({ error: "telegram" }, 500);
+  const aviso = await llamarTelegram(env, "sendMessage", {
+    chat_id: env.TELEGRAM_CHAT_ID,
+    text: mensajeDe(data, lanzado),
+    parse_mode: "HTML",
+    link_preview_options: { is_disabled: true },
+    reply_markup: { inline_keyboard: filas(botonesDe(data, lanzado)) },
+  });
+  if (!aviso) return json({ error: "telegram" }, 500);
+
+  // Las fotos, después de contestar a Tally: bajarlas y subirlas lleva unos segundos
+  const archivos = (data.fields ?? []).filter((f) => f.type === "FILE_UPLOAD" && Array.isArray(f.value)).flatMap((f) => f.value);
+  if (traer && archivos.length && respuestaDe(data))
+    ctx.waitUntil(mandarFotos(env, { formulario: traer, respuesta: respuestaDe(data), archivos, responderA: aviso.message_id }));
   return json({ ok: true });
 };

@@ -50,6 +50,17 @@ export const leerImportadas = async (env) => {
   return Array.isArray(datos) ? { negocios: datos } : datos;
 };
 
+// { negocios|tablon|casas: { <id de respuesta>: <ruta de la ficha> } }, qué ficha salió de
+// cada respuesta de Tally (lo escriben los importadores). {} si aún no existe.
+export const leerFichasTally = async (env) => {
+  const respuesta = await fetch(`${API}/contents/tally/fichas-importadas.json?ref=main`, {
+    headers: { ...cabeceras(env), accept: "application/vnd.github.raw+json" },
+  });
+  if (respuesta.status === 404) return {};
+  if (!respuesta.ok) throw new Error(`GitHub: HTTP ${respuesta.status} al leer fichas-importadas.json`);
+  return respuesta.json();
+};
+
 // Las últimas ejecuciones de todos los workflows, de la más nueva a la más vieja. null si
 // GitHub rechaza el token (caducado o sin permiso); error si falla otra cosa.
 export const listarEjecuciones = async (env) => {

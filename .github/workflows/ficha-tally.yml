@@ -1,0 +1,101 @@
+name: Ficha de Tally
+
+# Lo lanza el Worker de avisos al pulsar un botón en el grupo de Telegram: subir las
+# fotos de una respuesta de Tally a su ficha, publicarla o descartarla
+# (tally/ficha-tally.mjs). Al terminar, el Worker lo cuenta en el grupo.
+#
+# Las fotos solo entran en el repositorio por aquí, y solo porque alguien las ha visto
+# en el grupo y lo ha decidido: lo que se commitea se queda en el historial para
+# siempre.
+#
+# El repositorio y sus registros son públicos: los inputs no llevan nada personal (el
+# id de una respuesta no abre nada sin la clave de Tally), y el script no imprime ni
+# los datos de quien lo manda ni las direcciones firmadas de las fotos.
+on:
+  workflow_dispatch:
+    inputs:
+      accion:
+        description: Qué hacer
+        required: true
+        type: choice
+        options: [fotos, publicar, descartar]
+      formulario:
+        description: De qué formulario es la respuesta
+        required: true
+        type: choice
+        options: [negocios, tablon, casas]
+      respuesta:
+        description: El id de la respuesta en Tally
+        required: true
+        type: string
+
+permissions:
+  contents: write
+  # Para lanzar la publicación: un push hecho con el GITHUB_TOKEN no lanza otros workflows
+  actions: write
+
+# Uno detrás de otro: dos botones seguidos de la misma ficha no deben pisarse
+concurrency:
+  group: ficha-tally
+  cancel-in-progress: false
+
+jobs:
+  hacer:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: web-static/package-lock.json
+
+      # Por sharp, para las fotos
+      - name: Instalar
+        if: inputs.accion == 'fotos'
+        working-directory: web-static
+        run: npm ci
+
+      # Los inputs por variables, no pegados en la orden: así nada de lo que llegue puede
+      # colarse como código de la shell
+      - name: Hacerlo
+        env:
+          TALLY_API_KEY: ${{ secrets.TALLY_API_KEY }}
+          CI: "true"
+          ACCION: ${{ inputs.accion }}
+          FORMULARIO: ${{ inputs.formulario }}
+          RESPUESTA: ${{ inputs.respuesta }}
+        run: node tally/ficha-tally.mjs "$ACCION" "$FORMULARIO" "$RESPUESTA"
+
+      - name: Commitear
+        id: commit
+        env:
+          ACCION: ${{ inputs.accion }}
+          FORMULARIO: ${{ inputs.formulario }}
+        run: |
+          # tally/ entera y no sus dos JSON: git add falla si se le nombra uno que no existe
+          RUTAS="web-static/content web-static/public/media/imagenes tally"
+          if [ -z "$(git status --porcelain $RUTAS)" ]; then
+            echo "Nada que commitear"
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A $RUTAS
+          git commit -m "content: $ACCION desde Telegram ($FORMULARIO)"
+          # El CMS commitea por su cuenta en main: rebasar antes de empujar
+          git pull --rebase origin main
+          git push origin HEAD:main
+          echo "hecho=1" >> "$GITHUB_OUTPUT"
+
+      - name: Publicar la web
+        if: steps.commit.outputs.hecho == '1'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh workflow run web-static-pages.yml --ref main
+
+      - name: Contarlo en el grupo
+        env:
+          AVISOS_TOKEN: ${{ secrets.AVISOS_TOKEN }}
+        run: node tally/ficha-tally.mjs --avisar

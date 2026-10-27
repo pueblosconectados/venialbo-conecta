@@ -27,3 +27,17 @@ export const aTelegram = async (env, texto, botones = []) => {
   });
   return respuesta.ok;
 };
+
+// Cualquier otro método de la API (editar o borrar un mensaje, mandar fotos…). El
+// cuerpo va en JSON, o como FormData si lleva archivos. Devuelve `result`, o null si
+// Telegram no lo acepta.
+export const llamarTelegram = async (env, metodo, cuerpo) => {
+  const multipart = cuerpo instanceof FormData;
+  const respuesta = await fetch(`https://api.telegram.org/bot${env.TELEGRAM_TOKEN}/${metodo}`, {
+    method: "POST",
+    ...(multipart ? {} : { headers: { "content-type": "application/json" } }),
+    body: multipart ? cuerpo : JSON.stringify(cuerpo),
+  });
+  if (!respuesta.ok) return null;
+  return (await respuesta.json()).result ?? null;
+};

@@ -56,13 +56,13 @@ jobs:
 
       - name: Commitear los anuncios nuevos
         run: |
-          if [ -z "$(git status --porcelain web-static/content/anuncios tally/respuestas-importadas.json)" ]; then
+          if [ -z "$(git status --porcelain web-static/content/anuncios tally/respuestas-importadas.json tally/fichas-importadas.json)" ]; then
             echo "No habia ningun anuncio nuevo que traer"
             exit 0
           fi
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add web-static/content/anuncios tally/respuestas-importadas.json
+          git add web-static/content/anuncios tally/respuestas-importadas.json tally/fichas-importadas.json
           git commit -m "content: anuncios del tablon recibidos por el formulario"
           # El CMS commitea por su cuenta en main: rebasar antes de empujar
           git pull --rebase origin main

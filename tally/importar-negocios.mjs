@@ -25,6 +25,7 @@ import {
   DISCRETO,
   RAIZ,
   existe,
+  apuntarFicha,
   guardarImportadas,
   idDelFormulario,
   leerClave,
@@ -197,6 +198,7 @@ const main = async () => {
     if (faltan.length === 4) console.log("  ⚠ no ha dejado ninguna forma de contacto");
 
     yaHechas.push(envio.id);
+    await apuntarFicha("negocios", envio.id, destino);
   }
 
   importadas.negocios = yaHechas;

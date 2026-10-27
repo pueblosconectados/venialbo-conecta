@@ -12,7 +12,8 @@
 // trae todas las fichas con su contenido y otra el último commit de las ocultas. Por REST
 // sería una petición por fichero, y el plan gratuito da 50 por ejecución.
 
-import { graphql } from "./github.js";
+import { graphql, leerFichasTally } from "./github.js";
+import { botonesFicha } from "./fichas.js";
 import { aTelegram, elemento, LISTA } from "./telegram.js";
 
 const DIAS_AVISO = 2;
@@ -20,10 +21,11 @@ const BOT = "github-actions[bot]";
 const CMS = "https://app.pagescms.org/pueblosconectados/venialbo-conecta/main/collection";
 const DIA = 24 * 60 * 60 * 1000;
 
+// `formulario`: el de Tally del que llegan, para los botones de publicar y descartar
 const COLECCIONES = {
-  negocios: { carpeta: "web-static/content/negocios", titulo: (f) => f.nombre, tipo: "Alta de negocio" },
-  anuncios: { carpeta: "web-static/content/anuncios", titulo: (f) => f.titulo, tipo: "Anuncio" },
-  casas: { carpeta: "web-static/content/casas", titulo: (f) => f.titulo, tipo: "Casa" },
+  negocios: { carpeta: "web-static/content/negocios", titulo: (f) => f.nombre, tipo: "Alta de negocio", formulario: "negocios" },
+  anuncios: { carpeta: "web-static/content/anuncios", titulo: (f) => f.titulo, tipo: "Anuncio", formulario: "tablon" },
+  casas: { carpeta: "web-static/content/casas", titulo: (f) => f.titulo, tipo: "Casa", formulario: "casas" },
 };
 
 const REPO = `repository(owner: "pueblosconectados", name: "venialbo-conecta")`;
@@ -60,10 +62,16 @@ export const sinRevisar = async (env) => {
     .join("\n");
   const { repository: repo } = await graphql(env, `{ ${REPO} { object(expression: "main") { ... on Commit { ${historias} } } } }`);
 
+  // La respuesta de Tally de cada una, para publicarla o descartarla desde Telegram. Si
+  // no se puede leer, salen sin esos botones
+  const respuestas = new Map();
+  for (const [formulario, porId] of Object.entries(await leerFichasTally(env).catch(() => ({}))))
+    for (const [id, ruta] of Object.entries(porId)) respuestas.set(ruta, { formulario, id });
+
   return ocultas
     .map((o, i) => ({ ...o, commit: repo.object[`f${i}`]?.nodes?.[0] }))
     .filter((o) => o.commit?.author?.name === BOT)
-    .map(({ commit, ...o }) => ({ ...o, desde: Date.parse(commit.committedDate) }))
+    .map(({ commit, ...o }) => ({ ...o, desde: Date.parse(commit.committedDate), respuesta: respuestas.get(o.ruta) }))
     .sort((a, b) => a.desde - b.desde);
 };
 
@@ -74,22 +82,24 @@ const hace = (desde, ahora) => {
   return `hace ${horas} h`;
 };
 
-// Las líneas de la lista, y un botón por ficha para abrirla en el CMS (hasta 3)
+// Las líneas de la lista y, por ficha (hasta 3), una fila con el botón para abrirla en
+// el CMS y otra con publicar y descartar si se sabe de qué respuesta de Tally salió.
+// Los títulos no caben de tres en tres: un botón por fila.
 export const listaSinRevisar = (fichas, ahora = Date.now()) => ({
   lineas: fichas.map(
     (f) => elemento(f.titulo, `${COLECCIONES[f.coleccion].tipo} · llegó ${hace(f.desde, ahora)}`),
   ),
-  botones: fichas.slice(0, 3).map((f) => ({
-    text: `📝 ${f.titulo.length > 24 ? `${f.titulo.slice(0, 23)}…` : f.titulo}`,
-    url: enlaceCms(f.coleccion, f.ruta),
-  })),
+  filas: fichas.slice(0, 3).flatMap((f) => [
+    [{ text: `📝 ${f.titulo.length > 24 ? `${f.titulo.slice(0, 23)}…` : f.titulo}`, url: enlaceCms(f.coleccion, f.ruta) }],
+    ...(f.respuesta ? [botonesFicha(f.respuesta.formulario, f.respuesta.id)] : []),
+  ]),
 });
 
 // Lo que hace el cron a las 10:00: solo escribe si hay algo de más de DIAS_AVISO días
 export const recordarSinRevisar = async (env, { ahora = Date.now(), enviar = true } = {}) => {
   const viejas = (await sinRevisar(env)).filter((f) => ahora - f.desde >= DIAS_AVISO * DIA);
   if (!viejas.length) return null;
-  const { lineas, botones } = listaSinRevisar(viejas, ahora);
+  const { lineas, filas } = listaSinRevisar(viejas, ahora);
   const texto = [
     `🕰 <b>${viejas.length === 1 ? "Hay una ficha" : `Hay ${viejas.length} fichas`} sin revisar en el CMS</b>`,
     viejas.length === 1
@@ -100,8 +110,7 @@ export const recordarSinRevisar = async (env, { ahora = Date.now(), enviar = tru
       ? "<i>Repásala y márcala como visible. Si no vale, guárdala oculta o bórrala, y deja de salir aquí.</i>"
       : "<i>Repásalas y márcalas como visibles. Las que no valgan, guárdalas ocultas o bórralas, y dejan de salir aquí.</i>",
   ].join("\n\n");
-  // Una fila por botón: los títulos no caben de tres en tres
-  if (enviar && !(await aTelegram(env, texto, botones.map((b) => [b]))))
+  if (enviar && !(await aTelegram(env, texto, filas)))
     throw new Error("Telegram no aceptó el recordatorio");
   return texto;
 };

@@ -55,13 +55,13 @@ jobs:
 
       - name: Commitear las casas nuevas
         run: |
-          if [ -z "$(git status --porcelain web-static/content/casas tally/respuestas-importadas.json)" ]; then
+          if [ -z "$(git status --porcelain web-static/content/casas tally/respuestas-importadas.json tally/fichas-importadas.json)" ]; then
             echo "No habia ninguna casa nueva que traer"
             exit 0
           fi
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add web-static/content/casas tally/respuestas-importadas.json
+          git add web-static/content/casas tally/respuestas-importadas.json tally/fichas-importadas.json
           git commit -m "content: casas recibidas por el formulario"
           # El CMS commitea por su cuenta en main: rebasar antes de empujar
           git pull --rebase origin main

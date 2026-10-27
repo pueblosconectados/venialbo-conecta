@@ -18,6 +18,7 @@ import {
   RAIZ,
   existe,
   fechaHoraLocal,
+  apuntarFicha,
   guardarImportadas,
   idDelFormulario,
   leerClave,
@@ -199,6 +200,7 @@ const main = async () => {
     }
 
     yaHechas.push(envio.id);
+    await apuntarFicha(SLUG, envio.id, destino);
   }
 
   importadas[SLUG] = yaHechas;

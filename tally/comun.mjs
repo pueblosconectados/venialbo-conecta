@@ -4,7 +4,7 @@
 import { readFile, writeFile } from "node:fs/promises";
 import { createHash } from "node:crypto";
 import { homedir } from "node:os";
-import { dirname, join } from "node:path";
+import { dirname, join, relative, sep } from "node:path";
 import { fileURLToPath } from "node:url";
 
 export const AQUI = dirname(fileURLToPath(import.meta.url));
@@ -13,6 +13,7 @@ export const API = "https://api.tally.so";
 
 const FICHERO_IDS = join(AQUI, "formularios-creados.json");
 const FICHERO_IMPORTADAS = join(AQUI, "respuestas-importadas.json");
+const FICHERO_FICHAS = join(AQUI, "fichas-importadas.json");
 
 // El repositorio es público y los registros de Actions también, así que cuando esto
 // corre ahí no se imprime nada personal: ni quién manda la ficha ni el enlace de su
@@ -82,6 +83,17 @@ export const leerImportadas = async () => {
 
 export const guardarImportadas = async (datos) => {
   await writeFile(FICHERO_IMPORTADAS, `${JSON.stringify(datos, null, 2)}\n`, "utf8");
+};
+
+// Qué ficha salió de cada respuesta: { negocios|tablon|casas: { <id>: "web-static/content/…" } }.
+// Lo usan los botones de Telegram (tally/ficha-tally.mjs) para saber qué ficha publicar,
+// descartar o a cuál subir las fotos. Las importadas antes del 2026-10-27 no están.
+export const leerFichas = async () => JSON.parse((await readFile(FICHERO_FICHAS, "utf8").catch(() => null)) ?? "{}");
+
+export const apuntarFicha = async (clave, id, destino) => {
+  const fichas = await leerFichas();
+  fichas[clave] = { ...fichas[clave], [id]: relative(RAIZ, destino).split(sep).join("/") };
+  await writeFile(FICHERO_FICHAS, `${JSON.stringify(fichas, null, 2)}\n`, "utf8");
 };
 
 export const existe = async (ruta) =>

@@ -73,7 +73,11 @@ Detalles que conviene conocer:
 - **La foto no se descarga, a propósito.** Un binario que manda un desconocido, una vez
   commiteado, se queda en el historial de git para siempre: quitarlo obliga a reescribir
   la historia con `push --force` sobre una rama donde el CMS commitea por su cuenta. El
-  script deja el enlace, alguien la mira, y si vale se sube desde el CMS.
+  script deja el enlace, alguien la mira, y si vale se sube desde el CMS, o con el botón
+  «📷 Subir estas fotos» del grupo de Telegram (ver *Desde Telegram*, más abajo).
+- **`fichas-importadas.json` apunta qué ficha salió de cada respuesta**, para los botones
+  de Telegram. Lo escriben los tres importadores desde el 27 de octubre de 2026; lo
+  importado antes no está, y eso se hace desde el CMS.
 - **Este repositorio es público, y los registros de Actions también.** Por eso el script
   tiene modo discreto (`--discreto`, automático con `CI=true`): ahí no imprime ni quién
   manda la ficha ni el enlace de la foto, que va firmado y la abre a cualquiera que lo
@@ -241,7 +245,37 @@ El secreto con el que Tally firma está en `.secretos/tally-webhook-secret`, y e
 como `TALLY_SIGNING_SECRET` en el Worker. Si Telegram falla, Tally reintenta (a los
 5 min, 30 min, 1 h, 6 h y 1 día) y, si nada sale, manda un correo.
 
+## Desde Telegram: publicar, descartar y subir las fotos
+
+El aviso de cada alta, anuncio o casa lleva «✅ Publicar» y «🗑 Descartar» (este pide
+confirmación), y lo mismo el recordatorio de lo oculto sin revisar. Si trae fotos, el
+Worker las baja de Tally y las manda al grupo como álbum debajo del aviso, con
+«📷 Subir estas fotos» y «🚫 No subirlas» (`avisos/worker/src/fichas.js`).
+
+- **Las fotos se miran en el grupo y no entran en GitHub hasta que alguien pulsa
+  «Subir».** Si no valen, «No subirlas» las quita del grupo. **De Tally no se borra nunca
+  nada**: la respuesta se queda allí entera.
+- Cada botón lanza `.github/workflows/ficha-tally.yml`, que corre `ficha-tally.mjs`:
+
+  ```bash
+  node tally/ficha-tally.mjs fotos|publicar|descartar negocios|tablon|casas <respuesta>
+  ```
+
+  Si la respuesta aún no estaba en el CMS, la trae primero. Las fotos se piden a la API
+  en ese momento (sus direcciones van firmadas y cambian en cada consulta), se enderezan
+  según el EXIF, se reducen a 1600 px y se guardan en JPG sin metadatos como
+  `<ficha>-tally-N.jpg`: la primera de foto principal y el resto en «Más fotos» (en los
+  negocios, solo una). «Descartar» borra la ficha y esas fotos. Al terminar lanza la
+  publicación de la web (un push con el `GITHUB_TOKEN` de la Action no lo hace solo) y
+  cuenta en el grupo lo que ha hecho (`POST /fichas` del Worker).
+- **Los inputs del workflow solo llevan el id de la respuesta**, que sin la clave no abre
+  nada: las direcciones de las fotos no pueden ir ahí, que la página de la ejecución es
+  pública. Y entran a la orden por variables de entorno, no pegados.
+- El `GITHUB_TOKEN` del Worker sigue sin poder escribir: solo lanza el workflow.
+- *Comprobado el 2026-10-27*: Tally da las fotos recomprimidas (un 25–60% del original, a
+  la misma resolución) y sin GPS; cada una queda en unos 200 KB.
+
 ## Lo que esto no resuelve
 
-- El flujo sigue siendo *vecino envía → lo publicamos nosotros en el CMS*. El aviso de
-  Telegram dice que hay algo, pero pasarlo al CMS sigue siendo un botón.
+- El flujo sigue siendo *vecino envía → alguien lo revisa*: se puede publicar desde
+  Telegram, pero no se publica nada solo.

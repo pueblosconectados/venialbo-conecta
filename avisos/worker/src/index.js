@@ -23,6 +23,8 @@
 //   POST /enlaces        la Action   los enlaces que fallan en la comprobación semanal,
 //                                    para avisar de los que fallan dos veces seguidas
 //                                    (con el token; en enlaces.js)
+//   POST /fichas         la Action   lo que ha hecho un botón de publicar, descartar o
+//                                    subir fotos (con el token; en fichas.js)
 //   POST /recibido       el móvil    el service worker dice que le ha llegado un aviso,
 //                                    o que lo han tocado (en entregas.js)
 //
@@ -53,6 +55,7 @@ import { mandarErratas } from "./erratas.js";
 import { recordarRenovaciones } from "./renovaciones.js";
 import { recordarRepaso } from "./repaso.js";
 import { apuntarEnlaces } from "./enlaces.js";
+import { contarResultado } from "./fichas.js";
 
 // Los servicios de push conocidos. Lo demás se rechaza, para que nadie llene el KV con
 // direcciones inventadas.
@@ -163,7 +166,7 @@ const borrar = async (request, env) => {
 };
 
 export default {
-  async fetch(request, env) {
+  async fetch(request, env, ctx) {
     const { pathname } = new URL(request.url);
     const metodo = request.method;
 
@@ -217,7 +220,14 @@ export default {
         return json(resultado, resultado.error ? 400 : 200);
       }
 
-      if (pathname === "/tally") return await webhookTally(request, env, json);
+      if (pathname === "/tally") return await webhookTally(request, env, json, ctx);
+
+      if (pathname === "/fichas") {
+        if (!conToken(request, env)) return json({ error: "no autorizado" }, 401);
+        if (metodo !== "POST") return json({ error: "método no permitido" }, 405);
+        const resultado = await contarResultado(await leerCuerpo(request), env);
+        return json(resultado, resultado.error ? 400 : 200);
+      }
 
       if (pathname === "/resumen") {
         if (!conToken(request, env)) return json({ error: "no autorizado" }, 401);

@@ -236,6 +236,25 @@ Necesita `GITHUB_TOKEN` en el Worker: un token de grano fino de la organización
 los workflows) y **Contents: Read** (leer `tally/respuestas-importadas.json` para
 `/pendientes`). `/pendientes` necesita además `TALLY_API_KEY`.
 
+## Publicar, descartar y subir las fotos desde Telegram
+
+El aviso de lo que llega por Tally (altas, anuncios y casas) lleva «✅ Publicar» y
+«🗑 Descartar», y si trae fotos, el Worker las manda al grupo como álbum debajo, con
+«📷 Subir estas fotos» y «🚫 No subirlas». El recordatorio de lo oculto y `/pendientes`
+llevan también publicar y descartar. Está en `worker/src/fichas.js`; el detalle, en
+`tally/README.md` (*Desde Telegram*).
+
+- Cada botón lanza `ficha-tally.yml` con `{ accion, formulario, respuesta }`, y la Action
+  cuenta al terminar lo que ha hecho en `POST /fichas`. Si falla, avisa
+  `publicaciones.js`, sin «Reintentar» (necesita sus inputs).
+- Las fotos se bajan de Tally en el Worker y se suben a Telegram como archivo
+  (`sendMediaGroup`, multipart): la dirección firmada no sale de aquí. Se apunta en el
+  KV `ESTADO`, clave `fotos:<respuesta>` (90 días), qué mensajes son el álbum, para que
+  «No subirlas» pueda borrarlo.
+- Lo que hay en los botones es `<acción>:<letra del formulario>:<id de la respuesta>`;
+  la ficha la busca la Action en `tally/fichas-importadas.json`. El recordatorio lo lee
+  por la API para saber qué ficha es de qué respuesta (`leerFichasTally`).
+
 ## Avisar si falla una Action
 
 En la misma vuelta del cron (cada 5 minutos), el Worker mira las últimas ejecuciones de

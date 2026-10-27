@@ -38,6 +38,12 @@ const WORKFLOWS = {
     nombre: "Traer los anuncios del tablón",
     efecto: "los anuncios del tablón no se traen al CMS",
   },
+  ".github/workflows/ficha-tally.yml": {
+    nombre: "Ficha de Tally (botones de Telegram)",
+    efecto: "no se ha hecho lo que se pidió con el botón: hay que volver a pulsarlo o hacerlo desde el CMS",
+    // Necesita sus inputs (qué ficha y qué hacer): relanzarlo a secas no sirve
+    sinReintentar: true,
+  },
   ".github/workflows/enlaces.yml": {
     nombre: "Comprobar los enlaces",
     efecto: "no se avisa de los enlaces rotos",
@@ -93,15 +99,13 @@ export const revisar = (anterior, ejecuciones, ahora) => {
   for (const e of terminadas) {
     nuevo.visto = e.updated_at > nuevo.visto ? e.updated_at : nuevo.visto;
     const yaFallaba = nuevo.fallando[e.path];
-    const { nombre = e.name, efecto } = WORKFLOWS[e.path] ?? {};
+    const { nombre = e.name, efecto, sinReintentar } = WORKFLOWS[e.path] ?? {};
+    const reintentar = (fichero) => (sinReintentar ? [] : [{ text: "🔁 Reintentar", callback_data: `reintentar:${fichero}` }]);
 
     if (FALLOS.has(e.conclusion) && yaFallaba?.reintentado) {
       mensajes.push({
         texto: `🔴 <b>«${escapaHtml(nombre)}» sigue fallando después de reintentarlo</b>\nToca mirar qué pasa.`,
-        botones: [
-          { text: "Ver qué ha pasado", url: e.html_url },
-          { text: "🔁 Reintentar", callback_data: `reintentar:${e.path.split("/").pop()}` },
-        ],
+        botones: [{ text: "Ver qué ha pasado", url: e.html_url }, ...reintentar(e.path.split("/").pop())],
       });
       nuevo.fallando[e.path] = { ...yaFallaba, url: e.html_url, reintentado: false };
     } else if (FALLOS.has(e.conclusion) && !yaFallaba) {
@@ -113,10 +117,7 @@ export const revisar = (anterior, ejecuciones, ahora) => {
       const fichero = e.path.split("/").pop();
       mensajes.push({
         texto: lineas.join("\n"),
-        botones: [
-          { text: "Ver qué ha pasado", url: e.html_url },
-          { text: "🔁 Reintentar", callback_data: `reintentar:${fichero}` },
-        ],
+        botones: [{ text: "Ver qué ha pasado", url: e.html_url }, ...reintentar(fichero)],
       });
       nuevo.fallando[e.path] = { nombre, desde: Date.parse(e.updated_at), url: e.html_url };
     } else if (e.conclusion === "success" && yaFallaba) {
