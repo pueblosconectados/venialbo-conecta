@@ -11,6 +11,7 @@
 //   /cambios     los últimos guardados en el CMS, con quién y cuándo (cambios.js)
 //   /buscar x    busca en todo lo que se ve en la web (buscar.js)
 //   /republicar  vuelve a lanzar la publicación de la web
+//   /avisar      manda un aviso push a todos los móviles, con confirmación (avisar.js)
 //   /avisos      cuántos dispositivos tienen las push activadas, y si los últimos
 //                avisos les llegaron y cuánto tardaron (entregas.js)
 //   /semana      «Esta semana en Venialbo», el resumen para reenviar al pueblo (semana.js)
@@ -47,6 +48,7 @@ import { listaRenovaciones } from "./renovaciones.js";
 import { marcar, mensajesRepaso } from "./repaso.js";
 import { esBotonFicha, pulsacionFicha } from "./fichas.js";
 import { mensajeSemana } from "./semana.js";
+import { esBotonAviso, prepararAviso, pulsacionAviso } from "./avisar.js";
 
 const TALLY = "https://api.tally.so";
 
@@ -179,7 +181,10 @@ const CONSULTAR = [
   ["chatid", "El id de este chat"],
   ["ayuda", "Esta lista"],
 ];
-const HACER = [["republicar", "Vuelve a publicar la web"]];
+const HACER = [
+  ["avisar", "Aviso a todos los móviles: /avisar Título | Texto"],
+  ["republicar", "Vuelve a publicar la web"],
+];
 
 // La misma lista, para el menú de Telegram (telegram-config.mjs la lee de aquí). El menú
 // no tiene apartados: los que hacen algo van al final y con ⚡ delante.
@@ -216,7 +221,10 @@ const repasar = async (env) => {
 
 const semanaEnCurso = async () => mensajeSemana();
 
-const ACCIONES = { semana: semanaEnCurso, estado, visitas, pendientes, caducan, cambios, buscar: buscarEnWeb, republicar, avisos, repaso: repasar, renovaciones, chatid, ayuda, start: ayuda };
+// Lo que va detrás del comando: "/avisar Corte de agua | Mañana…"
+const avisar = async (env, mensaje, argumentos) => prepararAviso(env, mensaje, argumentos);
+
+const ACCIONES = { avisar, semana: semanaEnCurso, estado, visitas, pendientes, caducan, cambios, buscar: buscarEnWeb, republicar, avisos, repaso: repasar, renovaciones, chatid, ayuda, start: ayuda };
 // Los que se contestan fuera del grupo
 const EN_CUALQUIER_CHAT = new Set(["chatid"]);
 
@@ -241,6 +249,12 @@ const pulsacion = async (env, consulta) => {
     await marcarReintentado(env, cual);
     await aTelegram(env, `🔁 ${quien} ha relanzado «${escapaHtml(nombreDe(cual))}». Si vuelve a fallar, os aviso.`);
     return responder("🔁 Lanzado de nuevo.");
+  }
+
+  // «✅ Enviar» y «❌ Cancelar» de /avisar (avisar.js)
+  if (esBotonAviso(accion)) {
+    const [texto, alerta] = await pulsacionAviso(env, consulta, accion, cual, quien);
+    return responder(texto, alerta);
   }
 
   // Publicar, descartar y subir las fotos de lo que llega por Tally (fichas.js). La

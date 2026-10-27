@@ -25,6 +25,8 @@
 //   POST /enlaces        la Action   los enlaces que fallan en la comprobación semanal,
 //                                    para avisar de los que fallan dos veces seguidas
 //                                    (con el token; en enlaces.js)
+//   POST /aviso-enviado  la Action   a cuántos ha llegado un aviso de /avisar, al grupo
+//                                    (con el token; en avisar.js)
 //   POST /difundir       la Action   el texto para compartir lo nuevo por WhatsApp y
 //                                    Facebook, al grupo (con el token; en difusion.js)
 //   POST /fichas         la Action   lo que ha hecho un botón de publicar, descartar o
@@ -62,6 +64,7 @@ import { apuntarEnlaces } from "./enlaces.js";
 import { contarResultado } from "./fichas.js";
 import { mandarDifusion } from "./difusion.js";
 import { enviarSemana, mensajeSemana } from "./semana.js";
+import { contarAviso } from "./avisar.js";
 
 // Los servicios de push conocidos. Lo demás se rechaza, para que nadie llene el KV con
 // direcciones inventadas.
@@ -229,6 +232,13 @@ export default {
       }
 
       if (pathname === "/tally") return await webhookTally(request, env, json, ctx);
+
+      if (pathname === "/aviso-enviado") {
+        if (!conToken(request, env)) return json({ error: "no autorizado" }, 401);
+        if (metodo !== "POST") return json({ error: "método no permitido" }, 405);
+        const resultado = await contarAviso(await leerCuerpo(request), env);
+        return json(resultado, resultado.error ? 400 : 200);
+      }
 
       if (pathname === "/difundir") {
         if (!conToken(request, env)) return json({ error: "no autorizado" }, 401);

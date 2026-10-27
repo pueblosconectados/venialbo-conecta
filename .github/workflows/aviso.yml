@@ -1,0 +1,65 @@
+name: Aviso desde Telegram
+
+# Manda un aviso push a todos los suscritos (avisos/aviso-a-mano.mjs). Lo lanza el
+# Worker de avisos cuando alguien escribe /avisar en el grupo de Telegram y confirma con
+# «✅ Enviar» (avisos/worker/src/avisar.js); al terminar, el Worker cuenta en el grupo a
+# cuántos ha llegado.
+#
+# Los inputs se ven en la página pública de la ejecución: son el texto del aviso, que va
+# a todo el pueblo, así que no hay nada que esconder. Entran a la orden por variables de
+# entorno, no pegados, para que nada del texto pueda colarse como código de la shell.
+#
+# Necesita los secretos AVISOS_TOKEN y VAPID_PRIVADA, los mismos que avisos.yml.
+on:
+  workflow_dispatch:
+    inputs:
+      titulo:
+        description: Título del aviso
+        required: true
+        type: string
+      cuerpo:
+        description: Texto del aviso
+        required: true
+        type: string
+      url:
+        description: Página que se abre al tocarlo
+        required: false
+        default: "/"
+        type: string
+
+permissions:
+  contents: read
+
+concurrency:
+  group: aviso-telegram
+  cancel-in-progress: false
+
+jobs:
+  enviar:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          # Solo el script y la clave pública (en config.ts de la web)
+          sparse-checkout: |
+            /avisos/
+            /web-static/src/config.ts
+          sparse-checkout-cone-mode: false
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: avisos/package-lock.json
+
+      - run: npm ci
+        working-directory: avisos
+
+      - name: Enviar
+        env:
+          AVISOS_TOKEN: ${{ secrets.AVISOS_TOKEN }}
+          VAPID_PRIVADA: ${{ secrets.VAPID_PRIVADA }}
+          TITULO: ${{ inputs.titulo }}
+          CUERPO: ${{ inputs.cuerpo }}
+          RUTA: ${{ inputs.url }}
+        run: node avisos/aviso-a-mano.mjs "$TITULO" "$CUERPO" "${RUTA:-/}" --urgente --si --contar

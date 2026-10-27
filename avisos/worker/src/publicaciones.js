@@ -44,6 +44,11 @@ const WORKFLOWS = {
     // Necesita sus inputs (qué ficha y qué hacer): relanzarlo a secas no sirve
     sinReintentar: true,
   },
+  ".github/workflows/aviso.yml": {
+    nombre: "Aviso desde Telegram (/avisar)",
+    efecto: "el aviso no ha llegado a los móviles: hay que volver a mandarlo con /avisar",
+    sinReintentar: true,
+  },
   ".github/workflows/enlaces.yml": {
     nombre: "Comprobar los enlaces",
     efecto: "no se avisa de los enlaces rotos",

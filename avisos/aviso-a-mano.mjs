@@ -7,6 +7,11 @@
 //
 // Le llega a todo el pueblo: antes de mandar dice a cuántos y pide confirmación. Pide la
 // lista al Worker y firma con la clave de .secretos/vapid.json.
+//
+// Desde Telegram (/avisar, avisos/worker/src/avisar.js) lo lanza la Action aviso.yml con
+// --si (la confirmación ya se dio en el grupo) y --contar (al terminar, el Worker dice en
+// el grupo a cuántos ha llegado). Allí las claves llegan por AVISOS_TOKEN y VAPID_PRIVADA,
+// y la pública sale de la web, como en enviar.mjs.
 
 import { readFile } from "node:fs/promises";
 import { createInterface } from "node:readline/promises";
@@ -19,27 +24,35 @@ const RAIZ = join(dirname(fileURLToPath(import.meta.url)), "..");
 const WORKER = "https://venialbo-avisos.venialboconecta.workers.dev";
 
 const URGENTE = process.argv.includes("--urgente");
-const [titulo, cuerpo, url = "/"] = process.argv.slice(2).filter((a) => a !== "--urgente");
+const SI = process.argv.includes("--si");
+const CONTAR = process.argv.includes("--contar");
+const [titulo, cuerpo, url = "/"] = process.argv.slice(2).filter((a) => !a.startsWith("--"));
 if (!titulo || !cuerpo) {
   console.error('Uso: node avisos/aviso-a-mano.mjs "Título" "Texto" [/ruta] [--urgente]');
   process.exit(1);
 }
 
-const vapid = JSON.parse(await readFile(join(RAIZ, ".secretos", "vapid.json"), "utf8"));
-const token = (await readFile(join(RAIZ, ".secretos", "token-avisos"), "utf8")).trim();
-webpush.setVapidDetails("mailto:info@venialboconecta.es", vapid.publicKey, vapid.privateKey);
+const deFichero = async (nombre) => readFile(join(RAIZ, ".secretos", nombre), "utf8").catch(() => null);
+const token = (process.env.AVISOS_TOKEN ?? (await deFichero("token-avisos")))?.trim();
+const privada = (process.env.VAPID_PRIVADA ?? JSON.parse((await deFichero("vapid.json")) ?? "{}").privateKey)?.trim();
+// La pública sale de la web, para no tenerla en dos sitios
+const publica = (await readFile(join(RAIZ, "web-static", "src", "config.ts"), "utf8")).match(/VAPID_PUBLICA =\s*"([^"]+)"/)?.[1];
+if (!token || !privada || !publica) throw new Error("Faltan AVISOS_TOKEN, VAPID_PRIVADA o la clave pública");
+webpush.setVapidDetails("mailto:info@venialboconecta.es", publica, privada);
 
 const r = await fetch(`${WORKER}/suscripciones`, { headers: { authorization: `Bearer ${token}` } });
 if (!r.ok) throw new Error(`El Worker ha respondido ${r.status} al pedir la lista`);
 const suscripciones = await r.json();
 
 console.log(`«${titulo}» — ${cuerpo} → ${url}${URGENTE ? " (urgente)" : ""}`);
-const pregunta = createInterface({ input: process.stdin, output: process.stdout });
-const respuesta = await pregunta.question(`¿Mandar a ${suscripciones.length} suscritos? (s/n) `);
-pregunta.close();
-if (respuesta.trim().toLowerCase() !== "s") {
-  console.log("No se ha mandado nada");
-  process.exit(0);
+if (!SI) {
+  const pregunta = createInterface({ input: process.stdin, output: process.stdout });
+  const respuesta = await pregunta.question(`¿Mandar a ${suscripciones.length} suscritos? (s/n) `);
+  pregunta.close();
+  if (respuesta.trim().toLowerCase() !== "s") {
+    console.log("No se ha mandado nada");
+    process.exit(0);
+  }
 }
 
 const id = nuevoId();
@@ -75,3 +88,14 @@ console.log(
     (muertas.length ? `; ${muertas.length} ya no existían y se han borrado` : "") +
     (fallos.length ? `; ${fallos.length} han fallado (${[...new Set(fallos)].join(", ")})` : ""),
 );
+
+if (CONTAR) {
+  const c = await fetch(`${WORKER}/aviso-enviado`, {
+    method: "POST",
+    headers: { authorization: `Bearer ${token}`, "content-type": "application/json" },
+    body: JSON.stringify({ titulo, enviados: bien, total: suscripciones.length, fallos: fallos.length }),
+  });
+  if (!c.ok) console.warn(`  ⚠ El Worker ha respondido ${c.status} al contarlo en el grupo`);
+}
+// Si no ha llegado a nadie y no es porque no haya nadie, que la Action falle (y avise)
+if (suscripciones.length && !bien && fallos.length) process.exitCode = 1;

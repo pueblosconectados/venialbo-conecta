@@ -11,7 +11,8 @@ hace falta fuera de la web estática:
   `node avisos/erratas.mjs --todo --dry` (todo el contenido) o
   `node avisos/erratas.mjs <desde> <hasta> --dry` (lo cambiado entre dos commits).
 - `aviso-a-mano.mjs` — un aviso suelto a todos los suscritos, con confirmación:
-  `node avisos/aviso-a-mano.mjs "Título" "Texto" [/ruta] [--urgente]`.
+  `node avisos/aviso-a-mano.mjs "Título" "Texto" [/ruta] [--urgente]`. Desde el grupo de
+  Telegram es `/avisar` (ver más abajo).
 
 La clave privada VAPID está en `.secretos/vapid.json`; la pública, en
 `web-static/src/config.ts`. **No se pueden cambiar** sin perder a todos los suscriptores.
@@ -163,6 +164,32 @@ curl -H "Authorization: Bearer $(cat .secretos/token-avisos)" https://venialbo-a
 # …/semana?enviar lo manda al grupo
 ```
 
+## Avisar desde Telegram (`/avisar`)
+
+Para lo urgente (un corte de agua, una calle cortada), sin abrir el ordenador:
+
+```
+/avisar Corte de agua | Mañana de 9 a 14 no habrá agua en la calle Mayor
+/avisar Corte de agua | Mañana… | /tablon/2026-10-28-corte-de-agua
+```
+
+También vale el título en la primera línea y el texto en la siguiente. La tercera parte
+es la página que abre al tocarlo (de la web; sin ella, la portada). Título hasta 60
+caracteres y texto hasta 200: en el móvil no se ve más.
+
+- El bot enseña cómo llegará y a cuántos, con «✅ Enviar a N» y «❌ Cancelar». El borrador
+  vale una hora (KV `ESTADO`, `aviso:<id>`) y se borra al pulsar: dos toques no mandan
+  dos avisos.
+- «Enviar» lanza `.github/workflows/aviso.yml`, que lo manda con `aviso-a-mano.mjs
+  --urgente --si --contar` y al terminar llama a `POST /aviso-enviado` para decir en el
+  grupo a cuántos ha llegado. El Worker no tiene la clave privada de las push: la tiene
+  la Action (`VAPID_PRIVADA`), como en los avisos automáticos.
+- Los inputs del workflow son el texto del aviso, que va a todo el pueblo: no hay nada
+  que esconder en la página pública de la ejecución. Entran por variables de entorno.
+- Si la Action falla, avisa `publicaciones.js`, sin «Reintentar»: se vuelve a escribir
+  `/avisar`.
+- Está en `worker/src/avisar.js`.
+
 ## El resumen semanal de visitas
 
 Los lunes a las 9:00 (hora de Madrid) el Worker manda al grupo de Telegram cómo fue la
@@ -237,6 +264,7 @@ algo es `/republicar`.
 | `/caducan` | Los anuncios y avisos que desaparecen de la web en los próximos 7 días, con un botón para cambiar su fecha en el CMS |
 | `/cambios` | Los últimos 5 guardados en el CMS: qué ficha, quién y cuándo (➕ creado, ✏️ cambiado, 🗑 borrado) |
 | `/buscar <texto>` | Busca en todo lo que se ve en la web: el teléfono de un negocio, el contacto de un anuncio… con botones a la ficha en la web y en el CMS |
+| `/avisar Título \| Texto` | Un aviso push a todos los móviles, para lo urgente. Enseña cómo llegará y pide confirmación (ver *Avisar desde Telegram*) |
 | `/republicar` | Vuelve a lanzar la publicación de la web, para cuando ha fallado por algo pasajero |
 | `/avisos` | Cuántos dispositivos tienen las push activadas, y si les llegaron los últimos 5 avisos y cuánto tardaron |
 | `/semana` | «Esta semana en Venialbo», el resumen para reenviar al grupo del pueblo, con el botón de WhatsApp |
