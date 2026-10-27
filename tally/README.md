@@ -272,6 +272,9 @@ Worker las baja de Tally y las manda al grupo como álbum debajo del aviso, con
   nada: las direcciones de las fotos no pueden ir ahí, que la página de la ejecución es
   pública. Y entran a la orden por variables de entorno, no pegados.
 - El `GITHUB_TOKEN` del Worker sigue sin poder escribir: solo lanza el workflow.
+- **«👀 Ver cómo queda»** abre la vista previa de la ficha en la web (`/borrador/<clave>`),
+  en cuanto está traída y la web publicada: los workflows de traer lanzan la
+  publicación al terminar. Ver *La vista previa* en `avisos/README.md`.
 - *Comprobado el 2026-10-27*: Tally da las fotos recomprimidas (un 25–60% del original, a
   la misma resolución) y sin GPS; cada una queda en unos 200 KB.
 

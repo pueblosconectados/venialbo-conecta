@@ -255,6 +255,25 @@ llevan también publicar y descartar. Está en `worker/src/fichas.js`; el detall
   la ficha la busca la Action en `tally/fichas-importadas.json`. El recordatorio lo lee
   por la API para saber qué ficha es de qué respuesta (`leerFichasTally`).
 
+### La vista previa
+
+El aviso de Tally, el resultado de subir fotos (si la ficha sigue oculta) y el
+recordatorio de lo oculto llevan «👀 Ver cómo queda», a `/borrador/<clave>` en la web:
+la ficha pintada como se verá al publicarla. La clave es un HMAC con `BORRADORES_CLAVE`,
+el mismo que hace la build (`web-static/scripts/build-content.mjs`), de
+`tally:<respuesta>` si se sabe de qué respuesta de Tally salió la ficha (así hay enlace
+desde el primer aviso, antes de que la ficha exista) o si no de `ficha:<carpeta>/<id>`.
+Está en `enlaceBorrador` (`worker/src/fichas.js`). Funciona en cuanto la Action trae la
+ficha y se publica la web, unos minutos después del aviso.
+
+```bash
+npx wrangler secret put BORRADORES_CLAVE < ../../.secretos/borradores-clave
+```
+
+La misma clave va como secreto `BORRADORES_CLAVE` del repositorio en GitHub, para la
+build. **Si se cambia**, cambian todos los enlaces de vista previa (los viejos dejan de
+ir); no se pierde nada más.
+
 ## Avisar si falla una Action
 
 En la misma vuelta del cron (cada 5 minutos), el Worker mira las últimas ejecuciones de

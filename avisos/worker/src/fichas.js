@@ -51,6 +51,20 @@ const botonesFotos = (l, respuesta) => [
   { text: "🚫 No subirlas", callback_data: `nofot:${l}:${respuesta}` },
 ];
 
+// La vista previa de lo oculto (/borrador/<clave> en la web): la clave es la misma firma
+// que hace web-static/scripts/build-content.mjs con BORRADORES_CLAVE. Por la respuesta de
+// Tally si se sabe (así hay enlace desde el primer aviso, antes de que exista la ficha);
+// si no, por la ruta de la ficha. null si el Worker no tiene la clave.
+export const enlaceBorrador = async (env, { respuesta, ruta }) => {
+  if (!env.BORRADORES_CLAVE) return null;
+  const texto = respuesta ? `tally:${respuesta}` : `ficha:${ruta.replace(/^web-static\/content\//, "").replace(/\.json$/, "")}`;
+  const clave = await crypto.subtle.importKey("raw", new TextEncoder().encode(env.BORRADORES_CLAVE.trim()), { name: "HMAC", hash: "SHA-256" }, false, ["sign"]);
+  const firma = new Uint8Array(await crypto.subtle.sign("HMAC", clave, new TextEncoder().encode(texto)));
+  return `${WEB}/borrador/${[...firma].map((b) => b.toString(16).padStart(2, "0")).join("").slice(0, 32)}`;
+};
+
+export const botonVistaPrevia = (url) => ({ text: "👀 Ver cómo queda", url });
+
 // ── Las fotos al grupo ──────────────────────────────────────────────────────
 
 // Las baja de Tally (la dirección firmada no sale de aquí: Telegram recibe el archivo)
@@ -175,6 +189,7 @@ const valido = (r) =>
   LETRA[r.formulario] &&
   ["hecho", "ya", "nada", "error"].includes(r.estado) &&
   texto(r.mensaje, 500) &&
+  (r.respuesta === undefined || /^[A-Za-z0-9]{3,20}$/.test(r.respuesta)) &&
   (r.fotos === undefined || (Number.isInteger(r.fotos) && r.fotos >= 0 && r.fotos <= 10)) &&
   (r.titulo === undefined || texto(r.titulo, 300)) &&
   (r.ruta === null || r.ruta === undefined || (texto(r.ruta, 300) && /^web-static\/content\/(negocios|anuncios|casas)\/[a-z0-9-]+\.json$/.test(r.ruta)));
@@ -194,6 +209,11 @@ export const contarResultado = async (r, env) => {
     const [, , coleccion, fichero] = r.ruta.split("/");
     botones.push({ text: "📝 Ver en el CMS", url: `${CMS}/${coleccion}/edit/${encodeURIComponent(r.ruta)}` });
     if (r.activo) botones.push({ text: "🌐 Ver en la web", url: `${WEB}${EN_LA_WEB[coleccion]}${fichero.replace(/\.json$/, "")}` });
+    else {
+      // Oculta: la vista previa (estará al día cuando acabe la publicación que lanza la Action)
+      const previa = await enlaceBorrador(env, { respuesta: r.respuesta, ruta: r.ruta });
+      if (previa) botones.push(botonVistaPrevia(previa));
+    }
   }
   const enviado = await llamarTelegram(env, "sendMessage", {
     chat_id: env.TELEGRAM_CHAT_ID,

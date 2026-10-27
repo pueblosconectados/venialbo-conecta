@@ -20,7 +20,7 @@
 
 import { lanzarTraer } from "./github.js";
 import { escapaHtml, filas, llamarTelegram } from "./telegram.js";
-import { botonesFicha, mandarFotos } from "./fichas.js";
+import { botonesFicha, botonVistaPrevia, enlaceBorrador, mandarFotos } from "./fichas.js";
 
 // La lista de una colección en Pages CMS. La ficha aún no existe cuando llega el aviso
 // (se crea al pulsar el botón de traer), así que se enlaza la lista, no la ficha.
@@ -107,18 +107,22 @@ const respuestaDe = (datos) => datos.submissionId ?? datos.responseId;
 
 // Los enlaces van como botones debajo del mensaje, no como URL sueltas en el texto. Si
 // no se pudo traer, una fila más con el botón de reintentar; y en lo que se trae al CMS,
-// otra con publicar y descartar.
-const botonesDe = (datos, lanzado) => {
+// otra con la vista previa, y otra con publicar y descartar.
+const botonesDe = async (env, datos, lanzado) => {
   const { cms, traer } = formularioDe(datos);
   const enlaces = [
     ...(cms ? [{ text: "📝 Abrir en el CMS", url: cms }] : []),
     { text: "Ver en Tally", url: `https://tally.so/forms/${datos.formId}/submissions` },
   ];
   if (!traer) return [enlaces];
+  const respuesta = respuestaDe(datos);
+  // Estará en cuanto la Action la traiga y se publique la web: unos minutos
+  const previa = respuesta ? await enlaceBorrador(env, { respuesta }) : null;
   return [
     enlaces,
     ...(lanzado ? [] : [[{ text: "📥 Traer al CMS", callback_data: `traer:${traer}` }]]),
-    ...(respuestaDe(datos) ? [botonesFicha(traer, respuestaDe(datos))] : []),
+    ...(previa ? [[botonVistaPrevia(previa)]] : []),
+    ...(respuesta ? [botonesFicha(traer, respuesta)] : []),
   ];
 };
 
@@ -160,7 +164,7 @@ export const webhookTally = async (request, env, json, ctx) => {
     text: mensajeDe(data, lanzado),
     parse_mode: "HTML",
     link_preview_options: { is_disabled: true },
-    reply_markup: { inline_keyboard: filas(botonesDe(data, lanzado)) },
+    reply_markup: { inline_keyboard: filas(await botonesDe(env, data, lanzado)) },
   });
   if (!aviso) return json({ error: "telegram" }, 500);
 

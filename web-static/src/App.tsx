@@ -25,6 +25,7 @@ import { AnunciosShow } from "./public/pages/anuncios/AnunciosShow";
 import { PueblosConectados } from "./public/pages/PueblosConectados";
 import { EnlacesInteres } from "./public/pages/Enlaces";
 import { Buscar } from "./public/pages/Buscar";
+import { VistaPrevia } from "./public/pages/VistaPrevia";
 import { NotFound } from "./pages/NotFound";
 
 function App() {
@@ -51,6 +52,7 @@ function App() {
             <Route path="/enlaces" element={<EnlacesInteres />} />
             <Route path="/privacidad" element={<Privacidad />} />
             <Route path="/buscar" element={<Buscar />} />
+            <Route path="/borrador/:clave" element={<VistaPrevia />} />
           </Route>
           {/* 404 */}
           <Route path="*" element={<NotFound />} />

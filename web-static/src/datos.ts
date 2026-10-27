@@ -8,7 +8,7 @@
 // usábamos— para dar dos hooks. La lógica de datos siempre fue nuestra; lo único que
 // había que escribir eran los hooks, que son las 40 últimas líneas de este fichero.
 
-import { useEffect, useState } from "react";
+import { createContext, useContext, useEffect, useState } from "react";
 import { BASE_URL } from "./config";
 
 type Fila = Record<string, unknown>;
@@ -172,11 +172,24 @@ export const useList = <T,>(opciones: {
     JSON.stringify([opciones.resource, opciones.pagination, opciones.filters]),
   );
 
+// La vista previa de lo oculto (/borrador/<clave>, VistaPrevia.tsx): la ficha ya viene
+// cargada y se pinta con su pantalla de siempre. Dentro de este contexto, useOne de ese
+// recurso la devuelve en vez de pedirla (oculta no está en data/<recurso>/).
+export type Borrador = { recurso: string; ficha: unknown };
+export const BorradorContext = createContext<Borrador | null>(null);
+export const useBorrador = () => useContext(BorradorContext);
+
 export const useOne = <T,>(opciones: {
   resource: string;
   id?: string;
-}): Estado<T> =>
-  usePeticion(
-    () => obtener<T>(opciones.resource, opciones.id ?? ""),
-    JSON.stringify([opciones.resource, opciones.id]),
+}): Estado<T> => {
+  const borrador = useBorrador();
+  const delBorrador = borrador?.recurso === opciones.resource;
+  return usePeticion(
+    () =>
+      delBorrador
+        ? Promise.resolve(borrador.ficha as T)
+        : obtener<T>(opciones.resource, opciones.id ?? ""),
+    JSON.stringify([opciones.resource, opciones.id, delBorrador]),
   );
+};

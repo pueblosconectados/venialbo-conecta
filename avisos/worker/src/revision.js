@@ -13,7 +13,7 @@
 // sería una petición por fichero, y el plan gratuito da 50 por ejecución.
 
 import { graphql, leerFichasTally } from "./github.js";
-import { botonesFicha } from "./fichas.js";
+import { botonVistaPrevia, botonesFicha, enlaceBorrador } from "./fichas.js";
 import { aTelegram, elemento, LISTA } from "./telegram.js";
 
 const DIAS_AVISO = 2;
@@ -68,11 +68,14 @@ export const sinRevisar = async (env) => {
   for (const [formulario, porId] of Object.entries(await leerFichasTally(env).catch(() => ({}))))
     for (const [id, ruta] of Object.entries(porId)) respuestas.set(ruta, { formulario, id });
 
-  return ocultas
+  const lista = ocultas
     .map((o, i) => ({ ...o, commit: repo.object[`f${i}`]?.nodes?.[0] }))
     .filter((o) => o.commit?.author?.name === BOT)
     .map(({ commit, ...o }) => ({ ...o, desde: Date.parse(commit.committedDate), respuesta: respuestas.get(o.ruta) }))
     .sort((a, b) => a.desde - b.desde);
+  // Y su vista previa en la web
+  for (const f of lista) f.vistaPrevia = await enlaceBorrador(env, { respuesta: f.respuesta?.id, ruta: f.ruta });
+  return lista;
 };
 
 const hace = (desde, ahora) => {
@@ -83,14 +86,18 @@ const hace = (desde, ahora) => {
 };
 
 // Las líneas de la lista y, por ficha (hasta 3), una fila con el botón para abrirla en
-// el CMS y otra con publicar y descartar si se sabe de qué respuesta de Tally salió.
+// el CMS y su vista previa, y otra con publicar y descartar si se sabe de qué respuesta
+// de Tally salió.
 // Los títulos no caben de tres en tres: un botón por fila.
 export const listaSinRevisar = (fichas, ahora = Date.now()) => ({
   lineas: fichas.map(
     (f) => elemento(f.titulo, `${COLECCIONES[f.coleccion].tipo} · llegó ${hace(f.desde, ahora)}`),
   ),
   filas: fichas.slice(0, 3).flatMap((f) => [
-    [{ text: `📝 ${f.titulo.length > 24 ? `${f.titulo.slice(0, 23)}…` : f.titulo}`, url: enlaceCms(f.coleccion, f.ruta) }],
+    [
+      { text: `📝 ${f.titulo.length > 24 ? `${f.titulo.slice(0, 23)}…` : f.titulo}`, url: enlaceCms(f.coleccion, f.ruta) },
+      ...(f.vistaPrevia ? [{ ...botonVistaPrevia(f.vistaPrevia), text: "👀 Vista previa" }] : []),
+    ],
     ...(f.respuesta ? [botonesFicha(f.respuesta.formulario, f.respuesta.id)] : []),
   ]),
 });

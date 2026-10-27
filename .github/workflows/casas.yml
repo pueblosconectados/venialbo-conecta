@@ -24,6 +24,9 @@ on:
 
 permissions:
   contents: write
+  # Para lanzar la publicación (la vista previa de lo traído): un push hecho con el
+  # GITHUB_TOKEN no lanza otros workflows
+  actions: write
 
 # El mismo grupo que la de los anuncios: las dos escriben respuestas-importadas.json, y
 # a la vez se pisarian al rebasar
@@ -66,6 +69,9 @@ jobs:
           # El CMS commitea por su cuenta en main: rebasar antes de empujar
           git pull --rebase origin main
           git push origin HEAD:main
+          gh workflow run web-static-pages.yml --ref main
+        env:
+          GH_TOKEN: ${{ github.token }}
 
       - name: Publicar el informe en el resumen
         if: always()

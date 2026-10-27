@@ -6,6 +6,7 @@
 // El id de cada entrada es el nombre del fichero sin extensión. La forma de los datos
 // imita la antigua API del backend para que las páginas no tengan que cambiar.
 
+import { createHmac } from "node:crypto";
 import { access, mkdir, readdir, readFile, rm, stat, writeFile } from "node:fs/promises";
 import { basename, dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -59,6 +60,20 @@ const escribir = async (recurso, listado, detalles) => {
 const writeJson = async (path, data) => {
   await mkdir(dirname(path), { recursive: true });
   await writeFile(path, JSON.stringify(data));
+};
+
+// La vista previa de lo oculto (/borrador/<clave>): las fichas ocultas se preparan igual
+// que las visibles y luego se apartan. Al final se escriben en data/borradores/, cada una
+// con una clave que no se puede adivinar sin BORRADORES_CLAVE, la misma que tiene el
+// Worker de avisos para poner el enlace en Telegram (fichas.js). No salen en listados,
+// buscador ni páginas de compartir. No es privado (el repositorio es público y lo oculto
+// ya se puede leer ahí), pero tampoco se encuentra sin el enlace.
+const borradores = [];
+const esVisible = (f) => f.activo !== false && f.activa !== false;
+// `carpeta`: la de content/, que no siempre es el recurso (las casas van en anuncios)
+const apartar = (recurso, fichas, carpeta = recurso) => {
+  for (const ficha of fichas) if (!esVisible(ficha)) borradores.push({ recurso, carpeta, ficha });
+  return fichas.filter(esVisible);
 };
 
 const porTexto = (campo) => (a, b) => (a[campo] ?? "").localeCompare(b[campo] ?? "", "es");
@@ -122,10 +137,9 @@ const categoriaPorId = new Map(categorias.map((c) => [c.id, c]));
 await escribir("categorias", categorias, categorias);
 
 // Noticias — la categoría se guarda como ruta del fichero referenciado
-const noticias = (
+const noticias = apartar("noticias", (
   await Promise.all(
     (await leerColeccion("noticias"))
-      .filter((n) => n.activa !== false)
       .map(async (n) => {
         const categoria = categoriaPorId.get(n.categoria ? idDe(n.categoria) : "");
         if (!categoria) console.warn(`  ⚠ noticia ${n.id}: categoría no encontrada (${n.categoria})`);
@@ -136,7 +150,7 @@ const noticias = (
         };
       }),
   )
-).sort(porFechaDesc);
+).sort(porFechaDesc));
 // Los adjuntos y los álbumes solo se usan en la ficha, no en el listado.
 await escribir(
   "noticias",
@@ -145,14 +159,11 @@ await escribir(
 );
 
 // Negocios
-const negocios = (await leerColeccion("negocios"))
-  .filter((n) => n.activo !== false)
-  .sort(porTexto("nombre"));
+const negocios = apartar("negocios", (await leerColeccion("negocios")).sort(porTexto("nombre")));
 await escribir("negocios", negocios, negocios);
 
 // Servicios
-const servicios = (await leerColeccion("servicios"))
-  .filter((s) => s.activo !== false)
+const servicios = apartar("servicios", (await leerColeccion("servicios"))
   // «Más enlaces»: sin las filas vacías y con la dirección comprobada
   .map((s) => ({
     ...s,
@@ -163,7 +174,7 @@ const servicios = (await leerColeccion("servicios"))
         url: leerDireccion(e.url, `servicio ${s.id}`),
       })),
   }))
-  .sort((a, b) => porTexto("tipo")(a, b) || porTexto("nombre")(a, b));
+  .sort((a, b) => porTexto("tipo")(a, b) || porTexto("nombre")(a, b)));
 await escribir("servicios", servicios, servicios);
 
 // Actividades — la agenda: lo que se va a hacer y, cuando pasa, lo ya celebrado, con sus
@@ -222,10 +233,9 @@ const leerRepeticion = (a, quien) => {
   }
   return a.repeticion;
 };
-const actividades = (
+const actividades = apartar("actividades", (
   await Promise.all(
     (await leerColeccion("actividades"))
-      .filter((a) => a.activa !== false)
       .map(async (a) => {
         const quien = `actividad ${a.id}`;
         return {
@@ -247,7 +257,7 @@ const actividades = (
       (b.fecha ?? "").localeCompare(a.fecha ?? "") ||
       (b.hora ?? "").localeCompare(a.hora ?? "") ||
       b.id.localeCompare(a.id),
-  );
+  ));
 // El listado solo necesita la tarjeta
 await escribir(
   "actividades",
@@ -465,14 +475,13 @@ const leerCoordenadas = (texto, quien) => {
   }
   return { latitud, longitud };
 };
-const lugares = (await leerColeccion("lugares"))
-  .filter((l) => l.activo !== false)
+const lugares = apartar("lugares", (await leerColeccion("lugares"))
   .map((l) => ({
     ...quitar(l, "coordenadas"),
     ...leerCoordenadas(l.coordenadas, `lugar ${l.id}`),
     galeria: (l.galeria ?? []).filter((g) => g?.imagen),
   }))
-  .sort(porTexto("nombre"));
+  .sort(porTexto("nombre")));
 
 // Rutas — "Rutas" de Descubre Venialbo. No caducan. Los lugares por los que pasa
 // llegan como rutas de fichero (reference multiple): se cambian por {id, nombre}, en
@@ -485,10 +494,9 @@ const revisarGpx = async (ruta, quien) => {
   if (!info) throw new Error(`${quien}: no se encuentra ${ruta}`);
   return ruta;
 };
-const rutas = (
+const rutas = apartar("rutas", (
   await Promise.all(
     (await leerColeccion("rutas"))
-      .filter((r) => r.activa !== false)
       .map(async (r) => {
         const quien = `ruta ${r.id}`;
         return {
@@ -502,7 +510,7 @@ const rutas = (
         };
       }),
   )
-).sort(porTexto("nombre"));
+).sort(porTexto("nombre")));
 await escribir(
   "rutas",
   rutas.map((r) =>
@@ -567,16 +575,15 @@ const caducidadDe = (a) => {
   console.warn(`  ⚠ anuncio ${a.id}: sin fecha de caducidad, caduca el ${caduca}`);
   return caduca;
 };
-const anunciosDeVecinos = await Promise.all(
+const anunciosDeVecinos = apartar("anuncios", await Promise.all(
   (await leerColeccion("anuncios"))
-    .filter((a) => a.activo !== false)
     .map(async (a) => ({
       ...a,
       fecha_caducidad: caducidadDe(a),
       galeria: (a.galeria ?? []).filter((g) => g?.imagen),
       documentos: await revisarDocumentos(`anuncio ${a.id}`, a),
     })),
-);
+));
 
 // Las casas en venta y alquiler: en el CMS van en su propia colección (content/casas),
 // para que los anuncios normales no arrastren sus campos, pero en la web son parte del
@@ -591,8 +598,7 @@ const numero = (valor) => {
   const n = typeof valor === "number" ? valor : Number(String(valor ?? "").replace(/\./g, "").replace(",", "."));
   return valor != null && valor !== "" && Number.isFinite(n) && n > 0 ? n : null;
 };
-const casas = (await leerColeccion("casas"))
-  .filter((c) => c.activo !== false)
+const casas = apartar("anuncios", (await leerColeccion("casas"))
   .map(({ precio, superficie, habitaciones, banos, vendida, enlace, ...c }) => ({
     ...c,
     tipo: c.tipo === "casa_alquiler" ? "casa_alquiler" : "casa_venta",
@@ -607,7 +613,7 @@ const casas = (await leerColeccion("casas"))
     fecha_caducidad: vendida ? sumarDias(vendida, DIAS_VENDIDA) : null,
     galeria: (c.galeria ?? []).filter((g) => g?.imagen),
     documentos: [],
-  }));
+  })), "casas");
 
 // Comparten dirección: dos con el mismo nombre de fichero se pisarían
 const repetida = casas.find((c) => anunciosDeVecinos.some((a) => a.id === c.id));
@@ -700,3 +706,29 @@ const buscador = [
 ];
 await writeJson(join(DATA_DIR, "buscador.json"), buscador);
 console.log(`buscador: ${buscador.length}`);
+
+// Las fichas ocultas, para la vista previa (ver `apartar`, arriba): data/borradores/<clave>.json.
+// La clave sale de la respuesta de Tally si la ficha vino de un formulario (el Worker la
+// sabe desde el primer aviso, antes de que la ficha exista) y si no, de su carpeta y su
+// nombre. Sin BORRADORES_CLAVE (en local, si no está en .secretos/) no se escriben.
+const claveBorradores = (
+  process.env.BORRADORES_CLAVE ?? (await readFile(join(ROOT, "..", ".secretos", "borradores-clave"), "utf8").catch(() => ""))
+).trim();
+if (!claveBorradores) {
+  console.log("borradores: sin BORRADORES_CLAVE, no hay vista previa");
+} else {
+  const respuestaDe = new Map();
+  const importadas = JSON.parse(await readFile(join(ROOT, "..", "tally", "fichas-importadas.json"), "utf8").catch(() => "{}"));
+  for (const porId of Object.values(importadas))
+    for (const [respuesta, ruta] of Object.entries(porId)) respuestaDe.set(ruta, respuesta);
+  for (const { recurso, carpeta, ficha } of borradores) {
+    const respuesta = respuestaDe.get(`web-static/content/${carpeta}/${ficha.id}.json`);
+    const clave = createHmac("sha256", claveBorradores)
+      .update(respuesta ? `tally:${respuesta}` : `ficha:${carpeta}/${ficha.id}`)
+      .digest("hex")
+      .slice(0, 32);
+    const detalle = recurso === "lugares" ? { ...ficha, rutas: rutasPorLugar.get(ficha.id) ?? [] } : ficha;
+    await writeJson(join(DATA_DIR, "borradores", `${clave}.json`), { recurso, ficha: detalle });
+  }
+  console.log(`borradores: ${borradores.length}`);
+}

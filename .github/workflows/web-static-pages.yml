@@ -72,7 +72,12 @@ jobs:
           key: avatares-${{ github.run_id }}
           restore-keys: avatares-
 
+      # BORRADORES_CLAVE firma las direcciones de la vista previa de lo oculto
+      # (/borrador/<clave>); la misma está en el Worker de avisos. Sin ella, la web se
+      # publica igual, pero sin vista previa.
       - run: npm run build
+        env:
+          BORRADORES_CLAVE: ${{ secrets.BORRADORES_CLAVE }}
 
       - uses: actions/upload-pages-artifact@v5
         with:

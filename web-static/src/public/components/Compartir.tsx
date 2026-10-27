@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useBorrador } from "../../datos";
 import { Button, Dropdown } from "antd";
 import {
   CheckOutlined,
@@ -20,6 +21,9 @@ const enMovil = () =>
 
 export const Compartir = ({ titulo }: { titulo: string }) => {
   const [copiado, setCopiado] = useState(false);
+  // En la vista previa no hay nada que compartir: el enlace es privado y la ficha no
+  // existe aún en su dirección de verdad
+  const borrador = useBorrador();
   // Sin la ?consulta ni el #ancla: el enlace limpio de la ficha
   const url = `${window.location.origin}${window.location.pathname}`;
 
@@ -50,6 +54,7 @@ export const Compartir = ({ titulo }: { titulo: string }) => {
     </Button>
   );
 
+  if (borrador) return null;
   if (enMovil()) return boton;
 
   const texto = encodeURIComponent(`${titulo} ${url}`);
