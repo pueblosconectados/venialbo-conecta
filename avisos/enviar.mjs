@@ -1,7 +1,7 @@
 // Manda los avisos push de lo que se ha publicado (fase 3 de NOTIFICACIONES.md).
 //
 //   node avisos/enviar.mjs novedades     manda lo nuevo: avisos de portada, noticias,
-//                                        actividades y anuncios
+//                                        actividades (y sus fotos) y anuncios
 //   node avisos/enviar.mjs inicializar   da por avisado todo lo publicado, sin mandar nada
 //
 //   --dry   enseña lo que mandaría, sin mandar ni apuntar nada
@@ -22,6 +22,7 @@
 // El repositorio es público y los registros de Actions también: no se imprime nada de
 // las suscripciones, solo cuántas son.
 
+import { readFileSync } from "node:fs";
 import { readFile, writeFile } from "node:fs/promises";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -54,6 +55,20 @@ const ahoraMadrid = new Intl.DateTimeFormat("sv-SE", {
 const vigenteHasta = (fecha) =>
   !fecha || (fecha.length > 10 ? fecha.replace("T", " ").slice(0, 16) > ahoraMadrid : fecha.slice(0, 10) >= hoyMadrid);
 
+// Lo celebrado hasta hace 15 días aún avisa si trae fotos: es la crónica de algo reciente.
+// Más atrás ya es subir el archivo, y eso no se avisa.
+const haceQuinceDias = new Intl.DateTimeFormat("sv-SE", { timeZone: "Europe/Madrid" }).format(
+  new Date(ahora.getTime() - 15 * 86400_000),
+);
+
+// El listado no trae los álbumes: se miran en el detalle
+const traeFotos = (a) => {
+  if (a.fotos) return true;
+  const detalle = JSON.parse(readFileSync(join(DATOS, "actividades", `${a.id}.json`), "utf8"));
+  return Boolean(detalle.album_facebook || detalle.album_drive);
+};
+const celebrada = (a) => !vigenteHasta(a.fecha_fin ?? a.fecha);
+
 // ── Qué se avisa ────────────────────────────────────────────────────────────
 
 const RECURSOS = {
@@ -74,11 +89,15 @@ const RECURSOS = {
     nombre: ["noticia", "noticias"],
     listado: "/noticias",
   },
-  // De una actividad se avisa al publicarla, si aún no se ha celebrado. Las que se suben
-  // después, con las fotos, no avisan.
+  // De una actividad se avisa al publicarla si aún no se ha celebrado, y si ya se celebró,
+  // cuando se suben sus fotos en los 15 días siguientes (hasta el 2026-10-27 eso no avisaba)
   actividades: {
-    vigente: (a) => vigenteHasta(a.fecha_fin ?? a.fecha),
-    uno: (a) => ({ titulo: "Nueva actividad", cuerpo: a.titulo, url: `/actividades/${a.id}` }),
+    vigente: (a) => !celebrada(a) || ((a.fecha_fin ?? a.fecha).slice(0, 10) >= haceQuinceDias && traeFotos(a)),
+    uno: (a) => ({
+      titulo: celebrada(a) ? "Ya están las fotos" : "Nueva actividad",
+      cuerpo: a.titulo,
+      url: `/actividades/${a.id}`,
+    }),
     nombre: ["actividad", "actividades"],
     listado: "/actividades",
   },
