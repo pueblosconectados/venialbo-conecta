@@ -1,0 +1,9 @@
+{
+  "titulo": "Prueba de automatismo",
+  "tipo": "otro",
+  "descripcion": "Esto es una prueba que se va a borrar y no se va a subir, solamente vista previa",
+  "contacto": "No me pueden localizar ;)",
+  "fecha_publicacion": "2026-10-27T14:40",
+  "fecha_caducidad": "2026-11-26",
+  "activo": false
+}
