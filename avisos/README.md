@@ -141,6 +141,28 @@ repite. Para sacarlo a mano de algo ya publicado:
 node avisos/difusion.mjs noticias/<id> [actividades/<id>…] [--dry]
 ```
 
+## «Esta semana en Venialbo»
+
+Los viernes a las 10:00 llega al grupo un resumen para reenviar al grupo del pueblo, con
+«📲 Enviar por WhatsApp» (`wa.me` con el texto escrito). `/semana` lo enseña cuando se
+quiera. Está en `worker/src/semana.js` y sale de lo publicado (`data/*.json`, sin token):
+
+- **Agenda** de los próximos 7 días, de viernes a jueves (el viernes siguiente ya va en
+  el siguiente resumen): cada día que caen las actividades que se repiten, las de varios
+  días una vez («Hasta el mar 10» si ya habían empezado), y las fechas señaladas (las
+  anuales, cada año).
+- **Avisos** de portada vigentes, y **fotos** de lo celebrado esta semana.
+- **Noticias, tablón y casas** publicados en los últimos 7 días.
+
+Sin un enlace por cosa (WhatsApp solo saca la vista previa del primero): uno por
+apartado. Si la dirección de `wa.me` pasa de 4.000 caracteres, no lleva el botón y dice
+que se copie el mensaje. Si no hay nada, no escribe.
+
+```bash
+curl -H "Authorization: Bearer $(cat .secretos/token-avisos)" https://venialbo-avisos.venialboconecta.workers.dev/semana
+# …/semana?enviar lo manda al grupo
+```
+
 ## El resumen semanal de visitas
 
 Los lunes a las 9:00 (hora de Madrid) el Worker manda al grupo de Telegram cómo fue la
@@ -217,6 +239,7 @@ algo es `/republicar`.
 | `/buscar <texto>` | Busca en todo lo que se ve en la web: el teléfono de un negocio, el contacto de un anuncio… con botones a la ficha en la web y en el CMS |
 | `/republicar` | Vuelve a lanzar la publicación de la web, para cuando ha fallado por algo pasajero |
 | `/avisos` | Cuántos dispositivos tienen las push activadas, y si les llegaron los últimos 5 avisos y cuánto tardaron |
+| `/semana` | «Esta semana en Venialbo», el resumen para reenviar al grupo del pueblo, con el botón de WhatsApp |
 | `/repaso` | Las fichas sin revisar desde hace 6 meses, las cojas y los enlaces rotos, con botones para darlas por buenas |
 | `/renovaciones` | Cuándo caducan el token de GitHub, el de Cloudflare y lo apuntado a mano (el dominio), con botón para renovar lo que está cerca |
 | `/chatid` | El id del chat donde se escribe |

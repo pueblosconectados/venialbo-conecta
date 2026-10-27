@@ -13,6 +13,8 @@
 //                                    grupo y ?en-curso usa lo que va de semana
 //   GET  /vigilancia     a mano      lo que vería ahora la vigilancia (con el token; en
 //                                    vigilancia.js). No avisa ni guarda nada
+//   GET  /semana         a mano      «Esta semana en Venialbo» (con el token; en
+//                                    semana.js). Solo lo enseña: ?enviar lo manda
 //   POST /telegram       Telegram    los comandos del grupo y los botones (en comandos.js)
 //   GET  /revision       a mano      el recordatorio de lo oculto sin revisar (con el
 //                                    token; en revision.js). No lo manda
@@ -30,14 +32,14 @@
 //   POST /recibido       el móvil    el service worker dice que le ha llegado un aviso,
 //                                    o que lo han tocado (en entregas.js)
 //
-// Y el cron de wrangler.toml, cada 5 minutos: la vigilancia de GitHub y de la web, las
-// Actions que fallen (publicaciones.js), cada día a las 10:00 lo oculto sin revisar
-// (revision.js), lo que está en su último día de mañana (caducidad.js) y las casas que
+// Y el cron de wrangler.toml, cada 5 minutos: la vigilancia de GitHub y de la web y las
+// Actions que fallen (publicaciones.js). Cada día a las 10:00: lo oculto sin revisar
+// (revision.js), lo que está en su último día de mañana (caducidad.js), las casas que
 // cumplen 3, 6, 9… meses publicadas (casas.js), lo que hay que renovar pronto, como los
-// tokens (renovaciones.js), el primer lunes de cada mes el repaso de las fichas viejas
-// y cojas (repaso.js), y la limpieza de lo medido de los
-// avisos (entregas.js), y los lunes a las 9:00 el resumen
-// semanal.
+// tokens (renovaciones.js), y la limpieza de lo medido de los avisos (entregas.js); los
+// viernes, además, «Esta semana en Venialbo» (semana.js), y el primer lunes de cada mes
+// el repaso de las fichas viejas y cojas (repaso.js). Los lunes a las 9:00, el resumen
+// semanal de visitas.
 //
 // Cada suscripción se guarda en KV con el hash de su dirección como clave y la propia
 // suscripción como metadato. Así la lista entera sale de una sola llamada a list(), sin
@@ -59,6 +61,7 @@ import { recordarRepaso } from "./repaso.js";
 import { apuntarEnlaces } from "./enlaces.js";
 import { contarResultado } from "./fichas.js";
 import { mandarDifusion } from "./difusion.js";
+import { enviarSemana, mensajeSemana } from "./semana.js";
 
 // Los servicios de push conocidos. Lo demás se rechaza, para que nadie llene el KV con
 // direcciones inventadas.
@@ -272,6 +275,17 @@ export default {
         }
       }
 
+      if (pathname === "/semana") {
+        if (!conToken(request, env)) return json({ error: "no autorizado" }, 401);
+        if (metodo !== "GET") return json({ error: "método no permitido" }, 405);
+        const enviar = new URL(request.url).searchParams.has("enviar");
+        try {
+          return json({ enviado: enviar, texto: enviar ? await enviarSemana(env) : (await mensajeSemana()).texto });
+        } catch (e) {
+          return json({ error: String(e.message ?? e) }, 502);
+        }
+      }
+
       if (pathname === "/vigilancia") {
         if (!conToken(request, env)) return json({ error: "no autorizado" }, 401);
         if (metodo !== "GET") return json({ error: "método no permitido" }, 405);
@@ -300,6 +314,8 @@ export default {
       ctx.waitUntil(recordarCaducan(env));
       ctx.waitUntil(recordarCasas(env));
       ctx.waitUntil(recordarRenovaciones(env));
+      if (new Intl.DateTimeFormat("en-US", { timeZone: "Europe/Madrid", weekday: "short" }).format(momento) === "Fri")
+        ctx.waitUntil(enviarSemana(env));
       // El primer lunes del mes
       if (esLunes && Number(new Intl.DateTimeFormat("en-US", { timeZone: "Europe/Madrid", day: "numeric" }).format(momento)) <= 7)
         ctx.waitUntil(recordarRepaso(env));

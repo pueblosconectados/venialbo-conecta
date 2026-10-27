@@ -13,6 +13,7 @@
 //   /republicar  vuelve a lanzar la publicación de la web
 //   /avisos      cuántos dispositivos tienen las push activadas, y si los últimos
 //                avisos les llegaron y cuánto tardaron (entregas.js)
+//   /semana      «Esta semana en Venialbo», el resumen para reenviar al pueblo (semana.js)
 //   /repaso      las fichas sin revisar desde hace meses, las cojas y los enlaces rotos
 //                (repaso.js y enlaces.js), con botones para darlas por buenas
 //   /renovaciones  cuándo caducan los tokens del Worker y lo apuntado a mano, como el
@@ -45,6 +46,7 @@ import { resumenEntregas } from "./entregas.js";
 import { listaRenovaciones } from "./renovaciones.js";
 import { marcar, mensajesRepaso } from "./repaso.js";
 import { esBotonFicha, pulsacionFicha } from "./fichas.js";
+import { mensajeSemana } from "./semana.js";
 
 const TALLY = "https://api.tally.so";
 
@@ -171,6 +173,7 @@ const CONSULTAR = [
   ["cambios", "Lo último que se ha guardado en el CMS, y quién"],
   ["buscar", "Busca en la web: /buscar panadería"],
   ["avisos", "Cuántos tienen los avisos y si les llegan"],
+  ["semana", "El resumen de la semana para reenviar"],
   ["repaso", "Fichas viejas, cojas y enlaces rotos"],
   ["renovaciones", "Cuándo caducan los tokens y el dominio"],
   ["chatid", "El id de este chat"],
@@ -211,7 +214,9 @@ const repasar = async (env) => {
   return null;
 };
 
-const ACCIONES = { estado, visitas, pendientes, caducan, cambios, buscar: buscarEnWeb, republicar, avisos, repaso: repasar, renovaciones, chatid, ayuda, start: ayuda };
+const semanaEnCurso = async () => mensajeSemana();
+
+const ACCIONES = { semana: semanaEnCurso, estado, visitas, pendientes, caducan, cambios, buscar: buscarEnWeb, republicar, avisos, repaso: repasar, renovaciones, chatid, ayuda, start: ayuda };
 // Los que se contestan fuera del grupo
 const EN_CUALQUIER_CHAT = new Set(["chatid"]);
 
