@@ -1,0 +1,9 @@
+{
+  "titulo": "Misas mes de noviembre",
+  "tipo": "informacion",
+  "imagen_url": "/media/imagenes/misas-mes-de-noviembre.jpg",
+  "fecha_publicacion": "2026-10-28T10:56",
+  "fecha_caducidad": "2026-11-29",
+  "hora_caducidad": "13:00",
+  "activo": true
+}
