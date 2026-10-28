@@ -1296,6 +1296,18 @@ content:
         required: true
         options:
           format: yyyy-MM-dd
+      # build-content.mjs la junta con la fecha: "2026-10-25T14:00"
+      - name: hora_caducidad
+        label: Hasta las
+        description: >-
+          Opcional. A qué hora desaparece el aviso el día de «Visible hasta», como
+          14:00. Sin hora, se ve hasta el final del día.
+        type: string
+        options:
+          pattern:
+            # Acepta el campo vacío: la hora es opcional
+            regex: "^\\s*(([01]?\\d|2[0-3])\\s*([:.h]\\s*([0-5]\\d)?)?\\s*h?)?\\s*$"
+            message: "Escribe la hora como 14:00"
       - name: activo
         label: Visible en la web
         description: Desmárcalo para bajarlo antes de tiempo.

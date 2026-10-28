@@ -564,11 +564,17 @@ const sumarDias = (dia, dias) => {
   return fecha.toISOString().slice(0, 10);
 };
 // Con «Hasta las», la caducidad lleva hora ("2026-10-25T14:00", hora local de quien
-// visita); sin ella sigue siendo el día entero. La hora sin fecha no se usa.
+// visita); sin ella sigue siendo el día entero. La hora sin fecha no se usa. Vale
+// también para los avisos de portada.
+const caducidadConHora = (f, quien) => {
+  const hora = leerHora(f.hora_caducidad, quien);
+  if (hora && !f.fecha_caducidad) console.warn(`  ⚠ ${quien}: tiene «Hasta las» pero no «Visible hasta», se ignora la hora`);
+  if (!f.fecha_caducidad) return null;
+  return hora ? `${f.fecha_caducidad.slice(0, 10)}T${hora}` : f.fecha_caducidad;
+};
 const caducidadDe = (a) => {
-  const hora = leerHora(a.hora_caducidad, `anuncio ${a.id}`);
-  if (hora && !a.fecha_caducidad) console.warn(`  ⚠ anuncio ${a.id}: tiene «Hasta las» pero no «Visible hasta», se ignora la hora`);
-  if (a.fecha_caducidad) return hora ? `${a.fecha_caducidad.slice(0, 10)}T${hora}` : a.fecha_caducidad;
+  const fecha = caducidadConHora(a, `anuncio ${a.id}`);
+  if (fecha) return fecha;
   if (a.tipo === "informacion") return null;
   const caduca = sumarDias(a.fecha_publicacion ?? "", DIAS_ANUNCIO);
   if (!caduca) return null;
@@ -658,7 +664,11 @@ const avisos = (await leerColeccion("avisos"))
         : noticia
           ? { enlace: `/noticias/${noticia.id}` }
           : { enlace: null };
-    return { ...quitar(a, "actividad", "anuncio", "noticia"), ...enlace };
+    return {
+      ...quitar(a, "actividad", "anuncio", "noticia", "hora_caducidad"),
+      fecha_caducidad: caducidadConHora(a, quien),
+      ...enlace,
+    };
   })
   .sort((a, b) => nivelDe(a) - nivelDe(b) || (b.id ?? "").localeCompare(a.id ?? ""));
 await escribir("avisos", avisos, avisos);
