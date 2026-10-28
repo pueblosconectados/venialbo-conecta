@@ -32,15 +32,15 @@
       "etiqueta": "Horario"
     },
     {
-      "clave": "telefono",
+      "clave": "telefono_movil",
       "tipo": "telefono",
-      "etiqueta": "Teléfono fijo",
+      "etiqueta": "Teléfono móvil",
       "requerido": true
     },
     {
-      "clave": "telefono_movil",
+      "clave": "telefono",
       "tipo": "telefono",
-      "etiqueta": "Teléfono móvil"
+      "etiqueta": "Teléfono fijo"
     },
     {
       "clave": "email",
