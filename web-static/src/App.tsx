@@ -1,4 +1,5 @@
-import { BrowserRouter, Route, Routes } from "react-router";
+import { useLayoutEffect } from "react";
+import { BrowserRouter, Route, Routes, useLocation, useNavigationType } from "react-router";
 import { ConfigProvider } from "antd";
 import esES from "antd/locale/es_ES";
 import "antd/dist/reset.css";
@@ -28,9 +29,28 @@ import { Buscar } from "./public/pages/Buscar";
 import { VistaPrevia } from "./public/pages/VistaPrevia";
 import { NotFound } from "./pages/NotFound";
 
+// Al tocar un enlace la página no se recarga, solo cambia lo de dentro, y el navegador
+// deja el scroll donde estaba: quien bajaba en la portada hasta una actividad o hasta el
+// menú de abajo entraba en la ficha o en el Tablón ya bajado. En el ordenador no se veía:
+// el «cargando» deja la página corta un instante y el navegador sube solo; en el móvil,
+// con los datos ya en memoria, a veces ni se pinta y el scroll se queda. Al ir a otra página se
+// sube arriba; al volver atrás (POP) no, para que el navegador lo deje donde estaba. Los
+// enlaces a un #apartado los lleva la propia página (Privacidad).
+function ArribaAlCambiarDePagina() {
+  const { pathname, hash } = useLocation();
+  const tipo = useNavigationType();
+  useLayoutEffect(() => {
+    if (tipo !== "POP" && !hash) window.scrollTo(0, 0);
+    // Solo al cambiar de página: cambiar de pestaña en el Tablón (?tab=) no sube
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [pathname]);
+  return null;
+}
+
 function App() {
   return (
     <BrowserRouter basename={BASE_URL}>
+      <ArribaAlCambiarDePagina />
       <ConfigProvider locale={esES} theme={venialboTheme}>
         <Routes>
           <Route element={<PublicLayout />}>
