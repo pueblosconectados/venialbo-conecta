@@ -20,6 +20,7 @@ type LugarDetail = {
   tipo: string;
   resumen?: string | null;
   imagen_url?: string | null;
+  imagen_medidas?: [number, number];
   contenido?: string | null;
   galeria?: Foto[];
   direccion?: string | null;
@@ -59,6 +60,7 @@ export function LugaresShow() {
         <ImagenAmpliable
           src={imgUrl(l.imagen_url)}
           srcSet={juegoDeMiniaturas(l.imagen_url)}
+          medidas={l.imagen_medidas}
           sizes="(max-width: 832px) 100vw, 800px"
           alt={l.nombre}
           wrapperStyle={{ display: "block", width: "100%", marginBottom: 24 }}

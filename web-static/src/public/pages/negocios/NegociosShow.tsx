@@ -39,6 +39,7 @@ type Negocio = {
   web_url?: string;
   redes_sociales?: Record<string, string>;
   logo_url?: string;
+  logo_medidas?: [number, number];
   horario?: string;
   categoria_negocio?: string;
   activo: boolean;
@@ -79,9 +80,18 @@ export function NegociosShow() {
           <ImagenAmpliable
             src={imgUrl(n.logo_url)}
           srcSet={juegoDeMiniaturas(n.logo_url)}
+          medidas={n.logo_medidas}
           sizes="(max-width: 480px) 60vw, 300px"
             alt={n.nombre}
-            style={{ maxHeight: 160, display: "block" }}
+            // El ancho al que queda el logo una vez cargado (el de `sizes`, o menos si el
+            // alto de 160 lo frena), para que su hueco esté reservado desde el principio
+            style={{
+              maxHeight: 160,
+              display: "block",
+              ...(n.logo_medidas && {
+                width: `min(300px, 60vw, ${Math.round((160 * n.logo_medidas[0]) / n.logo_medidas[1])}px)`,
+              }),
+            }}
           />
         </div>
       )}

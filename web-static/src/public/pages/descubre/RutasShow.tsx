@@ -21,6 +21,7 @@ type RutaDetail = DatosRuta & {
   dificultad?: string | null;
   resumen?: string | null;
   imagen_url?: string | null;
+  imagen_medidas?: [number, number];
   contenido?: string | null;
   galeria?: Foto[];
   salida?: string | null;
@@ -62,6 +63,7 @@ export function RutasShow() {
         <ImagenAmpliable
           src={imgUrl(r.imagen_url)}
           srcSet={juegoDeMiniaturas(r.imagen_url)}
+          medidas={r.imagen_medidas}
           sizes="(max-width: 832px) 100vw, 800px"
           alt={r.nombre}
           wrapperStyle={{ display: "block", width: "100%", marginBottom: 24 }}

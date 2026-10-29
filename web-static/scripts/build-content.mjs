@@ -10,6 +10,7 @@ import { createHmac } from "node:crypto";
 import { access, mkdir, readdir, readFile, rm, stat, writeFile } from "node:fs/promises";
 import { basename, dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
+import sharp from "sharp";
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
 const CONTENT_DIR = join(ROOT, "content");
@@ -59,7 +60,37 @@ const escribir = async (recurso, listado, detalles) => {
 
 const writeJson = async (path, data) => {
   await mkdir(dirname(path), { recursive: true });
-  await writeFile(path, JSON.stringify(data));
+  await writeFile(path, JSON.stringify(conMedidas(data)));
+};
+
+// Las medidas de cada foto, para que la página le reserve el hueco antes de que llegue.
+// Sin ellas, el navegador la pinta con alto 0 y, al cargar, todo lo de debajo baja de
+// golpe (el CLS de Cloudflare: en la ficha del cartel del teatro, el 41 % de las veces).
+// Se leen solo las cabeceras, así que es rápido. El móvil puede guardar la foto tumbada
+// y decir en el EXIF que se gire: entonces ancho y alto van al revés.
+const MEDIA_DIR = join(PUBLIC_DIR, "media", "imagenes");
+const medidas = new Map();
+for (const f of await readdir(MEDIA_DIR).catch(() => [])) {
+  if (!/\.(jpe?g|png|webp|svg)$/i.test(f)) continue;
+  try {
+    const { width, height, orientation } = await sharp(join(MEDIA_DIR, f)).metadata();
+    if (width && height) medidas.set(`/media/imagenes/${f}`, orientation >= 5 ? [height, width] : [width, height]);
+  } catch {
+    // Una imagen que sharp no entiende se queda sin medidas: solo vuelve el salto
+  }
+}
+
+// A cada imagen_url, logo_url… que sea una foto de media/ le pone al lado sus medidas:
+// imagen_medidas, logo_medidas… como [ancho, alto]
+const conMedidas = (valor) => {
+  if (Array.isArray(valor)) return valor.map(conMedidas);
+  if (!valor || typeof valor !== "object") return valor;
+  const salida = {};
+  for (const [k, v] of Object.entries(valor)) {
+    salida[k] = conMedidas(v);
+    if (k.endsWith("_url") && medidas.has(v)) salida[k.replace(/_url$/, "_medidas")] = medidas.get(v);
+  }
+  return salida;
 };
 
 // La vista previa de lo oculto (/borrador/<clave>): las fichas ocultas se preparan igual

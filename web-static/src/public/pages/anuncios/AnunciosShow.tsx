@@ -39,6 +39,7 @@ type Anuncio = {
   descripcion?: string;
   contacto?: string;
   imagen_url?: string;
+  imagen_medidas?: [number, number];
   galeria?: Foto[];
   documentos?: Documento[];
   fecha_publicacion: string;
@@ -121,6 +122,7 @@ export function AnunciosShow() {
         <ImagenAmpliable
           src={imgUrl(a.imagen_url)}
           srcSet={juegoDeMiniaturas(a.imagen_url)}
+          medidas={a.imagen_medidas}
           sizes="(max-width: 832px) 100vw, 800px"
           alt={a.titulo}
           wrapperStyle={{ display: "block", width: "100%", marginBottom: 24 }}

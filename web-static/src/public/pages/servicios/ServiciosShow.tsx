@@ -35,6 +35,7 @@ type Servicio = {
   tipo: string;
   descripcion?: string;
   logo_url?: string;
+  logo_medidas?: [number, number];
   direccion?: string;
   telefono?: string;
   email?: string;
@@ -82,9 +83,18 @@ export function ServiciosShow() {
           <ImagenAmpliable
             src={imgUrl(s.logo_url)}
           srcSet={juegoDeMiniaturas(s.logo_url)}
+          medidas={s.logo_medidas}
           sizes="(max-width: 480px) 60vw, 300px"
             alt={s.nombre}
-            style={{ maxHeight: 160, display: "block" }}
+            // El ancho al que queda el logo una vez cargado (el de `sizes`, o menos si el
+            // alto de 160 lo frena), para que su hueco esté reservado desde el principio
+            style={{
+              maxHeight: 160,
+              display: "block",
+              ...(s.logo_medidas && {
+                width: `min(300px, 60vw, ${Math.round((160 * s.logo_medidas[0]) / s.logo_medidas[1])}px)`,
+              }),
+            }}
           />
         </div>
       )}

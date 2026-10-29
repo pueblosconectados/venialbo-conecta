@@ -27,6 +27,7 @@ type ActividadDetail = {
   categoria: string;
   resumen?: string | null;
   imagen_url?: string | null;
+  imagen_medidas?: [number, number];
   contenido?: string | null;
   galeria?: Foto[];
   video_url?: string | null;
@@ -64,6 +65,7 @@ export function ActividadesShow() {
         <ImagenAmpliable
           src={imgUrl(a.imagen_url)}
           srcSet={juegoDeMiniaturas(a.imagen_url)}
+          medidas={a.imagen_medidas}
           sizes="(max-width: 832px) 100vw, 800px"
           alt={a.titulo}
           wrapperStyle={{ display: "block", width: "100%", marginBottom: 24 }}
