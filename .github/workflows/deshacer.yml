@@ -1,0 +1,66 @@
+name: Deshacer desde Telegram
+
+# Vuelve una ficha a como estaba antes de sus últimos cambios (avisos/deshacer.mjs). Lo
+# lanza el Worker de avisos cuando alguien escribe /deshacer en el grupo de Telegram y
+# confirma (avisos/worker/src/deshacer.js); al terminar, el Worker lo cuenta en el grupo.
+#
+# Si alguien ha guardado la ficha desde que salió el botón, no hace nada: `esperado` es
+# el SHA que tenía entonces.
+#
+# Los inputs se ven en la página pública de la ejecución: son la ruta de la ficha y dos
+# SHA, nada personal. Entran a la orden por variables de entorno, no pegados.
+on:
+  workflow_dispatch:
+    inputs:
+      ruta:
+        description: La ficha (web-static/content/…/….json)
+        required: true
+        type: string
+      base:
+        description: El commit con la versión a la que se vuelve
+        required: true
+        type: string
+      esperado:
+        description: El SHA que tiene ahora la ficha, o «ninguno» si está borrada
+        required: true
+        type: string
+
+permissions:
+  contents: write
+  # Para lanzar la publicación: un push hecho con el GITHUB_TOKEN no lanza otros workflows
+  actions: write
+
+concurrency:
+  group: deshacer
+  cancel-in-progress: false
+
+jobs:
+  deshacer:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+
+      - name: Deshacer
+        id: deshacer
+        env:
+          RUTA: ${{ inputs.ruta }}
+          BASE: ${{ inputs.base }}
+          ESPERADO: ${{ inputs.esperado }}
+        run: node avisos/deshacer.mjs "$RUTA" "$BASE" "$ESPERADO"
+
+      - name: Publicar la web
+        if: steps.deshacer.outputs.hecho == '1'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh workflow run web-static-pages.yml --ref main
+
+      # También si algo ha fallado: que en el grupo se sepa
+      - name: Contarlo en el grupo
+        if: always()
+        env:
+          AVISOS_TOKEN: ${{ secrets.AVISOS_TOKEN }}
+        run: node avisos/deshacer.mjs --avisar

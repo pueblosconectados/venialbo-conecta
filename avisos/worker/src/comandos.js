@@ -12,6 +12,8 @@
 //   /buscar x    busca en todo lo que se ve en la web (buscar.js)
 //   /republicar  vuelve a lanzar la publicación de la web
 //   /avisar      manda un aviso push a todos los móviles, con confirmación (avisar.js)
+//   /deshacer    vuelve una ficha a como estaba antes de sus últimos cambios, con
+//                confirmación (deshacer.js)
 //   /avisos      cuántos dispositivos tienen las push activadas, y si los últimos
 //                avisos les llegaron y cuánto tardaron (entregas.js)
 //   /semana      «Esta semana en Venialbo», el resumen para reenviar al pueblo (semana.js)
@@ -49,6 +51,7 @@ import { marcar, mensajesRepaso } from "./repaso.js";
 import { esBotonFicha, pulsacionFicha } from "./fichas.js";
 import { mensajeSemana } from "./semana.js";
 import { esBotonAviso, prepararAviso, pulsacionAviso } from "./avisar.js";
+import { esBotonDeshacer, listaDeshacer, pulsacionDeshacer } from "./deshacer.js";
 
 const TALLY = "https://api.tally.so";
 
@@ -183,6 +186,7 @@ const CONSULTAR = [
 ];
 const HACER = [
   ["avisar", "Aviso a todos los móviles: /avisar Título | Texto"],
+  ["deshacer", "Vuelve una ficha a como estaba antes"],
   ["republicar", "Vuelve a publicar la web"],
 ];
 
@@ -224,7 +228,9 @@ const semanaEnCurso = async () => mensajeSemana();
 // Lo que va detrás del comando: "/avisar Corte de agua | Mañana…"
 const avisar = async (env, mensaje, argumentos) => prepararAviso(env, mensaje, argumentos);
 
-const ACCIONES = { avisar, semana: semanaEnCurso, estado, visitas, pendientes, caducan, cambios, buscar: buscarEnWeb, republicar, avisos, repaso: repasar, renovaciones, chatid, ayuda, start: ayuda };
+const deshacer = async (env) => listaDeshacer(env);
+
+const ACCIONES = { avisar, deshacer, semana: semanaEnCurso, estado, visitas, pendientes, caducan, cambios, buscar: buscarEnWeb, republicar, avisos, repaso: repasar, renovaciones, chatid, ayuda, start: ayuda };
 // Los que se contestan fuera del grupo
 const EN_CUALQUIER_CHAT = new Set(["chatid"]);
 
@@ -254,6 +260,12 @@ const pulsacion = async (env, consulta) => {
   // «✅ Enviar» y «❌ Cancelar» de /avisar (avisar.js)
   if (esBotonAviso(accion)) {
     const [texto, alerta] = await pulsacionAviso(env, consulta, accion, cual, quien);
+    return responder(texto, alerta);
+  }
+
+  // «↩️» de /deshacer, y su «Sí» y «No» (deshacer.js)
+  if (esBotonDeshacer(accion)) {
+    const [texto, alerta] = await pulsacionDeshacer(env, consulta, accion, cual, quien);
     return responder(texto, alerta);
   }
 

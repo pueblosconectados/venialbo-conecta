@@ -98,6 +98,14 @@ export const caducidadToken = async (env) => {
   return { fecha };
 };
 
+// Los ficheros que toca un commit (lo usa deshacer.js con los del bot, que no los dicen
+// en el mensaje)
+export const ficherosDeCommit = async (env, sha) => {
+  const respuesta = await fetch(`${API}/commits/${sha}`, { headers: cabeceras(env) });
+  if (!respuesta.ok) throw new Error(`GitHub: HTTP ${respuesta.status} al leer el commit ${sha.slice(0, 7)}`);
+  return (await respuesta.json()).files.map((f) => f.filename);
+};
+
 // Los últimos commits de main, del más nuevo al más viejo (los usa cambios.js). Con
 // 100 da para ver lo último del CMS aunque entre medias haya commits de las Actions.
 export const listarCommits = async (env) => {

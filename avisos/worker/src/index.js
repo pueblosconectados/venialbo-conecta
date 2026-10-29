@@ -31,6 +31,8 @@
 //                                    Facebook, al grupo (con el token; en difusion.js)
 //   POST /fichas         la Action   lo que ha hecho un botón de publicar, descartar o
 //                                    subir fotos (con el token; en fichas.js)
+//   POST /deshecho       la Action   si se ha podido deshacer una ficha con /deshacer, al
+//                                    grupo (con el token; en deshacer.js)
 //   POST /recibido       el móvil    el service worker dice que le ha llegado un aviso,
 //                                    o que lo han tocado (en entregas.js)
 //
@@ -65,6 +67,7 @@ import { contarResultado } from "./fichas.js";
 import { mandarDifusion } from "./difusion.js";
 import { enviarSemana, mensajeSemana } from "./semana.js";
 import { contarAviso } from "./avisar.js";
+import { contarDeshecho } from "./deshacer.js";
 
 // Los servicios de push conocidos. Lo demás se rechaza, para que nadie llene el KV con
 // direcciones inventadas.
@@ -251,6 +254,13 @@ export default {
         if (!conToken(request, env)) return json({ error: "no autorizado" }, 401);
         if (metodo !== "POST") return json({ error: "método no permitido" }, 405);
         const resultado = await contarResultado(await leerCuerpo(request), env);
+        return json(resultado, resultado.error ? 400 : 200);
+      }
+
+      if (pathname === "/deshecho") {
+        if (!conToken(request, env)) return json({ error: "no autorizado" }, 401);
+        if (metodo !== "POST") return json({ error: "método no permitido" }, 405);
+        const resultado = await contarDeshecho(await leerCuerpo(request), env);
         return json(resultado, resultado.error ? 400 : 200);
       }
 

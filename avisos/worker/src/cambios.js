@@ -14,7 +14,7 @@ const CUANTOS = 5;
 const CMS = "https://app.pagescms.org/pueblosconectados/venialbo-conecta/main/collection";
 const REPO = `repository(owner: "pueblosconectados", name: "venialbo-conecta")`;
 
-const TIPOS = {
+export const TIPOS = {
   noticias: "Noticia",
   actividades: "Actividad",
   anuncios: "Anuncio",
@@ -30,7 +30,7 @@ const TIPOS = {
 };
 const ICONOS = { Create: "➕", Update: "✏️", Delete: "🗑" };
 
-const hace = (desde, ahora) => {
+export const hace = (desde, ahora) => {
   const minutos = Math.max(1, Math.round((ahora - desde) / 60_000));
   if (minutos < 60) return `hace ${minutos} min`;
   const horas = Math.round(minutos / 60);
@@ -40,7 +40,7 @@ const hace = (desde, ahora) => {
 };
 
 // "2026-10-15-retirada-de-merinas" → "Retirada de merinas"
-const deSlug = (id) => {
+export const deSlug = (id) => {
   const texto = id.replace(/^\d{4}-\d{2}-\d{2}-/, "").replace(/-/g, " ");
   return texto.charAt(0).toUpperCase() + texto.slice(1);
 };
@@ -80,7 +80,7 @@ const juntar = (cambios) => {
 };
 
 // "MJ-Venialbo", "MJ-Venialbo y David Hernando", "A, B y C"
-const nombres = (lista) => (lista.length < 2 ? lista[0] : `${lista.slice(0, -1).join(", ")} y ${lista.at(-1)}`);
+export const nombres = (lista) => (lista.length < 2 ? lista[0] : `${lista.slice(0, -1).join(", ")} y ${lista.at(-1)}`);
 
 // El título actual de cada ficha que aún existe, en una sola consulta
 const titulos = async (env, fichas) => {
