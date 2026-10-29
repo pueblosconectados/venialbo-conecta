@@ -10,7 +10,6 @@ import { createHmac } from "node:crypto";
 import { access, mkdir, readdir, readFile, rm, stat, writeFile } from "node:fs/promises";
 import { basename, dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
-import sharp from "sharp";
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
 const CONTENT_DIR = join(ROOT, "content");
@@ -68,9 +67,13 @@ const writeJson = async (path, data) => {
 // golpe (el CLS de Cloudflare: en la ficha del cartel del teatro, el 41 % de las veces).
 // Se leen solo las cabeceras, así que es rápido. El móvil puede guardar la foto tumbada
 // y decir en el EXIF que se gire: entonces ancho y alto van al revés.
+//
+// sharp se carga solo si está: la Action de avisos pasa este script sin el npm ci de
+// web-static (solo quiere saber qué hay publicado), y ahí las medidas no hacen falta.
+const sharp = (await import("sharp").catch(() => null))?.default;
 const MEDIA_DIR = join(PUBLIC_DIR, "media", "imagenes");
 const medidas = new Map();
-for (const f of await readdir(MEDIA_DIR).catch(() => [])) {
+for (const f of sharp ? await readdir(MEDIA_DIR).catch(() => []) : []) {
   if (!/\.(jpe?g|png|webp|svg)$/i.test(f)) continue;
   try {
     const { width, height, orientation } = await sharp(join(MEDIA_DIR, f)).metadata();
