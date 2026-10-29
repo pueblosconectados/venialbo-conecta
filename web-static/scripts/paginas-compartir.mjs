@@ -213,6 +213,8 @@ for (const s of SECCIONES) {
   await escribir(s.ruta ? `${s.ruta}/index.html` : "index.html", html);
   enSitemap.push(s.ruta ? `${s.ruta}/` : "");
 }
+// El recorrido de public/conoce/ es una página aparte, con su propia vista previa
+enSitemap.push("conoce/");
 
 let total = 0;
 for (const f of FICHAS) {

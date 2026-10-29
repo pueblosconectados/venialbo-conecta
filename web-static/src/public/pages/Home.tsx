@@ -152,6 +152,30 @@ export function Home() {
             y por dónde pasear, sus negocios y servicios, y un tablón con la
             información útil del pueblo y los anuncios de los vecinos.
           </Typography.Text>
+          {/* El recorrido de public/conoce/ no es parte de la web de React: enlace normal.
+              Sin partir el enlace, para que en móvil corte después de la pregunta */}
+          <Typography.Text
+            style={{
+              display: "block",
+              marginTop: 14,
+              fontSize: 15,
+              color: colors.marronSuave,
+            }}
+          >
+            ¿Primera vez por aquí?{" "}
+            <a
+              href={`${import.meta.env.BASE_URL}conoce/`}
+              style={{
+                color: colors.musgo,
+                fontWeight: 500,
+                textDecoration: "underline",
+                textUnderlineOffset: 3,
+                whiteSpace: "nowrap",
+              }}
+            >
+              Recorre la web en un minuto
+            </a>
+          </Typography.Text>
         </div>
       </section>
 
