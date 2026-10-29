@@ -194,11 +194,16 @@ caracteres y texto hasta 200: en el móvil no se ve más.
 
 Los lunes a las 9:00 (hora de Madrid) el Worker manda al grupo de Telegram cómo fue la
 semana anterior, de lunes a domingo: visitas y páginas vistas comparadas con la semana
-de antes, las 5 páginas más vistas con su título, de dónde llegan, móvil u ordenador,
-el día con más visitas y la hora punta, las visitas desde fuera de España y cuántos
-dispositivos tienen los avisos activados. Si la web va lenta, lo avisa: cuando en el
-móvil la mitad de las cargas pasa de 3 s, o cuando una página sale en «malo» en al menos
-una de cada cuatro cargas según los Core Web Vitals de Google. Si va bien, no dice nada. Está en `worker/src/resumen.js`.
+de antes, la media al día y las páginas por visita; una barra por día, con el día fuerte
+y lo que se publicó ese día; las 5 páginas más vistas con su título; el reparto por
+secciones; por dónde entra la gente (la portada o la ficha compartida que más trajo); de
+dónde llegan, en porcentaje; móvil u ordenador, la hora punta y las franjas del día; el
+uso del buscador; las visitas desde fuera de España y cuántos dispositivos tienen los
+avisos activados. Si la web va lenta, lo avisa: cuando en el móvil la mitad de las
+cargas pasa de 3 s, o cuando una página sale en «malo» en al menos una de cada cuatro
+cargas según los Core Web Vitals de Google; si va bien, una línea con lo que tarda en
+cargar. Al final, si Cloudflare ha muestreado, dice que las cifras son aproximadas. Está
+en `worker/src/resumen.js`. `/visitas` en el grupo saca lo mismo de la semana en curso.
 
 - **Los datos** salen de Cloudflare Web Analytics por su API GraphQL (el dataset
   `rumPageloadEventsAdaptiveGroups`, que Cloudflare no documenta del todo). El token,
@@ -217,7 +222,8 @@ una de cada cuatro cargas según los Core Web Vitals de Google. Si va bien, no d
   curl -H "Authorization: Bearer $T" "https://venialbo-avisos.venialboconecta.workers.dev/resumen?en-curso&enviar"   # lo manda
   ```
 
-- **Las cifras son aproximadas**: quien lleva bloqueador no cuenta. WhatsApp y muchas
+- **Las cifras son aproximadas**: quien lleva bloqueador no cuenta, y Cloudflare guarda
+  una de cada 10 cargas y multiplica (por eso todo acaba en 0). WhatsApp y muchas
   apps no dicen de dónde viene la visita, así que eso sale como «Directo, WhatsApp u
   otras apps».
 

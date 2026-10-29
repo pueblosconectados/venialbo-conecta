@@ -8,14 +8,16 @@
 // (CF_ANALYTICS_TOKEN). El siteTag no es el token del script de la web: se saca de la
 // propia API agrupando por siteTag y requestHost.
 //
-// Las cifras son aproximadas: quien lleva bloqueador no cuenta, y Cloudflare muestrea
-// cuando hay mucho tráfico (a esta escala, casi nada).
+// Las cifras son aproximadas: quien lleva bloqueador no cuenta, y Cloudflare guarda solo
+// una de cada 10 cargas y multiplica (sampleInterval, mirado el 2026-10-29): por eso todo
+// acaba en 0. El mensaje lo dice al final.
 
 import { aTelegram, escapaHtml } from "./telegram.js";
 
 const GRAPHQL = "https://api.cloudflare.com/client/v4/graphql";
 const WEB = "https://venialboconecta.es";
 const DIA = 24 * 60 * 60 * 1000;
+const porcentaje = (parte, total) => (total ? Math.round((parte / total) * 100) : 0);
 const PAGINAS = 5;
 
 // ── Las fechas, en hora de Madrid ────────────────────────────────────────────
@@ -74,13 +76,16 @@ const rotulo = ({ primerDia, ultimoDia }) => {
 const CONSULTA = `query($cuenta: String!, $sitio: String!, $desde: Time!, $hasta: Time!, $previaDesde: Time!) {
   viewer { accounts(filter: { accountTag: $cuenta }) {
     total: rumPageloadEventsAdaptiveGroups(limit: 1, filter: { siteTag: $sitio, datetime_geq: $desde, datetime_lt: $hasta }) {
-      count sum { visits }
+      count sum { visits } avg { sampleInterval }
     }
     previa: rumPageloadEventsAdaptiveGroups(limit: 1, filter: { siteTag: $sitio, datetime_geq: $previaDesde, datetime_lt: $desde }) {
       count sum { visits }
     }
-    paginas: rumPageloadEventsAdaptiveGroups(limit: 20, orderBy: [count_DESC], filter: { siteTag: $sitio, datetime_geq: $desde, datetime_lt: $hasta }) {
+    paginas: rumPageloadEventsAdaptiveGroups(limit: 300, orderBy: [count_DESC], filter: { siteTag: $sitio, datetime_geq: $desde, datetime_lt: $hasta }) {
       count dimensions { requestPath }
+    }
+    entradas: rumPageloadEventsAdaptiveGroups(limit: 20, orderBy: [sum_visits_DESC], filter: { siteTag: $sitio, datetime_geq: $desde, datetime_lt: $hasta }) {
+      sum { visits } dimensions { requestPath }
     }
     origenes: rumPageloadEventsAdaptiveGroups(limit: 50, orderBy: [sum_visits_DESC], filter: { siteTag: $sitio, datetime_geq: $desde, datetime_lt: $hasta }) {
       sum { visits } dimensions { refererHost }
@@ -160,7 +165,7 @@ const nombreDe = async (ruta) => {
       const respuesta = await fetch(`${WEB}/data/${recurso}/${encodeURIComponent(m[1])}.json`);
       if (respuesta.ok) {
         const ficha = await respuesta.json();
-        if (ficha.titulo || ficha.nombre) return ficha.titulo || ficha.nombre;
+        if (ficha.titulo || ficha.nombre) return (ficha.titulo || ficha.nombre).trim();
       }
     } catch {
       // Sin título se queda la ruta
@@ -180,8 +185,17 @@ const ORIGENES = [
   [/(^|\.)(bing\.com|duckduckgo\.com|yahoo\.com|ecosia\.org)$/, "Otros buscadores"],
 ];
 const origenDe = (host) => ORIGENES.find(([patron]) => patron.test(host))?.[1] ?? host;
+const EMOJI_ORIGEN = {
+  "Directo, WhatsApp u otras apps": "💬",
+  Facebook: "📘",
+  Instagram: "📸",
+  WhatsApp: "💬",
+  Telegram: "✈️",
+  Google: "🔎",
+  "Otros buscadores": "🔎",
+};
 
-const DISPOSITIVOS = { mobile: "Móvil", desktop: "Ordenador", tablet: "Tablet" };
+const DISPOSITIVOS = { mobile: "📱 Móvil", desktop: "💻 Ordenador", tablet: "📲 Tablet" };
 
 // Los países llegan como código ISO ("FR"); los que no son un país se quedan fuera
 const PAISES = new Intl.DisplayNames(["es"], { type: "region" });
@@ -197,27 +211,76 @@ const paisDe = (codigo) => {
 // ── Cuándo se entra ──────────────────────────────────────────────────────────
 
 const diaMadrid = new Intl.DateTimeFormat("es-ES", { timeZone: "Europe/Madrid", weekday: "long", day: "numeric" });
+const diaCorto = new Intl.DateTimeFormat("es-ES", { timeZone: "UTC", weekday: "short", day: "numeric" });
+const BARRA = 8;
+const FRANJAS = [
+  ["🌅 Mañana", (h) => h >= 6 && h < 14],
+  ["☀️ Tarde", (h) => h >= 14 && h < 20],
+  ["🌙 Noche", (h) => h >= 20 || h < 6],
+];
 
-// El día con más visitas y la hora punta, en hora de Madrid. La API agrupa por horas
-// en UTC; se pasan a Madrid antes de sumar.
-const cuandoSeEntra = (horas) => {
+// Las barras de cada día, el día con más visitas, la hora punta y el reparto por franjas,
+// en hora de Madrid. La API agrupa por horas en UTC; se pasan a Madrid antes de sumar.
+// Las barras van sin cifra: Cloudflare estima cada agrupación por separado y los días no
+// siempre suman el total de arriba.
+const cuandoSeEntra = (horas, semana, ahora) => {
   const porDia = new Map();
   const porHora = new Map();
+  let total = 0;
   for (const { sum, dimensions } of horas) {
     if (!sum.visits) continue;
     const instante = new Date(dimensions.datetimeHour);
-    const dia = diaMadrid.format(instante);
+    const dia = fechaMadrid(instante);
     const hora = horaMadrid(instante);
     porDia.set(dia, (porDia.get(dia) ?? 0) + sum.visits);
     porHora.set(hora, (porHora.get(hora) ?? 0) + sum.visits);
+    total += sum.visits;
   }
-  const mayor = (mapa) => [...mapa].sort((a, b) => b[1] - a[1])[0];
-  const dia = mayor(porDia);
-  const hora = mayor(porHora);
-  if (!dia) return null;
-  // Sin la cifra del día: Cloudflare estima cada agrupación por separado y no siempre
-  // cuadra con el total de arriba
-  return `🕘 El día con más visitas: ${dia[0]} · La hora punta: ${hora[0]}:00`;
+  if (!total) return null;
+
+  // Con la semana en curso, solo los días que ya han empezado
+  const dias = Array.from({ length: 7 }, (_, i) => sumaDias(semana.primerDia, i)).filter(
+    (dia) => medianocheMadrid(dia) <= ahora,
+  );
+  const maximo = Math.max(...dias.map((dia) => porDia.get(dia) ?? 0));
+  const fuerte = dias.find((dia) => (porDia.get(dia) ?? 0) === maximo);
+  const barras = dias.map((dia) => {
+    const llenas = Math.round(((porDia.get(dia) ?? 0) / maximo) * BARRA);
+    const nombre = diaCorto.format(new Date(`${dia}T12:00:00Z`));
+    return `<code>${nombre.padEnd(6)}</code> ${"🟩".repeat(llenas) || "▫️"}${dia === fuerte ? " ⭐" : ""}`;
+  });
+
+  const horaPunta = [...porHora].sort((a, b) => b[1] - a[1])[0][0];
+  const franjas = FRANJAS.map(([nombre, enFranja]) => {
+    const suma = [...porHora].filter(([h]) => enFranja(h)).reduce((s, [, v]) => s + v, 0);
+    return `${nombre} ${porcentaje(suma, total)} %`;
+  });
+
+  return {
+    barras: barras.join("\n"),
+    fuerte,
+    nombreFuerte: diaMadrid.format(medianocheMadrid(fuerte).getTime() + 12 * 3600_000),
+    cuando: `🕘 Hora punta: las ${horaPunta}:00\n${franjas.join(" · ")}`,
+  };
+};
+
+// Lo que se publicó ese día, para ver si el pico vino de ahí. El id de noticias,
+// actividades y anuncios empieza por la fecha en que se crearon.
+const PUBLICABLES = ["noticias", "actividades", "anuncios"];
+const publicadoEl = async (fecha) => {
+  const titulos = [];
+  for (const recurso of PUBLICABLES) {
+    try {
+      const respuesta = await fetch(`${WEB}/data/${recurso}.json`);
+      if (!respuesta.ok) continue;
+      for (const ficha of await respuesta.json()) {
+        if (ficha.id?.startsWith(fecha)) titulos.push((ficha.titulo ?? ficha.id).trim());
+      }
+    } catch {
+      // Sin esa lista, el día fuerte sale igual, sin lo publicado
+    }
+  }
+  return titulos;
 };
 
 // ── Si va lenta ──────────────────────────────────────────────────────────────
@@ -264,14 +327,17 @@ const avisosDeLentitud = async ({ carga, experiencia }) => {
     avisos.push(`${escapaHtml(await nombreDe(ruta))}: ${problemas.join(", ")}`);
   }
 
-  return avisos.length ? `⚠️ <b>Va lenta</b>\n${avisos.join("\n")}` : null;
+  if (avisos.length) return `⚠️ <b>Va lenta</b>\n${avisos.join("\n")}`;
+  // Si va bien, una línea con el tiempo de carga en el móvil
+  if (!movil) return null;
+  const segundos = (movil.quantiles.pageLoadTimeP50 / 1_000_000).toLocaleString("es-ES", { maximumFractionDigits: 1 });
+  return `⚡ Va rápida: en el móvil carga en ${segundos} s ✅`;
 };
 
 // ── El mensaje ───────────────────────────────────────────────────────────────
 
 const numero = new Intl.NumberFormat("es-ES");
 const n = (x) => numero.format(x);
-const porcentaje = (parte, total) => (total ? Math.round((parte / total) * 100) : 0);
 
 const comparacion = (ahora, antes) => {
   if (!antes) return "Sin datos de la semana anterior para comparar";
@@ -291,6 +357,11 @@ export const suscriptores = async (env) => {
   return total;
 };
 
+// La sección de una ruta: "/tablon/2026-10-21-bando" → "/tablon"
+const seccionDe = (ruta) => `/${ruta.split("/")[1] ?? ""}`;
+// Lo que no cuenta como sección: la portada va aparte, y lo demás no es contenido
+const NO_SECCION = new Set(["/", "/buscar", "/borrador", "/privacidad"]);
+
 export const resumenSemanal = async (env, { ahora = new Date(), enCurso = false } = {}) => {
   const semana = semanas(ahora, enCurso);
   const datos = await consultar(env, semana);
@@ -298,15 +369,31 @@ export const resumenSemanal = async (env, { ahora = new Date(), enCurso = false 
   const visitas = datos.total[0]?.sum.visits ?? 0;
   const vistas = datos.total[0]?.count ?? 0;
   const visitasAntes = datos.previa[0]?.sum.visits ?? 0;
+  const muestreo = Math.round(datos.total[0]?.avg?.sampleInterval ?? 1);
 
   const lineas = [`📊 <b>Resumen de la semana</b>\n${rotulo(semana)}${enCurso ? " (en curso)" : ""}`];
 
   if (!vistas) {
     lineas.push("No se registró ninguna visita.");
   } else {
+    const cuando = cuandoSeEntra(datos.horas, semana, ahora);
+    const dias = Math.max(1, Math.min(7, Math.ceil((ahora - semana.desde) / DIA)));
+    const porVisita = (vistas / Math.max(visitas, 1)).toLocaleString("es-ES", { maximumFractionDigits: 1 });
     lineas.push(
-      `👥 <b>${n(visitas)} ${visitas === 1 ? "visita" : "visitas"}</b> · ${n(vistas)} páginas vistas\n${comparacion(visitas, visitasAntes)}`,
+      [
+        `👥 <b>${n(visitas)} ${visitas === 1 ? "visita" : "visitas"}</b> · ${n(vistas)} páginas vistas`,
+        comparacion(visitas, visitasAntes),
+        `📅 Unas ${n(Math.round(visitas / dias))} al día · ${porVisita} páginas por visita`,
+      ].join("\n"),
     );
+
+    if (cuando) {
+      const publicado = await publicadoEl(cuando.fuerte);
+      const motivo = publicado.length
+        ? `\nEse día se publicó ${publicado.slice(0, 3).map((t) => `«${escapaHtml(t)}»`).join(", ")}${publicado.length > 3 ? "…" : ""}`
+        : "";
+      lineas.push(`📈 <b>Día a día</b>\n${cuando.barras}\n⭐ El día fuerte: el ${cuando.nombreFuerte}${motivo}`);
+    }
 
     // Las rutas con y sin barra final son la misma página
     const porRuta = new Map();
@@ -320,6 +407,39 @@ export const resumenSemanal = async (env, { ahora = new Date(), enCurso = false 
       `📄 <b>Lo más visto</b>\n${masVistas.map(([, cuenta], i) => `${i + 1}. ${escapaHtml(nombres[i])} · ${n(cuenta)}`).join("\n")}`,
     );
 
+    // Cada sección con sus fichas: «Actividades» es el listado más todas las actividades
+    const porSeccion = new Map();
+    for (const [ruta, cuenta] of porRuta) {
+      const seccion = seccionDe(ruta);
+      if (NO_SECCION.has(seccion) || !SECCIONES[seccion]) continue;
+      porSeccion.set(seccion, (porSeccion.get(seccion) ?? 0) + cuenta);
+    }
+    if (porSeccion.size) {
+      const secciones = [...porSeccion].sort((a, b) => b[1] - a[1]).slice(0, 6);
+      const portada = porRuta.get("/") ?? 0;
+      lineas.push(
+        `🗂️ <b>Por secciones</b> (de las páginas vistas)\nPortada ${porcentaje(portada, vistas)} % · ${secciones
+          .map(([s, c]) => `${SECCIONES[s]} ${porcentaje(c, vistas)} %`)
+          .join(" · ")}`,
+      );
+    }
+
+    // Una visita cuenta en la página por la que se entra: la portada, o una ficha que
+    // alguien ha compartido
+    const porEntrada = new Map();
+    for (const { sum, dimensions } of datos.entradas) {
+      if (!sum.visits) continue;
+      const ruta = dimensions.requestPath.replace(/(.)\/$/, "$1");
+      porEntrada.set(ruta, (porEntrada.get(ruta) ?? 0) + sum.visits);
+    }
+    const porPortada = porEntrada.get("/") ?? 0;
+    if (porEntrada.size) {
+      const ficha = [...porEntrada].filter(([ruta]) => FICHAS.some(([patron]) => patron.test(ruta))).sort((a, b) => b[1] - a[1])[0];
+      const entradas = [`🏠 Por la portada: ${porcentaje(porPortada, visitas)} %`];
+      if (ficha) entradas.push(`🔗 La ficha que más gente trajo: «${escapaHtml(await nombreDe(ficha[0]))}» · ${n(ficha[1])}`);
+      lineas.push(`🚪 <b>Por dónde entran</b>\n${entradas.join("\n")}`);
+    }
+
     // Solo las entradas desde fuera: pasar de una página a otra de la web no es un origen
     const propio = new URL(WEB).hostname;
     const porOrigen = new Map();
@@ -329,22 +449,30 @@ export const resumenSemanal = async (env, { ahora = new Date(), enCurso = false 
       porOrigen.set(nombre, (porOrigen.get(nombre) ?? 0) + sum.visits);
     }
     if (porOrigen.size) {
+      const totalOrigenes = [...porOrigen.values()].reduce((s, v) => s + v, 0);
       const origenes = [...porOrigen].sort((a, b) => b[1] - a[1]).slice(0, 5);
-      lineas.push(`🔗 <b>De dónde llegan</b>\n${origenes.map(([o, v]) => `${escapaHtml(o)}: ${n(v)}`).join("\n")}`);
+      lineas.push(
+        `🧭 <b>De dónde llegan</b>\n${origenes
+          .map(([o, v]) => `${EMOJI_ORIGEN[o] ?? "🌐"} ${escapaHtml(o)}: ${porcentaje(v, totalOrigenes)} %`)
+          .join("\n")}`,
+      );
     }
 
     const dispositivos = datos.dispositivos.filter((d) => d.sum.visits);
     const totalDispositivos = dispositivos.reduce((s, d) => s + d.sum.visits, 0);
+    const lineasUso = [];
     if (totalDispositivos) {
-      lineas.push(
-        `📱 ${dispositivos
+      lineasUso.push(
+        dispositivos
           .map((d) => `${DISPOSITIVOS[d.dimensions.deviceType] ?? d.dimensions.deviceType} ${porcentaje(d.sum.visits, totalDispositivos)} %`)
-          .join(" · ")}`,
+          .join(" · "),
       );
     }
-
-    const cuando = cuandoSeEntra(datos.horas);
-    if (cuando) lineas.push(cuando);
+    if (cuando) lineasUso.push(cuando.cuando);
+    // Cuenta las veces que se abre y también lo que se escribe, que cambia la dirección
+    const buscador = porRuta.get("/buscar") ?? 0;
+    if (buscador) lineasUso.push(`🔍 Buscador: ${n(buscador)} páginas vistas`);
+    if (lineasUso.length) lineas.push(lineasUso.join("\n"));
 
     const fuera = datos.paises.filter((p) => p.sum.visits && p.dimensions.countryName !== "ES" && !NO_PAIS.has(p.dimensions.countryName));
     if (fuera.length) {
@@ -353,12 +481,15 @@ export const resumenSemanal = async (env, { ahora = new Date(), enCurso = false 
       lineas.push(`🌍 ${n(total)} ${total === 1 ? "visita" : "visitas"} desde fuera de España (${escapaHtml(detalle)}${fuera.length > 4 ? "…" : ""})`);
     }
 
-    const lentitud = await avisosDeLentitud(datos);
-    if (lentitud) lineas.push(lentitud);
+    const rendimiento = await avisosDeLentitud(datos);
+    if (rendimiento) lineas.push(rendimiento);
   }
 
   const avisos = await suscriptores(env);
   lineas.push(`🔔 ${n(avisos)} ${avisos === 1 ? "dispositivo" : "dispositivos"} con los avisos activados`);
+  if (muestreo > 1) {
+    lineas.push(`<i>ℹ️ Cifras aproximadas: Cloudflare cuenta 1 de cada ${muestreo} cargas y multiplica.</i>`);
+  }
 
   return lineas.join("\n\n");
 };
