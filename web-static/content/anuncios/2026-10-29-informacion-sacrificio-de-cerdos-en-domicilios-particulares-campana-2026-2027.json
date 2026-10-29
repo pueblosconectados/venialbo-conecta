@@ -1,0 +1,15 @@
+{
+  "titulo": "Información sacrificio de cerdos en domicilios particulares, campaña 2026-2027",
+  "tipo": "informacion",
+  "descripcion": "Información publicada en la [Sede Electrónica](https://venialbo.sedelectronica.es/preview-document/9fba1f86-15b0-48d5-807a-b65fb9923ab7/) del Ayuntamiento",
+  "imagen_url": "/media/imagenes/veterinarios.jpg",
+  "documentos": [
+    {
+      "archivo": "/media/documentos/sacrificio-cerdos-2026-2027.pdf",
+      "titulo": "Información sobre sacrificio de cerdos 2026-2027"
+    }
+  ],
+  "fecha_publicacion": "2026-10-29T14:37",
+  "fecha_caducidad": "2027-01-31",
+  "activo": true
+}
