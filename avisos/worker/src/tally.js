@@ -15,12 +15,16 @@
 // Las altas, anuncios y casas llevan además «✅ Publicar» y «🗑 Descartar», y si traen
 // fotos se mandan al grupo debajo del aviso, con «📷 Subir estas fotos» (fichas.js).
 //
+// Antes, se mira si parece repetido de algo que ya hay o si tiene pinta de spam
+// (repetidos.js), y va en el aviso, encima de los botones.
+//
 // Si Telegram falla se responde 500 y Tally reintenta por su cuenta (a los 5 min, 30 min,
 // 1 h, 6 h y 1 día). Volver a lanzar la Action no duplica nada: trae solo lo pendiente.
 
 import { lanzarTraer } from "./github.js";
 import { escapaHtml, filas, llamarTelegram } from "./telegram.js";
 import { botonesFicha, botonVistaPrevia, enlaceBorrador, mandarFotos } from "./fichas.js";
+import { revisarRespuesta } from "./repetidos.js";
 
 // La lista de una colección en Pages CMS. La ficha aún no existe cuando llega el aviso
 // (se crea al pulsar el botón de traer), así que se enlaza la lista, no la ficha.
@@ -28,11 +32,12 @@ const CMS = "https://app.pagescms.org/pueblosconectados/venialbo-conecta/main/co
 
 // Los formularios, por su id de tally/formularios-creados.json. `traer` es la Action que
 // lo pasa al CMS (ver TRAER en github.js); contacto no se importa a ningún sitio.
+// `etiqueta` es la pregunta que hace de título, para buscar repetidos.
 const FORMULARIOS = {
   obJXzX: { titulo: "✉️ Mensaje de contacto" },
-  ZjxqQa: { titulo: "🏪 Alta de negocio", traer: "negocios", oculto: "oculta", cms: `${CMS}/negocios` },
-  NpzGOW: { titulo: "📌 Anuncio para el tablón", traer: "tablon", oculto: "oculto", cms: `${CMS}/anuncios` },
-  kbd67J: { titulo: "🏠 Casa en venta o alquiler", traer: "casas", oculto: "oculta", cms: `${CMS}/casas` },
+  ZjxqQa: { titulo: "🏪 Alta de negocio", traer: "negocios", etiqueta: "Nombre del negocio", oculto: "oculta", cms: `${CMS}/negocios` },
+  NpzGOW: { titulo: "📌 Anuncio para el tablón", traer: "tablon", etiqueta: "Título del anuncio", oculto: "oculto", cms: `${CMS}/anuncios` },
+  kbd67J: { titulo: "🏠 Casa en venta o alquiler", traer: "casas", etiqueta: "Título del anuncio", oculto: "oculta", cms: `${CMS}/casas` },
 };
 
 // Lo que dice el pie según haya salido la Action de traer
@@ -126,7 +131,7 @@ const botonesDe = async (env, datos, lanzado) => {
   ];
 };
 
-const mensajeDe = (datos, lanzado) => {
+const mensajeDe = (datos, lanzado, alertas) => {
   const { fields } = datos;
   const formulario = formularioDe(datos);
   const pie = [pieDe(formulario, lanzado)].filter(Boolean);
@@ -136,6 +141,7 @@ const mensajeDe = (datos, lanzado) => {
   const montar = (cuantos) =>
     [
       `<b>${escapaHtml(formulario.titulo)}</b>`,
+      ...alertas,
       ...campos.slice(0, cuantos),
       ...(cuantos < campos.length ? ["<i>…sigue en Tally</i>"] : []),
       ...pie,
@@ -157,11 +163,14 @@ export const webhookTally = async (request, env, json, ctx) => {
   if (evento.eventType !== "FORM_RESPONSE" || !evento.data) return json({ ignorado: true });
 
   const { data } = evento;
-  const { traer } = formularioDe(data);
-  const lanzado = traer ? await lanzarTraer(env, traer).catch(() => false) : null;
+  const { traer, etiqueta } = formularioDe(data);
+  const [lanzado, alertas] = await Promise.all([
+    traer ? lanzarTraer(env, traer).catch(() => false) : null,
+    revisarRespuesta(env, { formulario: traer, respuesta: respuestaDe(data), campos: data.fields ?? [], etiquetaTitulo: etiqueta }),
+  ]);
   const aviso = await llamarTelegram(env, "sendMessage", {
     chat_id: env.TELEGRAM_CHAT_ID,
-    text: mensajeDe(data, lanzado),
+    text: mensajeDe(data, lanzado, alertas),
     parse_mode: "HTML",
     link_preview_options: { is_disabled: true },
     reply_markup: { inline_keyboard: filas(await botonesDe(env, data, lanzado)) },
