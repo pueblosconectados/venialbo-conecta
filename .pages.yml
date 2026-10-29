@@ -245,11 +245,12 @@ content:
           varios días, la hora de cada día. Sin hora, en el calendario del móvil sale
           como un evento de todo el día.
         type: string
-        options:
-          pattern:
-            # Acepta el campo vacío: la hora es opcional
-            regex: "^\\s*(([01]?\\d|2[0-3])\\s*([:.h]\\s*([0-5]\\d)?)?\\s*h?)?\\s*$"
-            message: "Escribe la hora como 18:30"
+        # Va fuera de options: Pages CMS no lo lee dentro, y así se coló
+        # «A partir de las 18:30» en una actividad
+        pattern:
+          # Acepta el campo vacío: la hora es opcional
+          regex: "^\\s*(([01]?\\d|2[0-3])\\s*([:.h]\\s*([0-5]\\d)?)?\\s*h?)?\\s*$"
+          message: "Escribe la hora como 18:30"
       - name: hora_fin
         label: Hora de fin
         description: >-
@@ -257,11 +258,10 @@ content:
           "de 18:00 a 20:00", y en el calendario del móvil dura eso; sin ella, dura una
           hora.
         type: string
-        options:
-          pattern:
-            # Acepta el campo vacío: la hora es opcional
-            regex: "^\\s*(([01]?\\d|2[0-3])\\s*([:.h]\\s*([0-5]\\d)?)?\\s*h?)?\\s*$"
-            message: "Escribe la hora como 18:30"
+        pattern:
+          # Acepta el campo vacío: la hora es opcional
+          regex: "^\\s*(([01]?\\d|2[0-3])\\s*([:.h]\\s*([0-5]\\d)?)?\\s*h?)?\\s*$"
+          message: "Escribe la hora como 18:30"
       # Las etiquetas y los colores de la web están en src/public/pages/actividades/categorias.ts:
       # si se añade una aquí, añadirla también allí.
       - name: categoria
@@ -1090,11 +1090,10 @@ content:
           Opcional, y solo con «Visible hasta». A qué hora desaparece ese día, como
           14:00. Sin hora, se ve hasta el final del día.
         type: string
-        options:
-          pattern:
-            # Acepta el campo vacío: la hora es opcional
-            regex: "^\\s*(([01]?\\d|2[0-3])\\s*([:.h]\\s*([0-5]\\d)?)?\\s*h?)?\\s*$"
-            message: "Escribe la hora como 14:00"
+        pattern:
+          # Acepta el campo vacío: la hora es opcional
+          regex: "^\\s*(([01]?\\d|2[0-3])\\s*([:.h]\\s*([0-5]\\d)?)?\\s*h?)?\\s*$"
+          message: "Escribe la hora como 14:00"
       - name: activo
         label: Visible en la web
         type: boolean
@@ -1303,11 +1302,10 @@ content:
           Opcional. A qué hora desaparece el aviso el día de «Visible hasta», como
           14:00. Sin hora, se ve hasta el final del día.
         type: string
-        options:
-          pattern:
-            # Acepta el campo vacío: la hora es opcional
-            regex: "^\\s*(([01]?\\d|2[0-3])\\s*([:.h]\\s*([0-5]\\d)?)?\\s*h?)?\\s*$"
-            message: "Escribe la hora como 14:00"
+        pattern:
+          # Acepta el campo vacío: la hora es opcional
+          regex: "^\\s*(([01]?\\d|2[0-3])\\s*([:.h]\\s*([0-5]\\d)?)?\\s*h?)?\\s*$"
+          message: "Escribe la hora como 14:00"
       - name: activo
         label: Visible en la web
         description: Desmárcalo para bajarlo antes de tiempo.
