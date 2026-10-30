@@ -1,0 +1,61 @@
+name: Retirar un anuncio desde Telegram
+
+# Retira del Tablón un anuncio que alguien ha pedido quitar por el formulario de
+# contacto (avisos/retirar.mjs): oculta el anuncio, o marca la casa como vendida o
+# alquilada. Lo lanza el Worker de avisos al pulsar el botón del aviso en el grupo
+# (avisos/worker/src/retirar.js); al terminar, el Worker lo cuenta en el grupo.
+#
+# Los inputs se ven en la página pública de la ejecución: son la ruta del anuncio y el
+# id de un mensaje del grupo, nada personal (quién lo pidió no sale de Tally). Entran a
+# la orden por variables de entorno, no pegados.
+on:
+  workflow_dispatch:
+    inputs:
+      ruta:
+        description: El anuncio o la casa (web-static/content/{anuncios,casas}/….json)
+        required: true
+        type: string
+      mensaje:
+        description: El aviso del grupo al que se contesta (opcional)
+        required: false
+        type: string
+        default: ""
+
+permissions:
+  contents: write
+  # Para lanzar la publicación: un push hecho con el GITHUB_TOKEN no lanza otros workflows
+  actions: write
+
+concurrency:
+  group: retirar
+  cancel-in-progress: false
+
+jobs:
+  retirar:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+
+      - name: Retirar
+        id: retirar
+        env:
+          RUTA: ${{ inputs.ruta }}
+        run: node avisos/retirar.mjs "$RUTA"
+
+      - name: Publicar la web
+        if: steps.retirar.outputs.hecho == '1'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh workflow run web-static-pages.yml --ref main
+
+      # También si algo ha fallado: que en el grupo se sepa
+      - name: Contarlo en el grupo
+        if: always()
+        env:
+          AVISOS_TOKEN: ${{ secrets.AVISOS_TOKEN }}
+          MENSAJE: ${{ inputs.mensaje }}
+        run: node avisos/retirar.mjs --avisar

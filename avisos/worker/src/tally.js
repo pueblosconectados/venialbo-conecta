@@ -15,6 +15,10 @@
 // Las altas, anuncios y casas llevan además «✅ Publicar» y «🗑 Descartar», y si traen
 // fotos se mandan al grupo debajo del aviso, con «📷 Subir estas fotos» (fichas.js).
 //
+// Si es un mensaje de contacto que pide quitar un anuncio del Tablón («Pide que lo
+// quitemos», o «Avísanos» de una casa vendida), el aviso dice cuál y lleva el botón para
+// hacerlo (retirar.js).
+//
 // Antes, se mira si parece repetido de algo que ya hay o si tiene pinta de spam
 // (repetidos.js), y va en el aviso, encima de los botones.
 //
@@ -25,6 +29,7 @@ import { lanzarTraer } from "./github.js";
 import { escapaHtml, filas, llamarTelegram } from "./telegram.js";
 import { botonesFicha, botonVistaPrevia, enlaceBorrador, mandarFotos } from "./fichas.js";
 import { revisarRespuesta } from "./repetidos.js";
+import { pedidoRetirar } from "./retirar.js";
 
 // La lista de una colección en Pages CMS. La ficha aún no existe cuando llega el aviso
 // (se crea al pulsar el botón de traer), así que se enlaza la lista, no la ficha.
@@ -113,13 +118,13 @@ const respuestaDe = (datos) => datos.submissionId ?? datos.responseId;
 // Los enlaces van como botones debajo del mensaje, no como URL sueltas en el texto. Si
 // no se pudo traer, una fila más con el botón de reintentar; y en lo que se trae al CMS,
 // otra con la vista previa, y otra con publicar y descartar.
-const botonesDe = async (env, datos, lanzado) => {
+const botonesDe = async (env, datos, lanzado, retirada) => {
   const { cms, traer } = formularioDe(datos);
   const enlaces = [
     ...(cms ? [{ text: "📝 Abrir en el CMS", url: cms }] : []),
     { text: "Ver en Tally", url: `https://tally.so/forms/${datos.formId}/submissions` },
   ];
-  if (!traer) return [enlaces];
+  if (!traer) return [enlaces, ...(retirada?.boton ? [[retirada.boton]] : [])];
   const respuesta = respuestaDe(datos);
   // Estará en cuanto la Action la traiga y se publique la web: unos minutos
   const previa = respuesta ? await enlaceBorrador(env, { respuesta }) : null;
@@ -164,16 +169,17 @@ export const webhookTally = async (request, env, json, ctx) => {
 
   const { data } = evento;
   const { traer, etiqueta } = formularioDe(data);
-  const [lanzado, alertas] = await Promise.all([
+  const [lanzado, alertas, retirada] = await Promise.all([
     traer ? lanzarTraer(env, traer).catch(() => false) : null,
     revisarRespuesta(env, { formulario: traer, respuesta: respuestaDe(data), campos: data.fields ?? [], etiquetaTitulo: etiqueta }),
+    traer ? null : pedidoRetirar(data.fields ?? []),
   ]);
   const aviso = await llamarTelegram(env, "sendMessage", {
     chat_id: env.TELEGRAM_CHAT_ID,
-    text: mensajeDe(data, lanzado, alertas),
+    text: mensajeDe(data, lanzado, [...(retirada ? [retirada.linea] : []), ...alertas]),
     parse_mode: "HTML",
     link_preview_options: { is_disabled: true },
-    reply_markup: { inline_keyboard: filas(await botonesDe(env, data, lanzado)) },
+    reply_markup: { inline_keyboard: filas(await botonesDe(env, data, lanzado, retirada)) },
   });
   if (!aviso) return json({ error: "telegram" }, 500);
 

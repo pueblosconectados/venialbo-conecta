@@ -56,6 +56,7 @@ import { esBotonAviso, prepararAviso, pulsacionAviso } from "./avisar.js";
 import { esBotonDeshacer, listaDeshacer, pulsacionDeshacer } from "./deshacer.js";
 import { esBotonSede, listaSede, pulsacionSede } from "./sede.js";
 import { esBotonPrensa, pulsacionPrensa } from "./prensa.js";
+import { esBotonRetirar, pulsacionRetirar } from "./retirar.js";
 
 const TALLY = "https://api.tally.so";
 
@@ -285,6 +286,12 @@ const pulsacion = async (env, consulta) => {
   // «⏳ +30 días» de /caducan y del aviso de las 10:00 (caducidad.js)
   if (esBotonAlargar(accion)) {
     const [texto, alerta] = await pulsacionAlargar(env, consulta, cual, quien);
+    return responder(texto, alerta);
+  }
+
+  // «🙈 Ocultar» o «🏷️ Marcar como vendida» de lo que piden quitar del Tablón (retirar.js)
+  if (esBotonRetirar(accion)) {
+    const [texto, alerta] = await pulsacionRetirar(env, consulta, cual, quien);
     return responder(texto, alerta);
   }
 

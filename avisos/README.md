@@ -31,6 +31,7 @@ La clave privada VAPID está en `.secretos/vapid.json`; la pública, en
 | `GET /sede` | A mano, con el token | Lo que hay ahora en el tablón de la sede electrónica y de qué avisaría, sin avisar ni guardar nada |
 | `POST /sede-tablon` | La Action, con el token | Cuenta en el grupo si se ha podido pasar al Tablón un anuncio de la sede (ver `sede-tablon.mjs`) |
 | `POST /alargado` | La Action, con el token | Cuenta en el grupo si se ha podido alargar un anuncio con «⏳ +30 días» (ver `alargar.mjs`) |
+| `POST /retirado` | La Action, con el token | Cuenta en el grupo si se ha podido quitar del Tablón lo que pidieron por el formulario de contacto (ver `retirar.mjs`) |
 | `POST /prensa-noticia` | La Action, con el token | Cuenta en el grupo si se ha podido crear la noticia de un aviso de prensa (ver `prensa-noticia.mjs`) |
 | `POST /telegram` | Telegram, con su clave | Los comandos del grupo y los botones «📥 Traer» |
 | `GET /revision` | A mano, con el token | Lo oculto sin revisar y el recordatorio que saldría, sin mandarlo |
@@ -418,6 +419,31 @@ npx wrangler secret put BORRADORES_CLAVE < ../../.secretos/borradores-clave
 La misma clave va como secreto `BORRADORES_CLAVE` del repositorio en GitHub, para la
 build. **Si se cambia**, cambian todos los enlaces de vista previa (los viejos dejan de
 ir); no se pierde nada más.
+
+## Quitar lo que piden retirar
+
+Cada anuncio de vecinos lleva en la web «¿Ya no hace falta este anuncio? Pide que lo
+quitemos», y cada casa «¿Ya está vendida? Avísanos». Los dos van al formulario de
+contacto con el campo oculto `anuncio` = `"<título> (<id>)"`. Cuando llega uno así, el
+aviso dice arriba cuál es, con enlace, y lleva un botón: **«🙈 Ocultar «…»»** en los
+anuncios y **«🏷️ Marcar como vendida»** (o alquilada) en las casas. Está en
+`worker/src/retirar.js`.
+
+- El botón lanza `.github/workflows/retirar.yml` (`retirar.mjs`): el anuncio pasa a
+  `activo: false` (no se borra) y la casa recibe «Vendida o alquilada el» = hoy, así
+  que sale con el sello una semana y luego se va sola, como promete la web. Commitea
+  como «Retirar <ruta> (desde Telegram)», republica y lo cuenta en el grupo. Se deshace
+  con `/deshacer`.
+- El campo oculto lo puede escribir cualquiera en la dirección del formulario: solo
+  sale el botón si el id es de algo publicado (`data/anuncios.json`, que trae también
+  las casas). Si ya no se ve, o la casa ya estaba vendida, el aviso lo dice sin botón.
+  No pide más confirmación: lo pulsa alguien que acaba de leer el mensaje.
+- El botón lleva la huella de la ruta, como los de `/repaso` y «⏳ +30 días», y se busca
+  otra vez al pulsarlo: nada en el KV.
+- Si ya estaba oculto o vendida, no toca nada y lo dice.
+
+`alargar.mjs` y `retirar.mjs` guardan con `guardar-ficha.mjs`: commit, y antes de
+empujar, comprobar que nadie ha guardado la ficha mientras y rebasar sobre `main`.
 
 ## Avisar si falla una Action
 
