@@ -45,7 +45,7 @@ export const RUTA_FICHA = /^web-static\/content\/([a-z]+)\/([A-Za-z0-9][A-Za-z0-
 const fichasDelMensaje = (mensaje) => {
   const linea = mensaje.split("\n")[0];
   const m =
-    linea.match(/^(?:Create|Update|Delete) (\S+) \(via Pages CMS\)$/) ?? linea.match(/^Deshacer (\S+) \(desde Telegram\)$/);
+    linea.match(/^(?:Create|Update|Delete) (\S+) \(via Pages CMS\)$/) ?? linea.match(/^(?:Deshacer|Alargar) (\S+) \(desde Telegram\)$/);
   if (m) return [m[1]];
   if (linea.startsWith("content: ")) return null;
   return [];

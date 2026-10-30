@@ -30,6 +30,7 @@ La clave privada VAPID está en `.secretos/vapid.json`; la pública, en
 | `GET /vigilancia` | A mano, con el token | Lo que vería ahora la vigilancia de GitHub y de la web, sin avisar ni guardar nada |
 | `GET /sede` | A mano, con el token | Lo que hay ahora en el tablón de la sede electrónica y de qué avisaría, sin avisar ni guardar nada |
 | `POST /sede-tablon` | La Action, con el token | Cuenta en el grupo si se ha podido pasar al Tablón un anuncio de la sede (ver `sede-tablon.mjs`) |
+| `POST /alargado` | La Action, con el token | Cuenta en el grupo si se ha podido alargar un anuncio con «⏳ +30 días» (ver `alargar.mjs`) |
 | `POST /prensa-noticia` | La Action, con el token | Cuenta en el grupo si se ha podido crear la noticia de un aviso de prensa (ver `prensa-noticia.mjs`) |
 | `POST /telegram` | Telegram, con su clave | Los comandos del grupo y los botones «📥 Traer» |
 | `GET /revision` | A mano, con el token | Lo oculto sin revisar y el recordatorio que saldría, sin mandarlo |
@@ -332,7 +333,7 @@ algo es `/republicar`.
 | `/estado` | Si GitHub Pages, Actions y la web funcionan ahora |
 | `/visitas` | El resumen de lo que va de semana |
 | `/pendientes` | Lo que ha llegado por Tally y aún no está en el CMS, con botones «📥 Traer», y lo que está en el CMS oculto sin revisar, con un botón para abrir cada ficha |
-| `/caducan` | Los anuncios y avisos que desaparecen de la web en los próximos 7 días, con un botón para cambiar su fecha en el CMS |
+| `/caducan` | Los anuncios y avisos que desaparecen de la web en los próximos 7 días, con un botón para cambiar su fecha en el CMS y, en los anuncios, «⏳ +30 días» |
 | `/cambios` | Los últimos 5 guardados en el CMS: qué ficha, quién y cuándo (➕ creado, ✏️ cambiado, 🗑 borrado) |
 | `/buscar <texto>` | Busca en todo lo que se ve en la web: el teléfono de un negocio, el contacto de un anuncio… con botones a la ficha en la web y en el CMS |
 | `/avisar Título \| Texto` | Un aviso push a todos los móviles, para lo urgente. Enseña cómo llegará y pide confirmación (ver *Avisar desde Telegram*) |
@@ -472,6 +473,17 @@ hay nada, no escribe. Está en `worker/src/caducidad.js`.
   días, `caducidadDe` en `build-content.mjs`). No hace falta token.
 - **La fecha es el último día que se ve**: `haCaducado` (en `web-static/src/datos.ts`)
   lo deja hasta las 23:59 de ese día.
+- **«⏳ +30 días»**, al lado de cada anuncio del Tablón (no en los avisos de portada ni
+  en las casas vendidas, cuya fecha es la de lo que anuncian): lanza
+  `.github/workflows/alargar.yml` (`alargar.mjs`), que pone la fecha de caducidad en
+  ese último día más 30 (la hora, si la tenía, se queda), commitea como «Alargar <ruta>
+  (desde Telegram)», republica y lo cuenta en el grupo. Se deshace con `/deshacer`.
+  - El botón lleva la huella de la ruta, como los de `/repaso`, y al pulsarlo se busca
+    otra vez el anuncio en la web: no guarda nada en el KV ni caduca.
+  - Solo alarga si el anuncio sigue caducando el día que decía el aviso: si alguien le
+    ha cambiado la fecha, o ya se ha alargado, no hace nada y lo dice. Dos toques no
+    suman 60 días.
+  - A un anuncio de vecinos sin fecha (caduca a los 30 días de publicarse) se le pone.
 
 ## El repaso del contenido
 

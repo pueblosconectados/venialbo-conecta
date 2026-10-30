@@ -95,7 +95,7 @@ const enlaceCms = (coleccion, ruta) => `${CMS}/${coleccion}/edit/${encodeURIComp
 const corto = (texto, max = 22) => (texto.length > max ? `${texto.slice(0, max - 1)}…` : texto);
 
 // Lo que va en el callback_data de los botones (Telegram deja 64 bytes; la ruta no cabe)
-const huella = async (ruta) => {
+export const huella = async (ruta) => {
   const bytes = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(ruta));
   return [...new Uint8Array(bytes).slice(0, 6)].map((b) => b.toString(16).padStart(2, "0")).join("");
 };

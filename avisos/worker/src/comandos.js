@@ -7,7 +7,8 @@
 //   /visitas     lo que va de semana (resumen.js)
 //   /pendientes  lo que han mandado por Tally y aún no está en el CMS, con botones
 //                para traerlo, y lo que ya está pero oculto sin revisar (revision.js)
-//   /caducan     lo que desaparece de la web en los próximos 7 días (caducidad.js)
+//   /caducan     lo que desaparece de la web en los próximos 7 días, con «⏳ +30 días»
+//                en los anuncios (caducidad.js)
 //   /cambios     los últimos guardados en el CMS, con quién y cuándo (cambios.js)
 //   /buscar x    busca en todo lo que se ve en la web (buscar.js)
 //   /republicar  vuelve a lanzar la publicación de la web
@@ -43,7 +44,7 @@ import { aTelegram, elemento, escapaHtml, filas, LISTA } from "./telegram.js";
 import { COMPONENTES, estadoDe, vigilar } from "./vigilancia.js";
 import { fallandoAhora, marcarReintentado, nombreDe } from "./publicaciones.js";
 import { listaSinRevisar, sinRevisar } from "./revision.js";
-import { listaCaducan } from "./caducidad.js";
+import { esBotonAlargar, listaCaducan, pulsacionAlargar } from "./caducidad.js";
 import { ultimosCambios } from "./cambios.js";
 import { buscar } from "./buscar.js";
 import { resumenEntregas } from "./entregas.js";
@@ -278,6 +279,12 @@ const pulsacion = async (env, consulta) => {
   // «📰 Crear noticia» de los avisos de prensa de news-rastreator (prensa.js)
   if (esBotonPrensa(accion)) {
     const [texto, alerta] = await pulsacionPrensa(env, consulta, cual, quien);
+    return responder(texto, alerta);
+  }
+
+  // «⏳ +30 días» de /caducan y del aviso de las 10:00 (caducidad.js)
+  if (esBotonAlargar(accion)) {
+    const [texto, alerta] = await pulsacionAlargar(env, consulta, cual, quien);
     return responder(texto, alerta);
   }
 

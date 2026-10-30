@@ -38,6 +38,8 @@
 //                                    grupo (con el token; en deshacer.js)
 //   POST /sede-tablon    la Action   si se ha podido pasar al Tablón un anuncio de la sede,
 //                                    al grupo (con el token; en sede.js)
+//   POST /alargado       la Action   si se ha podido alargar un anuncio con «⏳ +30 días»,
+//                                    al grupo (con el token; en caducidad.js)
 //   POST /prensa-noticia la Action   si se ha podido crear la noticia de un aviso de
 //                                    prensa, al grupo (con el token; en prensa.js)
 //   POST /recibido       el móvil    el service worker dice que le ha llegado un aviso,
@@ -64,7 +66,7 @@ import { vigilar } from "./vigilancia.js";
 import { webhookTelegram } from "./comandos.js";
 import { revisarPublicaciones } from "./publicaciones.js";
 import { recordarSinRevisar, sinRevisar } from "./revision.js";
-import { recordarCaducan } from "./caducidad.js";
+import { contarAlargado, recordarCaducan } from "./caducidad.js";
 import { recordarCasas } from "./casas.js";
 import { contarSede, vigilarSede } from "./sede.js";
 import { contarPrensa } from "./prensa.js";
@@ -271,6 +273,13 @@ export default {
         if (!conToken(request, env)) return json({ error: "no autorizado" }, 401);
         if (metodo !== "POST") return json({ error: "método no permitido" }, 405);
         const resultado = await contarSede(await leerCuerpo(request), env);
+        return json(resultado, resultado.error ? 400 : 200);
+      }
+
+      if (pathname === "/alargado") {
+        if (!conToken(request, env)) return json({ error: "no autorizado" }, 401);
+        if (metodo !== "POST") return json({ error: "método no permitido" }, 405);
+        const resultado = await contarAlargado(await leerCuerpo(request), env);
         return json(resultado, resultado.error ? 400 : 200);
       }
 

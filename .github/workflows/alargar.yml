@@ -1,0 +1,69 @@
+name: Alargar un anuncio desde Telegram
+
+# Alarga 30 días un anuncio del Tablón (avisos/alargar.mjs). Lo lanza el Worker de avisos
+# al pulsar «⏳ +30 días» en el aviso de lo que caduca o en /caducan
+# (avisos/worker/src/caducidad.js); al terminar, el Worker lo cuenta en el grupo.
+#
+# Si el anuncio ya no caduca el día `desde`, no hace nada: alguien le ha cambiado la
+# fecha, o ya se ha alargado.
+#
+# Los inputs se ven en la página pública de la ejecución: son la ruta del anuncio, una
+# fecha y el id de un mensaje del grupo, nada personal. Entran a la orden por variables
+# de entorno, no pegados.
+on:
+  workflow_dispatch:
+    inputs:
+      ruta:
+        description: El anuncio (web-static/content/anuncios/….json)
+        required: true
+        type: string
+      desde:
+        description: El último día que se veía, según el aviso (AAAA-MM-DD)
+        required: true
+        type: string
+      mensaje:
+        description: El aviso del grupo al que se contesta (opcional)
+        required: false
+        type: string
+        default: ""
+
+permissions:
+  contents: write
+  # Para lanzar la publicación: un push hecho con el GITHUB_TOKEN no lanza otros workflows
+  actions: write
+
+# Uno detrás de otro: dos toques al mismo botón no deben alargarlo dos veces
+concurrency:
+  group: alargar
+  cancel-in-progress: false
+
+jobs:
+  alargar:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+
+      - name: Alargar
+        id: alargar
+        env:
+          RUTA: ${{ inputs.ruta }}
+          DESDE: ${{ inputs.desde }}
+        run: node avisos/alargar.mjs "$RUTA" "$DESDE"
+
+      - name: Publicar la web
+        if: steps.alargar.outputs.hecho == '1'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh workflow run web-static-pages.yml --ref main
+
+      # También si algo ha fallado: que en el grupo se sepa
+      - name: Contarlo en el grupo
+        if: always()
+        env:
+          AVISOS_TOKEN: ${{ secrets.AVISOS_TOKEN }}
+          MENSAJE: ${{ inputs.mensaje }}
+        run: node avisos/alargar.mjs --avisar
