@@ -1,0 +1,14 @@
+{
+  "titulo": "Tasas por aprovechamientos especiales",
+  "tipo": "informacion",
+  "descripcion": "Publicado en la [Sede Electrónica de Ayuntamiento](https://venialbo.sedelectronica.es/preview-document/9c9d6e3f-0013-4490-860f-abc02ca74f53/)",
+  "imagen_url": "/media/imagenes/tasa-por-aprovechamientos-especiales.jpg",
+  "documentos": [
+    {
+      "archivo": "/media/documentos/tasa-por-aprovechamientos-especiales.pdf"
+    }
+  ],
+  "fecha_publicacion": "2026-10-30T09:02",
+  "fecha_caducidad": "2026-11-22",
+  "activo": true
+}
