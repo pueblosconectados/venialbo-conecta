@@ -1,0 +1,94 @@
+name: De la prensa a Noticias
+
+# Lo lanza el Worker de avisos al pulsar «📰 Crear noticia» en un aviso de prensa de
+# news-rastreator (avisos/worker/src/prensa.js): crea en el CMS una noticia oculta con
+# el título y el enlace al periódico (avisos/prensa-noticia.mjs). Al terminar, el Worker
+# lo cuenta en el grupo.
+#
+# Los inputs se ven en la página pública de la ejecución: son el titular, la fuente, el
+# enlace y la fecha de una noticia ya publicada, y el id de un mensaje del grupo. Entran
+# a la orden por variables de entorno, no pegados.
+on:
+  workflow_dispatch:
+    inputs:
+      titulo:
+        description: El titular
+        required: true
+        type: string
+      fuente:
+        description: El periódico (opcional)
+        required: false
+        type: string
+        default: ""
+      enlace:
+        description: El enlace de Google News (news.google.com/rss/articles/…)
+        required: true
+        type: string
+      fecha:
+        description: Cuándo se publicó, en ISO (opcional; si no, ahora)
+        required: false
+        type: string
+        default: ""
+      mensaje:
+        description: El aviso del grupo al que se contesta (opcional)
+        required: false
+        type: string
+        default: ""
+
+permissions:
+  contents: write
+  # Para lanzar la publicación: un push hecho con el GITHUB_TOKEN no lanza otros workflows
+  actions: write
+
+# Uno detrás de otro: dos pulsaciones del mismo aviso no deben crear dos noticias
+concurrency:
+  group: prensa-noticia
+  cancel-in-progress: false
+
+jobs:
+  crear:
+    runs-on: ubuntu-latest
+    env:
+      TITULO: ${{ inputs.titulo }}
+      FUENTE: ${{ inputs.fuente }}
+      ENLACE: ${{ inputs.enlace }}
+      FECHA: ${{ inputs.fecha }}
+      MENSAJE: ${{ inputs.mensaje }}
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+
+      - name: Crear la noticia
+        id: crear
+        run: node avisos/prensa-noticia.mjs
+
+      - name: Commitear
+        id: commit
+        if: steps.crear.outputs.hecho == '1'
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A web-static/content/noticias
+          git commit -m "content: noticia de prensa desde Telegram"
+          # El CMS commitea por su cuenta en main: rebasar antes de empujar
+          git pull --rebase origin main
+          git push origin HEAD:main
+          echo "hecho=1" >> "$GITHUB_OUTPUT"
+
+      # Para que exista la vista previa de lo oculto («👀 Ver cómo queda»)
+      - name: Publicar la web
+        if: steps.commit.outputs.hecho == '1'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh workflow run web-static-pages.yml --ref main
+
+      # También si algo ha fallado: que en el grupo se sepa
+      - name: Contarlo en el grupo
+        if: always()
+        env:
+          AVISOS_TOKEN: ${{ secrets.AVISOS_TOKEN }}
+          SUBIDO: ${{ steps.commit.outputs.hecho }}
+        run: node avisos/prensa-noticia.mjs --avisar

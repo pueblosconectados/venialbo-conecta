@@ -54,6 +54,7 @@ import { mensajeSemana } from "./semana.js";
 import { esBotonAviso, prepararAviso, pulsacionAviso } from "./avisar.js";
 import { esBotonDeshacer, listaDeshacer, pulsacionDeshacer } from "./deshacer.js";
 import { esBotonSede, listaSede, pulsacionSede } from "./sede.js";
+import { esBotonPrensa, pulsacionPrensa } from "./prensa.js";
 
 const TALLY = "https://api.tally.so";
 
@@ -271,6 +272,12 @@ const pulsacion = async (env, consulta) => {
   // «📋 Pasar al Tablón» de los avisos de la sede (sede.js)
   if (esBotonSede(accion)) {
     const [texto, alerta] = await pulsacionSede(env, consulta, cual, quien);
+    return responder(texto, alerta);
+  }
+
+  // «📰 Crear noticia» de los avisos de prensa de news-rastreator (prensa.js)
+  if (esBotonPrensa(accion)) {
+    const [texto, alerta] = await pulsacionPrensa(env, consulta, cual, quien);
     return responder(texto, alerta);
   }
 

@@ -30,6 +30,7 @@ La clave privada VAPID está en `.secretos/vapid.json`; la pública, en
 | `GET /vigilancia` | A mano, con el token | Lo que vería ahora la vigilancia de GitHub y de la web, sin avisar ni guardar nada |
 | `GET /sede` | A mano, con el token | Lo que hay ahora en el tablón de la sede electrónica y de qué avisaría, sin avisar ni guardar nada |
 | `POST /sede-tablon` | La Action, con el token | Cuenta en el grupo si se ha podido pasar al Tablón un anuncio de la sede (ver `sede-tablon.mjs`) |
+| `POST /prensa-noticia` | La Action, con el token | Cuenta en el grupo si se ha podido crear la noticia de un aviso de prensa (ver `prensa-noticia.mjs`) |
 | `POST /telegram` | Telegram, con su clave | Los comandos del grupo y los botones «📥 Traer» |
 | `GET /revision` | A mano, con el token | Lo oculto sin revisar y el recordatorio que saldría, sin mandarlo |
 | `POST /envios` | La Action, con el token | Apunta un envío push y a qué dispositivos lo aceptó el servicio de push (ver «Si los avisos llegan») |
@@ -289,6 +290,33 @@ con un botón al documento. Está en `worker/src/sede.js`.
 
   ```bash
   curl -H "Authorization: Bearer $(cat .secretos/token-avisos)" https://venialbo-avisos.venialboconecta.workers.dev/sede
+  ```
+
+## «📰 Crear noticia» en los avisos de prensa
+
+news-rastreator (el repo hermano) manda al mismo grupo, con el mismo bot, las noticias
+de Google News que mencionan Venialbo. Cada aviso lleva «📰 Crear noticia», y la
+pulsación llega aquí, al webhook del bot. Está en `worker/src/prensa.js`.
+
+- El botón solo lleva `prensa:<segundos>`, la fecha de la noticia (`callback_data`
+  admite 64 bytes y el enlace de Google News no cabe). El título, la fuente y el enlace
+  se leen del propio aviso, así que **si cambia su forma en news-rastreator
+  (`mensaje()`), hay que cambiar también `leerAviso`**. Telegram no da el texto de los
+  mensajes de hace más de 48 horas: esos, a mano.
+- Lanza `.github/workflows/prensa-noticia.yml` (`prensa-noticia.mjs`), que crea en el
+  CMS una noticia **oculta**, en «Otras», sin foto, con la fecha de la noticia y una
+  línea «Puedes ver la noticia de <periódico> [aquí](…)». La foto y el texto son del
+  periódico: los pone quien la revise. El grupo recibe «📝 Ver en el CMS» y «👀 Ver
+  cómo queda»; si falla, el aviso recupera su botón para reintentar.
+- **El enlace del periódico**: Google News solo da uno suyo, que redirige con
+  JavaScript. Se le pide el de verdad a su `batchexecute`, como hace su página; si
+  Google lo cambia, se deja el suyo, que también sirve, y el grupo lo sabe.
+- Con el id de Google o el enlace del periódico ya en alguna noticia, no crea otra: dice
+  cuál es.
+- Para probar sin escribir nada:
+
+  ```bash
+  TITULO="…" FUENTE="La Opinión de Zamora" ENLACE="https://news.google.com/rss/articles/…" node avisos/prensa-noticia.mjs --dry
   ```
 
 ## Los comandos del bot
