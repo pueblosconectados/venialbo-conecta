@@ -13,6 +13,9 @@
 //                                    grupo y ?en-curso usa lo que va de semana
 //   GET  /vigilancia     a mano      lo que vería ahora la vigilancia (con el token; en
 //                                    vigilancia.js). No avisa ni guarda nada
+//   GET  /sede           a mano      lo que vería ahora la vigilancia de la sede
+//                                    electrónica (con el token; en sede.js). Tampoco
+//                                    avisa ni guarda nada
 //   GET  /semana         a mano      «Esta semana en Venialbo» (con el token; en
 //                                    semana.js). Solo lo enseña: ?enviar lo manda
 //   POST /telegram       Telegram    los comandos del grupo y los botones (en comandos.js)
@@ -37,7 +40,8 @@
 //                                    o que lo han tocado (en entregas.js)
 //
 // Y el cron de wrangler.toml, cada 5 minutos: la vigilancia de GitHub y de la web y las
-// Actions que fallen (publicaciones.js). Cada día a las 10:00: lo oculto sin revisar
+// Actions que fallen (publicaciones.js). Cada hora, de 7:30 a 22:30, lo nuevo en la sede
+// electrónica del Ayuntamiento (sede.js). Cada día a las 10:00: lo oculto sin revisar
 // (revision.js), lo que está en su último día de mañana (caducidad.js), las casas que
 // cumplen 3, 6, 9… meses publicadas (casas.js), lo que hay que renovar pronto, como los
 // tokens (renovaciones.js), y la limpieza de lo medido de los avisos (entregas.js); los
@@ -58,6 +62,7 @@ import { revisarPublicaciones } from "./publicaciones.js";
 import { recordarSinRevisar, sinRevisar } from "./revision.js";
 import { recordarCaducan } from "./caducidad.js";
 import { recordarCasas } from "./casas.js";
+import { vigilarSede } from "./sede.js";
 import { apuntarEnvio, apuntarRecibido, limpiarEntregas } from "./entregas.js";
 import { mandarErratas } from "./erratas.js";
 import { recordarRenovaciones } from "./renovaciones.js";
@@ -306,6 +311,12 @@ export default {
         }
       }
 
+      if (pathname === "/sede") {
+        if (!conToken(request, env)) return json({ error: "no autorizado" }, 401);
+        if (metodo !== "GET") return json({ error: "método no permitido" }, 405);
+        return json(await vigilarSede(env, { enviar: false }));
+      }
+
       if (pathname === "/vigilancia") {
         if (!conToken(request, env)) return json({ error: "no autorizado" }, 401);
         if (metodo !== "GET") return json({ error: "método no permitido" }, 405);
@@ -329,6 +340,9 @@ export default {
     const esLunes = new Intl.DateTimeFormat("en-US", { timeZone: "Europe/Madrid", weekday: "short" }).format(momento) === "Mon";
     const enPunto = momento.getUTCMinutes() === 0;
     if (esLunes && horaMadrid(momento) === 9 && enPunto) ctx.waitUntil(enviarResumen(env));
+    // La sede, a y media de 7:30 a 22:30 (Madrid va en horas enteras respecto a UTC)
+    if (momento.getUTCMinutes() === 30 && horaMadrid(momento) >= 7 && horaMadrid(momento) <= 22)
+      ctx.waitUntil(vigilarSede(env));
     if (horaMadrid(momento) === 10 && enPunto) {
       ctx.waitUntil(recordarSinRevisar(env));
       ctx.waitUntil(recordarCaducan(env));

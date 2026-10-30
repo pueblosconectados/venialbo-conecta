@@ -28,6 +28,7 @@ La clave privada VAPID está en `.secretos/vapid.json`; la pública, en
 | `POST /tally` | Tally, firmado | Reenvía la respuesta de un formulario a Telegram (ver `tally/README.md`) |
 | `GET /resumen` | A mano, con el token | El resumen semanal de visitas. Solo lo enseña; `?enviar` lo manda al grupo y `?en-curso` usa lo que va de semana |
 | `GET /vigilancia` | A mano, con el token | Lo que vería ahora la vigilancia de GitHub y de la web, sin avisar ni guardar nada |
+| `GET /sede` | A mano, con el token | Lo que hay ahora en el tablón de la sede electrónica y de qué avisaría, sin avisar ni guardar nada |
 | `POST /telegram` | Telegram, con su clave | Los comandos del grupo y los botones «📥 Traer» |
 | `GET /revision` | A mano, con el token | Lo oculto sin revisar y el recordatorio que saldría, sin mandarlo |
 | `POST /envios` | La Action, con el token | Apunta un envío push y a qué dispositivos lo aceptó el servicio de push (ver «Si los avisos llegan») |
@@ -254,6 +255,28 @@ Para ver qué vería ahora, sin avisar ni guardar:
 curl -H "Authorization: Bearer $(cat .secretos/token-avisos)" https://venialbo-avisos.venialboconecta.workers.dev/vigilancia
 ```
 
+## La sede electrónica del Ayuntamiento
+
+El Ayuntamiento no avisa cuando sube algo a `venialbo.sedelectronica.es`, y mucho acaba
+en el Tablón de la web. Cada hora, de 7:30 a 22:30 (a y media, colgado del mismo cron),
+el Worker lee su tablón de anuncios y manda al grupo cada anuncio nuevo en su mensaje,
+con un botón al documento. Está en `worker/src/sede.js`.
+
+- **Cómo se lee**: la sede es de Gestiona (esPublico) y no tiene RSS. Se lee la tabla
+  HTML de `/board`, que trae los 10 últimos sin sesión. Cada anuncio tiene un enlace
+  fijo, `/preview-document/<uuid>`, y ese uuid es lo que se apunta como visto, en el KV
+  `ESTADO` (clave `sede`).
+- **No avisa de lo viejo**: la primera vez solo apunta lo que hay, y nunca avisa de lo
+  publicado hace más de 7 días (si quitan un anuncio, sube a la primera página uno viejo
+  que no estaba apuntado). Si los 10 son nuevos de golpe, dice que puede haber más.
+- **Si no puede mirarla** (la sede va lenta a veces, o cambian la página y ya no está la
+  tabla), avisa tras 3 vueltas seguidas y otra vez al volver.
+- `/sede` en el grupo enseña lo último que hay. Para ver qué avisaría, sin avisar:
+
+  ```bash
+  curl -H "Authorization: Bearer $(cat .secretos/token-avisos)" https://venialbo-avisos.venialboconecta.workers.dev/sede
+  ```
+
 ## Los comandos del bot
 
 Escribiendo en el grupo de Telegram, el bot contesta. Está en `worker/src/comandos.js`.
@@ -272,6 +295,7 @@ algo es `/republicar`.
 | `/buscar <texto>` | Busca en todo lo que se ve en la web: el teléfono de un negocio, el contacto de un anuncio… con botones a la ficha en la web y en el CMS |
 | `/avisar Título \| Texto` | Un aviso push a todos los móviles, para lo urgente. Enseña cómo llegará y pide confirmación (ver *Avisar desde Telegram*) |
 | `/republicar` | Vuelve a lanzar la publicación de la web, para cuando ha fallado por algo pasajero |
+| `/sede` | Los 5 últimos anuncios del tablón de la sede electrónica del Ayuntamiento |
 | `/avisos` | Cuántos dispositivos tienen las push activadas, y si les llegaron los últimos 5 avisos y cuánto tardaron |
 | `/semana` | «Esta semana en Venialbo», el resumen para reenviar al grupo del pueblo, con el botón de WhatsApp |
 | `/repaso` | Las fichas sin revisar desde hace 6 meses, las cojas y los enlaces rotos, con botones para darlas por buenas |

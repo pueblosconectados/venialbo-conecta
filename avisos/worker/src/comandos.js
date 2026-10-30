@@ -16,6 +16,7 @@
 //                confirmación (deshacer.js)
 //   /avisos      cuántos dispositivos tienen las push activadas, y si los últimos
 //                avisos les llegaron y cuánto tardaron (entregas.js)
+//   /sede        lo último en el tablón de la sede electrónica del Ayuntamiento (sede.js)
 //   /semana      «Esta semana en Venialbo», el resumen para reenviar al pueblo (semana.js)
 //   /repaso      las fichas sin revisar desde hace meses, las cojas y los enlaces rotos
 //                (repaso.js y enlaces.js), con botones para darlas por buenas
@@ -52,6 +53,7 @@ import { esBotonFicha, pulsacionFicha } from "./fichas.js";
 import { mensajeSemana } from "./semana.js";
 import { esBotonAviso, prepararAviso, pulsacionAviso } from "./avisar.js";
 import { esBotonDeshacer, listaDeshacer, pulsacionDeshacer } from "./deshacer.js";
+import { listaSede } from "./sede.js";
 
 const TALLY = "https://api.tally.so";
 
@@ -178,6 +180,7 @@ const CONSULTAR = [
   ["cambios", "Lo último que se ha guardado en el CMS, y quién"],
   ["buscar", "Busca en la web: /buscar panadería"],
   ["avisos", "Cuántos tienen los avisos y si les llegan"],
+  ["sede", "Lo último en la sede electrónica"],
   ["semana", "El resumen de la semana para reenviar"],
   ["repaso", "Fichas viejas, cojas y enlaces rotos"],
   ["renovaciones", "Cuándo caducan los tokens y el dominio"],
@@ -225,12 +228,14 @@ const repasar = async (env) => {
 
 const semanaEnCurso = async () => mensajeSemana();
 
+const sede = async () => listaSede();
+
 // Lo que va detrás del comando: "/avisar Corte de agua | Mañana…"
 const avisar = async (env, mensaje, argumentos) => prepararAviso(env, mensaje, argumentos);
 
 const deshacer = async (env) => listaDeshacer(env);
 
-const ACCIONES = { avisar, deshacer, semana: semanaEnCurso, estado, visitas, pendientes, caducan, cambios, buscar: buscarEnWeb, republicar, avisos, repaso: repasar, renovaciones, chatid, ayuda, start: ayuda };
+const ACCIONES = { avisar, deshacer, semana: semanaEnCurso, sede, estado, visitas, pendientes, caducan, cambios, buscar: buscarEnWeb, republicar, avisos, repaso: repasar, renovaciones, chatid, ayuda, start: ayuda };
 // Los que se contestan fuera del grupo
 const EN_CUALQUIER_CHAT = new Set(["chatid"]);
 
