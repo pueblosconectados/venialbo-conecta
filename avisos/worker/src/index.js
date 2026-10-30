@@ -36,6 +36,8 @@
 //                                    subir fotos (con el token; en fichas.js)
 //   POST /deshecho       la Action   si se ha podido deshacer una ficha con /deshacer, al
 //                                    grupo (con el token; en deshacer.js)
+//   POST /sede-tablon    la Action   si se ha podido pasar al Tablón un anuncio de la sede,
+//                                    al grupo (con el token; en sede.js)
 //   POST /recibido       el móvil    el service worker dice que le ha llegado un aviso,
 //                                    o que lo han tocado (en entregas.js)
 //
@@ -62,7 +64,7 @@ import { revisarPublicaciones } from "./publicaciones.js";
 import { recordarSinRevisar, sinRevisar } from "./revision.js";
 import { recordarCaducan } from "./caducidad.js";
 import { recordarCasas } from "./casas.js";
-import { vigilarSede } from "./sede.js";
+import { contarSede, vigilarSede } from "./sede.js";
 import { apuntarEnvio, apuntarRecibido, limpiarEntregas } from "./entregas.js";
 import { mandarErratas } from "./erratas.js";
 import { recordarRenovaciones } from "./renovaciones.js";
@@ -259,6 +261,13 @@ export default {
         if (!conToken(request, env)) return json({ error: "no autorizado" }, 401);
         if (metodo !== "POST") return json({ error: "método no permitido" }, 405);
         const resultado = await contarResultado(await leerCuerpo(request), env);
+        return json(resultado, resultado.error ? 400 : 200);
+      }
+
+      if (pathname === "/sede-tablon") {
+        if (!conToken(request, env)) return json({ error: "no autorizado" }, 401);
+        if (metodo !== "POST") return json({ error: "método no permitido" }, 405);
+        const resultado = await contarSede(await leerCuerpo(request), env);
         return json(resultado, resultado.error ? 400 : 200);
       }
 

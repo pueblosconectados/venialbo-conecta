@@ -1,0 +1,78 @@
+name: De la sede al Tablón
+
+# Lo lanza el Worker de avisos al pulsar «📋 Pasar al Tablón» en un aviso de la sede
+# electrónica del Ayuntamiento (avisos/worker/src/sede.js): crea en el CMS una ficha
+# oculta del Tablón con el PDF del documento (avisos/sede-tablon.mjs). Al terminar, el
+# Worker lo cuenta en el grupo.
+#
+# Los inputs se ven en la página pública de la ejecución: son el uuid del documento,
+# público en la sede, y el id de un mensaje del grupo. Entran a la orden por variables
+# de entorno, no pegados.
+on:
+  workflow_dispatch:
+    inputs:
+      documento:
+        description: El uuid del documento en la sede (/preview-document/<uuid>)
+        required: true
+        type: string
+      mensaje:
+        description: El aviso del grupo al que se contesta (opcional)
+        required: false
+        type: string
+        default: ""
+
+permissions:
+  contents: write
+  # Para lanzar la publicación: un push hecho con el GITHUB_TOKEN no lanza otros workflows
+  actions: write
+
+# Uno detrás de otro: dos pulsaciones del mismo aviso no deben crear dos fichas
+concurrency:
+  group: sede-tablon
+  cancel-in-progress: false
+
+jobs:
+  pasar:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+
+      - name: Crear la ficha
+        id: pasar
+        env:
+          DOCUMENTO: ${{ inputs.documento }}
+          MENSAJE: ${{ inputs.mensaje }}
+        run: node avisos/sede-tablon.mjs "$DOCUMENTO" "$MENSAJE"
+
+      - name: Commitear
+        id: commit
+        if: steps.pasar.outputs.hecho == '1'
+        run: |
+          RUTAS="web-static/content/anuncios web-static/public/media/documentos"
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A $RUTAS
+          git commit -m "content: anuncio de la sede electrónica desde Telegram"
+          # El CMS commitea por su cuenta en main: rebasar antes de empujar
+          git pull --rebase origin main
+          git push origin HEAD:main
+          echo "hecho=1" >> "$GITHUB_OUTPUT"
+
+      # Para que exista la vista previa de lo oculto («👀 Ver cómo queda»)
+      - name: Publicar la web
+        if: steps.commit.outputs.hecho == '1'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh workflow run web-static-pages.yml --ref main
+
+      # También si algo ha fallado: que en el grupo se sepa
+      - name: Contarlo en el grupo
+        if: always()
+        env:
+          AVISOS_TOKEN: ${{ secrets.AVISOS_TOKEN }}
+          SUBIDO: ${{ steps.commit.outputs.hecho }}
+        run: node avisos/sede-tablon.mjs --avisar

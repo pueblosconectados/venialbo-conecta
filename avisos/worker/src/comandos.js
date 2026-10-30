@@ -53,7 +53,7 @@ import { esBotonFicha, pulsacionFicha } from "./fichas.js";
 import { mensajeSemana } from "./semana.js";
 import { esBotonAviso, prepararAviso, pulsacionAviso } from "./avisar.js";
 import { esBotonDeshacer, listaDeshacer, pulsacionDeshacer } from "./deshacer.js";
-import { listaSede } from "./sede.js";
+import { esBotonSede, listaSede, pulsacionSede } from "./sede.js";
 
 const TALLY = "https://api.tally.so";
 
@@ -265,6 +265,12 @@ const pulsacion = async (env, consulta) => {
   // «✅ Enviar» y «❌ Cancelar» de /avisar (avisar.js)
   if (esBotonAviso(accion)) {
     const [texto, alerta] = await pulsacionAviso(env, consulta, accion, cual, quien);
+    return responder(texto, alerta);
+  }
+
+  // «📋 Pasar al Tablón» de los avisos de la sede (sede.js)
+  if (esBotonSede(accion)) {
+    const [texto, alerta] = await pulsacionSede(env, consulta, cual, quien);
     return responder(texto, alerta);
   }
 

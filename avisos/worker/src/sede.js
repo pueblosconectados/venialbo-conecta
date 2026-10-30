@@ -13,8 +13,15 @@
 // - Si los 10 son nuevos de golpe, puede haber más en la página 2: se dice.
 // - Si la sede no contesta, o la página cambia y ya no se encuentra la tabla, avisa tras
 //   FALLOS_AVISO vueltas seguidas (horas), y otra vez al volver. La sede va lenta a veces.
+//
+// Cada aviso lleva «📋 Pasar al Tablón» ("sede:<uuid>"): lanza el workflow
+// sede-tablon.yml (avisos/sede-tablon.mjs), que crea la ficha oculta con el PDF y al
+// terminar llama a POST /sede-tablon para contarlo en el grupo (contarSede). Hasta que
+// no se pulsa, no entra nada en GitHub.
 
-import { aTelegram, elemento, escapaHtml, LISTA } from "./telegram.js";
+import { lanzarWorkflow } from "./github.js";
+import { botonVistaPrevia, enlaceBorrador } from "./fichas.js";
+import { aTelegram, elemento, escapaHtml, LISTA, llamarTelegram } from "./telegram.js";
 
 export const SEDE = "https://venialbo.sedelectronica.es";
 const TABLON = `${SEDE}/board`;
@@ -89,6 +96,7 @@ const leerTablon = async () => {
 };
 
 const BOTON_TABLON = { text: "Abrir el tablón de la sede", url: TABLON };
+const botonPasar = (id) => ({ text: "📋 Pasar al Tablón", callback_data: `sede:${id}` });
 
 const mensajeNuevo = (anuncio) => ({
   texto: [
@@ -96,7 +104,7 @@ const mensajeNuevo = (anuncio) => ({
     `<b>${escapaHtml(anuncio.titulo)}</b>`,
     escapaHtml([anuncio.procedimiento, anuncio.fecha].filter(Boolean).join(" · ")),
   ].join("\n"),
-  botones: [{ text: "Ver en la sede", url: enlaceDe(anuncio) }],
+  botones: [{ text: "Ver en la sede", url: enlaceDe(anuncio) }, botonPasar(anuncio.id)],
 });
 
 // Compara con la vez anterior y devuelve el estado nuevo y los mensajes que tocan. Lo
@@ -168,4 +176,85 @@ export const listaSede = async () => {
     texto: [`🏛️ <b>Lo último en la sede electrónica</b>`, ...lista].join(LISTA),
     botones: [BOTON_TABLON],
   };
+};
+
+// ── «📋 Pasar al Tablón» ─────────────────────────────────────────────────────
+
+const WORKFLOW = "sede-tablon.yml";
+const WEB = "https://venialboconecta.es";
+const CMS = "https://app.pagescms.org/pueblosconectados/venialbo-conecta/main/collection";
+const ES_UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/;
+
+export const esBotonSede = (accion) => accion === "sede";
+
+// Devuelve el texto para answerCallbackQuery y si va como alerta
+export const pulsacionSede = async (env, consulta, id, quien) => {
+  if (!ES_UUID.test(id ?? "")) return ["No sé qué hacer con este botón.", true];
+  const mensaje = consulta.message;
+  const lanzado = await lanzarWorkflow(env, WORKFLOW, { documento: id, mensaje: String(mensaje.message_id) }).catch(() => false);
+  if (!lanzado) return ["GitHub no ha aceptado lanzarlo. Mira el token de GitHub del Worker, o pásalo a mano.", true];
+
+  // Se quita el botón, para que nadie lo pulse otra vez mientras tanto
+  const filas = (mensaje.reply_markup?.inline_keyboard ?? [])
+    .map((fila) => fila.filter((b) => b.callback_data !== consulta.data))
+    .filter((fila) => fila.length);
+  await llamarTelegram(env, "editMessageReplyMarkup", {
+    chat_id: mensaje.chat.id,
+    message_id: mensaje.message_id,
+    reply_markup: { inline_keyboard: filas },
+  });
+  await llamarTelegram(env, "sendMessage", {
+    chat_id: mensaje.chat.id,
+    text: `📋 ${quien} lo pasa al Tablón. En un par de minutos estará en el CMS, oculto y con el PDF; os aviso.`,
+    parse_mode: "HTML",
+    reply_parameters: { message_id: mensaje.message_id, allow_sending_without_reply: true },
+  });
+  return ["Hecho: en marcha."];
+};
+
+// ── POST /sede-tablon: lo que cuenta la Action al terminar ──────────────────
+
+const cadena = (v, max) => typeof v === "string" && v.length <= max;
+
+const valido = (r) =>
+  r &&
+  ES_UUID.test(r.documento ?? "") &&
+  ["hecho", "ya", "error"].includes(r.estado) &&
+  cadena(r.mensaje, 500) &&
+  (r.mensaje_id === undefined || (Number.isInteger(r.mensaje_id) && r.mensaje_id > 0)) &&
+  (r.titulo === undefined || cadena(r.titulo, 300)) &&
+  (r.activo === undefined || typeof r.activo === "boolean") &&
+  (r.ruta === undefined || (cadena(r.ruta, 300) && /^web-static\/content\/anuncios\/[a-z0-9-]+\.json$/.test(r.ruta)));
+
+export const contarSede = async (r, env) => {
+  if (!valido(r)) return { error: "resultado no válido" };
+  const titulo = r.titulo ? `«${escapaHtml(r.titulo)}»` : "El anuncio";
+  let texto;
+  if (r.estado === "hecho")
+    texto = `📋 ${titulo} está en el Tablón del CMS, <b>oculto</b>, con el PDF y sin fecha de caducidad. Repasadlo y publicadlo cuando esté listo.`;
+  else if (r.estado === "ya") texto = `ℹ️ ${titulo} ya se había pasado al Tablón${r.activo ? " y está publicado" : ", y sigue oculto"}.`;
+  else texto = `⚠️ No se ha podido pasar al Tablón: ${escapaHtml(r.mensaje)}.`;
+
+  const botones = [];
+  if (r.ruta) {
+    const [, , coleccion, fichero] = r.ruta.split("/");
+    botones.push({ text: "📝 Ver en el CMS", url: `${CMS}/${coleccion}/edit/${encodeURIComponent(r.ruta)}` });
+    if (r.activo) botones.push({ text: "🌐 Ver en la web", url: `${WEB}/tablon/${fichero.replace(/\.json$/, "")}` });
+    else {
+      // Estará al día cuando acabe la publicación que lanza la Action
+      const previa = await enlaceBorrador(env, { ruta: r.ruta });
+      if (previa) botones.push(botonVistaPrevia(previa));
+    }
+  }
+  if (r.estado === "error") botones.push({ text: "🔁 Reintentar", callback_data: `sede:${r.documento}` });
+
+  const enviado = await llamarTelegram(env, "sendMessage", {
+    chat_id: env.TELEGRAM_CHAT_ID,
+    text: texto,
+    parse_mode: "HTML",
+    link_preview_options: { is_disabled: true },
+    ...(r.mensaje_id ? { reply_parameters: { message_id: r.mensaje_id, allow_sending_without_reply: true } } : {}),
+    ...(botones.length ? { reply_markup: { inline_keyboard: [botones] } } : {}),
+  });
+  return enviado ? { ok: true } : { error: "Telegram no lo ha aceptado" };
 };

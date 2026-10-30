@@ -29,6 +29,7 @@ La clave privada VAPID está en `.secretos/vapid.json`; la pública, en
 | `GET /resumen` | A mano, con el token | El resumen semanal de visitas. Solo lo enseña; `?enviar` lo manda al grupo y `?en-curso` usa lo que va de semana |
 | `GET /vigilancia` | A mano, con el token | Lo que vería ahora la vigilancia de GitHub y de la web, sin avisar ni guardar nada |
 | `GET /sede` | A mano, con el token | Lo que hay ahora en el tablón de la sede electrónica y de qué avisaría, sin avisar ni guardar nada |
+| `POST /sede-tablon` | La Action, con el token | Cuenta en el grupo si se ha podido pasar al Tablón un anuncio de la sede (ver `sede-tablon.mjs`) |
 | `POST /telegram` | Telegram, con su clave | Los comandos del grupo y los botones «📥 Traer» |
 | `GET /revision` | A mano, con el token | Lo oculto sin revisar y el recordatorio que saldría, sin mandarlo |
 | `POST /envios` | La Action, con el token | Apunta un envío push y a qué dispositivos lo aceptó el servicio de push (ver «Si los avisos llegan») |
@@ -271,6 +272,19 @@ con un botón al documento. Está en `worker/src/sede.js`.
   que no estaba apuntado). Si los 10 son nuevos de golpe, dice que puede haber más.
 - **Si no puede mirarla** (la sede va lenta a veces, o cambian la página y ya no está la
   tabla), avisa tras 3 vueltas seguidas y otra vez al volver.
+- **«📋 Pasar al Tablón»**, en cada aviso: lanza `.github/workflows/sede-tablon.yml`
+  (`sede-tablon.mjs`), que crea en el CMS una ficha del Tablón **oculta**, de tipo
+  Información, **sin caducidad** (se limpia a mano) y con el PDF del documento en
+  «Documentos para descargar». El grupo recibe «📝 Ver en el CMS» y «👀 Ver cómo
+  queda»; si falla, «🔁 Reintentar». Hasta que no se pulsa, no entra nada en GitHub, y
+  el PDF que entra se queda en el historial aunque luego se borre la ficha.
+  - El título se pasa de mayúsculas a normal y se le quita el «ANUNCIO.» del
+    principio; los nombres propios que hay que respetar van en `PROPIOS`.
+  - El PDF solo se baja con la cookie de la página del documento, y lleva el principio
+    del uuid en el nombre: así, pulsar dos veces no crea dos fichas.
+  - Hay documentos que la sede no deja abrir fuera de su tablón («La página solicitada
+    se encuentra deshabilitada»; pasa con alguna hoja de Sacyl). Esos, a mano.
+  - Para probar sin escribir nada: `node avisos/sede-tablon.mjs <uuid> --dry`.
 - `/sede` en el grupo enseña lo último que hay. Para ver qué avisaría, sin avisar:
 
   ```bash
