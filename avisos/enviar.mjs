@@ -94,7 +94,9 @@ const RECURSOS = {
     listado: "/noticias",
   },
   // De una actividad se avisa al publicarla si aún no se ha celebrado, y si ya se celebró,
-  // cuando se suben sus fotos en los 15 días siguientes (hasta el 2026-10-27 eso no avisaba)
+  // cuando se suben sus fotos en los 15 días siguientes, aunque se avisara al anunciarla
+  // (claveDe). Hasta el 2026-10-27 las fotos no avisaban, y hasta el 2026-11-03 solo si
+  // la actividad no se había avisado antes
   actividades: {
     vigente: (a) => !celebrada(a) || ((a.fecha_fin ?? a.fecha).slice(0, 10) >= haceQuinceDias && traeFotos(a)),
     uno: (a) => ({
@@ -115,6 +117,14 @@ const RECURSOS = {
 
 const leerJson = async (ruta) => JSON.parse(await readFile(ruta, "utf8"));
 const clave = (recurso, id) => `${recurso}/${id}`;
+// Las fotos de lo ya celebrado se apuntan aparte: la actividad suele haberse avisado
+// antes, al anunciarla, y las fotos tienen que avisar igual (Halloween, 2026-11-02)
+const claveDe = (recurso, fila) =>
+  recurso === "actividades" && celebrada(fila) && traeFotos(fila)
+    ? `${clave(recurso, fila.id)}/fotos`
+    : clave(recurso, fila.id);
+// La de la ficha va siempre, aunque se avise por las fotos: deshacer.js la mira
+const apuntar = (ya, recurso, fila) => ya.add(clave(recurso, fila.id)).add(claveDe(recurso, fila));
 
 const publicado = async (recursos) =>
   (
@@ -239,7 +249,7 @@ const guardar = async (ids) => {
 
 if (modo === "inicializar") {
   const ya = new Set(await leerJson(NOTIFICADOS).catch(() => []));
-  for (const { recurso, fila } of await publicado(Object.keys(RECURSOS))) ya.add(clave(recurso, fila.id));
+  for (const { recurso, fila } of await publicado(Object.keys(RECURSOS))) apuntar(ya, recurso, fila);
   await guardar(ya);
   console.log(`${ya.size} publicaciones dadas por avisadas${DRY ? " (--dry: sin guardar)" : ""}`);
   process.exit(0);
@@ -263,10 +273,10 @@ if (!notificados) {
 }
 const ya = new Set(notificados);
 
-const pendientes = (await publicado(Object.keys(RECURSOS))).filter(({ recurso, fila }) => !ya.has(clave(recurso, fila.id)));
+const pendientes = (await publicado(Object.keys(RECURSOS))).filter(({ recurso, fila }) => !ya.has(claveDe(recurso, fila)));
 const novedades = pendientes.filter(({ recurso, fila }) => RECURSOS[recurso].vigente(fila));
 // Lo que caducó o ya se celebró antes de avisar, se da por avisado sin mandarlo
-for (const { recurso, fila } of pendientes) ya.add(clave(recurso, fila.id));
+for (const { recurso, fila } of pendientes) apuntar(ya, recurso, fila);
 
 if (!novedades.length) {
   console.log("Nada nuevo");
