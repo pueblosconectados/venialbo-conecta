@@ -1366,6 +1366,8 @@ content:
           values:
             - name: redes
               label: El pueblo en las redes
+            - name: hablan
+              label: Hablan de Venialbo (publicaciones, artículos o vídeos sobre el pueblo)
             - name: otros
               label: Más sobre Venialbo
       - name: activo

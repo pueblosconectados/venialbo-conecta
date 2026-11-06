@@ -27,6 +27,7 @@ type Enlace = {
 // si se añade un grupo allí, añadirlo aquí.
 const GRUPOS: Record<string, string> = {
   redes: "El pueblo en las redes",
+  hablan: "Hablan de Venialbo",
   otros: "Más sobre Venialbo",
 };
 const ORDEN = Object.keys(GRUPOS);
