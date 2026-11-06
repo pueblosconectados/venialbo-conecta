@@ -15,6 +15,7 @@ import { TarjetaFila } from "../../components/TarjetaFila";
 import { textoPlano } from "../../../markdown";
 import { TIPOS_SERVICIO, tipoServicio } from "./tipos";
 import { EtiquetaNuevo } from "../../components/EtiquetaNuevo";
+import { Apartado } from "../../components/TituloApartado";
 
 type Servicio = {
   id: string;
@@ -134,12 +135,7 @@ export function ServiciosList() {
       {/* Con «Todos los tipos», un apartado por tipo, como los grupos de Enlaces. Al
           filtrar por uno, el desplegable ya dice cuál es y sobra el título. */}
       {gruposDe(items, conApartados).map(({ titulo, servicios }) => (
-        <section key={titulo ?? "todos"} style={{ marginBottom: 24 }}>
-          {titulo && (
-            <Typography.Title level={4} style={{ marginBottom: 12 }}>
-              {titulo}
-            </Typography.Title>
-          )}
+        <Apartado key={titulo ?? "todos"} titulo={titulo}>
           <Row gutter={[16, 16]}>
             {servicios.map((s) => (
               <Col key={s.id} xs={24} md={12}>
@@ -175,7 +171,7 @@ export function ServiciosList() {
               </Col>
             ))}
           </Row>
-        </section>
+        </Apartado>
       ))}
       {total > PAGE_SIZE && (
         <div style={{ textAlign: "center", marginTop: 24 }}>

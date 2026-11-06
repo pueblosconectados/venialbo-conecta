@@ -20,6 +20,7 @@ import { Imagen } from "../../components/Imagen";
 import { TarjetaFila } from "../../components/TarjetaFila";
 import { textoPlano } from "../../../markdown";
 import { EtiquetaNuevo } from "../../components/EtiquetaNuevo";
+import { Apartado as Recuadro } from "../../components/TituloApartado";
 import {
   CASAS,
   INFORMACION,
@@ -45,8 +46,6 @@ type Anuncio = {
 };
 
 const PAGE_SIZE = 12;
-
-const tituloApartado = { margin: "0 0 4px" } as const;
 
 // El clip junto a la fecha: que se vea sin entrar que dentro hay un PDF.
 const Adjuntos = ({ n }: { n?: number }) =>
@@ -185,11 +184,10 @@ export function AnunciosList() {
       />
 
       {ver === "informacion" && (
-        <section>
-          <Typography.Title level={3} style={tituloApartado}>Información</Typography.Title>
-          <Typography.Paragraph style={{ color: colors.marronSuave }}>
-            Horarios y avisos que conviene tener a mano.
-          </Typography.Paragraph>
+        <Recuadro
+          titulo="Información"
+          subtitulo="Horarios y avisos que conviene tener a mano."
+        >
           <Row gutter={[16, 16]}>
             {informacion.map((a) => (
               <Col key={a.id} xs={24} md={12}>
@@ -226,16 +224,19 @@ export function AnunciosList() {
               </Col>
             ))}
           </Row>
-        </section>
+        </Recuadro>
       )}
 
       {ver === "casas" && (
-        <section>
-          <div className="vc-cabecera-lista" style={{ marginBottom: 4 }}>
-            <Typography.Title level={3} style={{ margin: 0 }}>
+        <Recuadro
+          titulo={
+            <>
               <HomeOutlined style={{ color: colors.terracota, marginRight: 8 }} />
               Casas en venta y alquiler
-            </Typography.Title>
+            </>
+          }
+          subtitulo="Siguen aquí hasta que se venden o se alquilan."
+          accion={
             <Button
               type="primary"
               icon={<PlusOutlined />}
@@ -245,10 +246,8 @@ export function AnunciosList() {
             >
               Publicar una casa
             </Button>
-          </div>
-          <Typography.Paragraph style={{ color: colors.marronSuave }}>
-            Siguen aquí hasta que se venden o se alquilan.
-          </Typography.Paragraph>
+          }
+        >
           {casas.length === 0 && (
             <Typography.Paragraph style={{ color: colors.marronSuave }}>
               Ahora mismo no hay ninguna. Si vendes o alquilas una casa en el pueblo, publícala.
@@ -261,13 +260,13 @@ export function AnunciosList() {
               </Col>
             ))}
           </Row>
-        </section>
+        </Recuadro>
       )}
 
       {ver === "vecinos" && (
-        <section>
-          <div className="vc-cabecera-lista" style={{ marginBottom: 16 }}>
-            <Typography.Title level={3} style={{ margin: 0 }}>Anuncios de vecinos</Typography.Title>
+        <Recuadro
+          titulo="Anuncios de vecinos"
+          accion={
             <Button
               type="primary"
               icon={<PlusOutlined />}
@@ -277,7 +276,8 @@ export function AnunciosList() {
             >
               Publicar un anuncio
             </Button>
-          </div>
+          }
+        >
           {total === 0 && (
             <Typography.Paragraph style={{ color: colors.marronSuave }}>
               Ahora mismo no hay anuncios. Si tienes algo que contar al pueblo, publícalo.
@@ -349,7 +349,7 @@ export function AnunciosList() {
               />
             </div>
           )}
-        </section>
+        </Recuadro>
       )}
     </div>
   );

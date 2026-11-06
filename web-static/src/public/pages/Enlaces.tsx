@@ -13,6 +13,7 @@ import {
 import { useList } from "../../datos";
 import { Imagen } from "../components/Imagen";
 import { colors } from "../../theme";
+import { Apartado } from "../components/TituloApartado";
 
 type Enlace = {
   id: string;
@@ -162,25 +163,24 @@ export function EnlacesInteres() {
   else if (enlaces.length === 0)
     cuerpo = <Empty description="Todavía no hay enlaces" style={{ margin: "48px 0" }} />;
   else
-    cuerpo = grupos.map((grupo) => (
-      <section key={grupo} style={{ marginBottom: 28 }}>
-        {/* Con un solo grupo, el título no aporta nada */}
-        {grupos.length > 1 && (
-          <Typography.Title level={4} style={{ marginBottom: 12 }}>
-            {GRUPOS[grupo]}
-          </Typography.Title>
-        )}
-        <Row gutter={[16, 16]}>
-          {enlaces
-            .filter((e) => grupoDe(e) === grupo)
-            .map((e) => (
+    cuerpo = grupos.map((grupo) => {
+      const delGrupo = enlaces.filter((e) => grupoDe(e) === grupo);
+      return (
+        <Apartado
+          key={grupo}
+          // Con un solo grupo, el título no aporta nada
+          titulo={grupos.length > 1 ? GRUPOS[grupo] : undefined}
+        >
+          <Row gutter={[16, 16]}>
+            {delGrupo.map((e) => (
               <Col key={e.id} xs={24} sm={12}>
                 <Tarjeta enlace={e} />
               </Col>
             ))}
-        </Row>
-      </section>
-    ));
+          </Row>
+        </Apartado>
+      );
+    });
 
   return (
     <div style={{ maxWidth: 900, margin: "0 auto" }}>

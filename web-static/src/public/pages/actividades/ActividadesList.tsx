@@ -30,6 +30,7 @@ import {
   yaCelebrada,
 } from "./categorias";
 import { EtiquetaNuevo } from "../../components/EtiquetaNuevo";
+import { Apartado } from "../../components/TituloApartado";
 
 // El calendario se carga solo cuando alguien lo abre: la lista sigue siendo lo primero
 const CalendarioActividades = lazy(() =>
@@ -68,12 +69,6 @@ type ActividadList = {
 };
 
 const POR_PAGINA = 12;
-
-const tituloSeccion = (texto: string) => (
-  <Typography.Title level={3} style={{ margin: "0 0 16px" }}>
-    {texto}
-  </Typography.Title>
-);
 
 export function ActividadesList() {
   const [page, setPage] = useState(1);
@@ -266,22 +261,18 @@ export function ActividadesList() {
         />
       )}
       {filtradas.length > 0 && (
-        <>
-          {tituloSeccion("Próximas")}
+        <Apartado titulo="Próximas">
           {proximas.length > 0 ? (
             fila(proximas)
           ) : (
-            <Typography.Paragraph style={{ color: colors.marronSuave }}>
+            <Typography.Paragraph style={{ color: colors.marronSuave, margin: 0 }}>
               Ahora mismo no hay ninguna anunciada.
             </Typography.Paragraph>
           )}
-        </>
+        </Apartado>
       )}
       {celebradas.length > 0 && (
-        <div style={{ marginTop: 36 }}>
-          {tituloSeccion("Ya celebradas")}
-          {fila(items)}
-        </div>
+        <Apartado titulo="Ya celebradas">{fila(items)}</Apartado>
       )}
       {celebradas.length > POR_PAGINA && (
         <div style={{ marginTop: 24, display: "flex", justifyContent: "center" }}>

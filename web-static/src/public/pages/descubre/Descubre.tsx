@@ -14,6 +14,7 @@ import {
   type DatosRuta,
 } from "./rutas";
 import { EtiquetaNuevo } from "../../components/EtiquetaNuevo";
+import { Apartado } from "../../components/TituloApartado";
 
 type LugarList = {
   id: string;
@@ -62,15 +63,18 @@ function QueVer() {
   const lugares = tipo ? todos.filter((l) => l.tipo === tipo) : todos;
 
   return (
-    <section>
-      <CabeceraBloque
-        titulo="Qué ver"
-        valor={tipo}
-        onChange={setTipo}
-        todas="Todos los tipos"
-        opciones={opcionesPresentes(TIPOS_LUGAR, todos.map((l) => l.tipo))}
-        etiqueta="Filtrar lugares por tipo"
-      />
+    <Apartado
+      titulo="Qué ver"
+      accion={
+        <Filtro
+          valor={tipo}
+          onChange={setTipo}
+          todas="Todos los tipos"
+          opciones={opcionesPresentes(TIPOS_LUGAR, todos.map((l) => l.tipo))}
+          etiqueta="Filtrar lugares por tipo"
+        />
+      }
+    >
       {query.isLoading ? (
         <Spin style={{ display: "block", margin: "60px auto" }} />
       ) : query.isError ? (
@@ -96,7 +100,7 @@ function QueVer() {
           })}
         </Row>
       )}
-    </section>
+    </Apartado>
   );
 }
 
@@ -113,15 +117,18 @@ function Rutas() {
   const rutas = modalidad ? todas.filter((r) => r.modalidad === modalidad) : todas;
 
   return (
-    <section style={{ marginTop: 48 }}>
-      <CabeceraBloque
-        titulo="Rutas"
-        valor={modalidad}
-        onChange={setModalidad}
-        todas="A pie, en bici y en coche"
-        opciones={opcionesPresentes(MODALIDADES, todas.map((r) => r.modalidad))}
-        etiqueta="Filtrar rutas por cómo se hacen"
-      />
+    <Apartado
+      titulo="Rutas"
+      accion={
+        <Filtro
+          valor={modalidad}
+          onChange={setModalidad}
+          todas="A pie, en bici y en coche"
+          opciones={opcionesPresentes(MODALIDADES, todas.map((r) => r.modalidad))}
+          etiqueta="Filtrar rutas por cómo se hacen"
+        />
+      }
+    >
       <Row gutter={[16, 16]}>
         {rutas.map((r) => {
           const m = modalidadRuta(r.modalidad);
@@ -143,7 +150,7 @@ function Rutas() {
           );
         })}
       </Row>
-    </section>
+    </Apartado>
   );
 }
 
@@ -158,30 +165,25 @@ const opcionesPresentes = (
     .map(([clave, e]) => ({ value: clave, label: e.icono ? `${e.icono}  ${e.nombre}` : e.nombre }));
 };
 
-function CabeceraBloque(props: {
-  titulo: string;
+function Filtro(props: {
   valor: string;
   onChange: (valor: string) => void;
   todas: string;
   opciones: { value: string; label: string }[];
   etiqueta: string;
 }) {
+  // Con una sola opción (o ninguna) el filtro no filtraría nada
+  if (props.opciones.length <= 1) return null;
   return (
-    <div className="vc-cabecera-lista">
-      <Typography.Title level={3} style={{ margin: 0 }}>{props.titulo}</Typography.Title>
-      {/* Con una sola opción (o ninguna) el filtro no filtraría nada */}
-      {props.opciones.length > 1 && (
-        <Select
-          value={props.valor}
-          size="large"
-          prefix={<FilterOutlined />}
-          className="vc-filtro"
-          onChange={props.onChange}
-          options={[{ value: "", label: props.todas }, ...props.opciones]}
-          aria-label={props.etiqueta}
-        />
-      )}
-    </div>
+    <Select
+      value={props.valor}
+      size="large"
+      prefix={<FilterOutlined />}
+      className="vc-filtro"
+      onChange={props.onChange}
+      options={[{ value: "", label: props.todas }, ...props.opciones]}
+      aria-label={props.etiqueta}
+    />
   );
 }
 
