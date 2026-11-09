@@ -2,6 +2,7 @@
   "titulo": "Declaración alerta lluvias JCyL (08/11/2026)",
   "tipo": "informacion",
   "descripcion": "Publicado por el Ayuntamiento en su [sede electrónica](https://venialbo.sedelectronica.es/board). El documento, aquí abajo.",
+  "imagen_url": "/media/imagenes/screenshot20261109073431chrome.jpg",
   "documentos": [
     {
       "archivo": "/media/documentos/declaracion-alerta-lluvias-jcyl-08-11-2026-a65d536f.pdf",
@@ -9,6 +10,5 @@
     }
   ],
   "fecha_publicacion": "2026-11-09T07:32",
-  "fecha_caducidad": "",
-  "activo": false
+  "activo": true
 }
