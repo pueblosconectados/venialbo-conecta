@@ -280,6 +280,12 @@ const actividades = apartar("actividades", (
           noticia: enlaceA(a.noticia, noticiaPorId, "titulo", quien),
           // Una fila de la galería que se quedó sin foto no pinta nada
           galeria: (a.galeria ?? []).filter((g) => g?.imagen),
+          // Siempre lista, sin las filas vacías. Con flat vale también un enlace suelto,
+          // que es como estaba antes y lo que devolvería un /deshacer de entonces
+          album_facebook: [a.album_facebook ?? []]
+            .flat()
+            .filter((url) => url?.trim())
+            .map((url) => leerDireccion(url, quien)),
           documentos: await revisarDocumentos(quien, a),
         };
       }),

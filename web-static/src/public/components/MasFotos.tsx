@@ -31,7 +31,8 @@ export function MasFotos({
   drive,
   desde,
 }: {
-  facebook?: string | null;
+  /** Uno (noticias) o varios (actividades), cada uno con su botón. */
+  facebook?: string | string[] | null;
   drive?: string | null;
   /** La fecha desde la que cuentan los tres meses de Drive. */
   desde?: string | null;
@@ -41,15 +42,16 @@ export function MasFotos({
 
   const hasta = drive ? driveHasta(desde) : null;
   const conDrive = !!hasta && !haCaducado(hasta);
-  if (!facebook && !conDrive) return null;
+  const enFacebook = [facebook ?? []].flat().filter(Boolean);
+  if (!enFacebook.length && !conDrive) return null;
 
   return (
     <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginTop: 16 }}>
-      {facebook && (
-        <Button href={facebook} target="_blank" rel="noopener noreferrer" icon={<FacebookFilled />}>
-          Ver más fotos en Facebook
+      {enFacebook.map((url, i) => (
+        <Button key={url} href={url} target="_blank" rel="noopener noreferrer" icon={<FacebookFilled />}>
+          Ver más fotos en Facebook{enFacebook.length > 1 && ` (${i + 1})`}
         </Button>
-      )}
+      ))}
       {conDrive && (
         <>
           <Button icon={<GoogleOutlined />} onClick={() => setAvisoAbierto(true)}>

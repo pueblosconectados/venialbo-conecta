@@ -69,7 +69,7 @@ const haceQuinceDias = new Intl.DateTimeFormat("sv-SE", { timeZone: "Europe/Madr
 const traeFotos = (a) => {
   if (a.fotos) return true;
   const detalle = JSON.parse(readFileSync(join(DATOS, "actividades", `${a.id}.json`), "utf8"));
-  return Boolean(detalle.album_facebook || detalle.album_drive);
+  return Boolean(detalle.album_facebook?.length || detalle.album_drive);
 };
 const celebrada = (a) => !vigenteHasta(a.fecha_fin ?? a.fecha);
 

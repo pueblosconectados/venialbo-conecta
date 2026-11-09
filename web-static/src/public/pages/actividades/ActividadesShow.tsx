@@ -31,7 +31,7 @@ type ActividadDetail = {
   contenido?: string | null;
   galeria?: Foto[];
   video_url?: string | null;
-  album_facebook?: string | null;
+  album_facebook?: string[];
   album_drive?: string | null;
   documentos?: Documento[];
   // build-content.mjs cambia la ruta del fichero por lo justo para el enlace

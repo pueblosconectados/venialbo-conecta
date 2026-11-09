@@ -371,9 +371,13 @@ content:
         description: Opcional. El enlace del vídeo, tal cual lo da YouTube al compartir.
         type: string
       - name: album_facebook
-        label: Álbum en Facebook
-        description: Opcional. El enlace al álbum con más fotos. Quien no tenga Facebook no lo podrá ver; para eso está el de Drive.
+        label: Álbumes o publicaciones en Facebook
+        description: >-
+          Opcional. Hasta 4 enlaces, cada uno con su botón en la ficha. Quien no tenga
+          Facebook no los podrá ver; para eso está el de Drive.
         type: string
+        list:
+          max: 4
       - name: album_drive
         label: Álbum en Google Drive
         description: >-
