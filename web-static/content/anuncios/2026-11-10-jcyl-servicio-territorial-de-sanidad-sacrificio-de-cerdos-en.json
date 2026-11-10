@@ -1,7 +1,8 @@
 {
   "titulo": "JCYL SERVICIO TERRITORIAL DE SANIDAD. Sacrificio de cerdos en domicilios particulares y de jabalís abatidos en actividades cinegéticas para autoconsumo, campaña 2026-2027",
   "tipo": "informacion",
-  "descripcion": "Publicado por el Ayuntamiento en su [sede electrónica](https://venialbo.sedelectronica.es/board). El documento, aquí abajo.",
+  "descripcion": "Publicado por el Ayuntamiento en su [sede electrónica](https://venialbo.sedelectronica.es/board). El documento, aquí abajo.\n\nMas información en el siguiente [enlace](https://www.saludcastillayleon.es/es/seguridadalimentaria/matanza-domiciliaria)",
+  "imagen_url": "/media/imagenes/captura-de-pantalla-2026-11-10-104153.jpg",
   "documentos": [
     {
       "archivo": "/media/documentos/jcyl-servicio-territorial-de-sanidad-sacrificio-de-cerdos-en-2dd27366.pdf",
@@ -9,6 +10,6 @@
     }
   ],
   "fecha_publicacion": "2026-11-10T10:36",
-  "fecha_caducidad": "",
-  "activo": false
+  "fecha_caducidad": "2027-01-31",
+  "activo": true
 }
