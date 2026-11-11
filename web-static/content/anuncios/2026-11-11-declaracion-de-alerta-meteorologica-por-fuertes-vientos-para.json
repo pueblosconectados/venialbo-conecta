@@ -2,6 +2,7 @@
   "titulo": "Declaración de alerta meteorológica por fuertes vientos para toda la comunidad de Castilla y León. (10/11/2026)",
   "tipo": "informacion",
   "descripcion": "Publicado por el Ayuntamiento en su [sede electrónica](https://venialbo.sedelectronica.es/board). El documento, aquí abajo.",
+  "imagen_url": "/media/imagenes/screenshot20261111150244drive.jpg",
   "documentos": [
     {
       "archivo": "/media/documentos/declaracion-de-alerta-meteorologica-por-fuertes-vientos-para-a07eada5.pdf",
@@ -9,6 +10,5 @@
     }
   ],
   "fecha_publicacion": "2026-11-11T15:01",
-  "fecha_caducidad": "",
-  "activo": false
+  "activo": true
 }
