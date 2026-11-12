@@ -10,5 +10,7 @@
     }
   ],
   "fecha_publicacion": "2026-11-11T15:01",
+  "fecha_caducidad": "2026-11-13",
+  "hora_caducidad": "00:00",
   "activo": true
 }
