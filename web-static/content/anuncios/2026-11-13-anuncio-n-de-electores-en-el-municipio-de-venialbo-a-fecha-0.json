@@ -2,13 +2,14 @@
   "titulo": "Anuncio nº de electores en el municipio de Venialbo, a fecha 01-10-2026 (oficina del censo electoral)",
   "tipo": "informacion",
   "descripcion": "Publicado por el Ayuntamiento en su [sede electrónica](https://venialbo.sedelectronica.es/board). El documento, aquí abajo.",
+  "imagen_url": "/media/imagenes/electores-octubre.png",
   "documentos": [
     {
       "archivo": "/media/documentos/anuncio-n-de-electores-en-el-municipio-de-venialbo-a-fecha-0-78e67e15.pdf",
       "titulo": "Anuncio nº de electores en el municipio de Venialbo, a fecha 01-10-2026 (oficina del censo electoral)"
     }
   ],
-  "fecha_publicacion": "2026-11-13T09:31",
-  "fecha_caducidad": "",
-  "activo": false
+  "fecha_publicacion": "2026-11-13T09:33",
+  "fecha_caducidad": "2026-11-30",
+  "activo": true
 }
