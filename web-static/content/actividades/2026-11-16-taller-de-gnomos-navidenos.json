@@ -1,0 +1,13 @@
+{
+  "titulo": "Taller de Gnomos Navideños",
+  "fecha": "2026-11-21",
+  "hora": "17:30",
+  "hora_fin": "19:00",
+  "categoria": "otra",
+  "organiza": "web-static/content/servicios/asociacion-venialbense-para-las-artes-escenicas-avae.json",
+  "destacada": false,
+  "activa": true,
+  "novedad_hasta": "2026-11-19",
+  "resumen": "En este taller podrás crear tu gnomo luminoso para Navidad",
+  "imagen_url": "/media/imagenes/taller-de-gnomos-navidenos.jpg"
+}
