@@ -1,0 +1,8 @@
+{
+  "nombre": "Bibliobus",
+  "fecha": "2026-11-19",
+  "fecha_fin": "2026-11-19",
+  "anual": false,
+  "nota": "Paradas: Colegio (10:45-11:40) y Plaza de la Iglesia (11:45-12:15)",
+  "activa": true
+}
