@@ -1,0 +1,20 @@
+{
+  "titulo": "Actuación del grupo de teatro Talanda en Moraleja del Vino",
+  "fecha": "2026-11-15",
+  "hora": "19:00",
+  "categoria": "cultura",
+  "organiza": "web-static/content/servicios/asociacion-venialbense-para-las-artes-escenicas-avae.json",
+  "destacada": false,
+  "activa": true,
+  "novedad_hasta": "2026-11-20",
+  "imagen_url": "/media/imagenes/melocoton-en-almibar-thumbnail-1.jpg",
+  "contenido": "El grupo de teatro Talanda presentó su obra \"Melocotón en almíbar\" en Moraleja del Vino",
+  "galeria": [
+    {}
+  ],
+  "video_url": "https://youtu.be/gCG-XocFy0k",
+  "album_facebook": [
+    "https://www.facebook.com/AVAE.Venialbo/posts/pfbid034CywGTce4MNTo9L9r2ZTVJ5FGPxxZXYs3NV1oyeYBERc6WaD2RrPbNgTQBbSVMjDl"
+  ],
+  "album_drive": "https://drive.google.com/drive/folders/1xh_XfgZZAuP_uDCkzHBW4pO7DXsj70zm?usp=drive_link"
+}
