@@ -1,0 +1,30 @@
+{
+  "nombre": "Ruta Venialbo - Aldearrubia@PueblosConectados",
+  "modalidad": "bici",
+  "activa": true,
+  "novedad_hasta": "2026-11-22",
+  "distancia_km": 56.32,
+  "duracion": "2 h",
+  "desnivel_m": 68,
+  "dificultad": "facil",
+  "recorrido": "lineal",
+  "salida": "Ayuntamiento de Venialbo",
+  "coordenadas_salida": "41.390154, -5.540524",
+  "wikiloc_url": "https://es.wikiloc.com/rutas-ciclismo/venialbo-aldearrubiapueblosconectados-294034079?wa=share&og=iwvgGlA2zSg&utm_campaign=badge&utm_source=unknown&utm_medium=unknown",
+  "imagen_url": "/media/imagenes/20261031122221.jpg",
+  "contenido": "El 31 de octubre, nuestro vecino Carlos, de todos conocido entre otras cosas, por su gran afición a la bicicleta, se prestó voluntario para unir un poco más Venialbo con Aldearrubia, “Pueblos Conectados” en el concurso Innova CyL del 2026. Y por bien poco, no lo pillamos ya cuando estaba tomando café tras su paseíto. ¡Menudo correcaminos está hecho!\n\nPues reto conseguido… En breve tendremos visitas mutuas y compartiremos experiencias y cultura para poder conocernos un poquito mejor y ser un poquito más pueblos conectados.",
+  "galeria": [
+    {
+      "imagen": "/media/imagenes/169925448master.jpg",
+      "pie": "Salida desde Venialbo"
+    },
+    {
+      "imagen": "/media/imagenes/169925471master.jpg",
+      "pie": "Llegada a Aldearrubia"
+    },
+    {
+      "imagen": "/media/imagenes/20261031122212-3.jpg",
+      "pie": "Reto conseguido"
+    }
+  ]
+}
