@@ -2,13 +2,24 @@
   "titulo": "Taller de Gnomos Navideños",
   "fecha": "2026-11-21",
   "hora": "17:30",
-  "hora_fin": "19:00",
+  "hora_fin": "20:00",
   "categoria": "otra",
   "organiza": "web-static/content/servicios/asociacion-venialbense-para-las-artes-escenicas-avae.json",
   "destacada": false,
   "activa": true,
-  "novedad_hasta": "2026-11-19",
-  "resumen": "En este taller podrás crear tu gnomo luminoso para Navidad. Apúntate en el siguiente enlace",
+  "novedad_hasta": "2026-11-23",
+  "resumen": "En este taller podrás crear tu gnomo luminoso para Navidad. ",
   "imagen_url": "/media/imagenes/taller-de-gnomos-navidenos.jpg",
-  "contenido": "En este taller podrás crear tu gnomo luminoso para Navidad. **Apúntate en el siguiente** **[enlace.](https://forms.gle/zRvxHdDAqXA6iqMF6)**"
+  "contenido": "Taller de gnomos navideños luminosos para niños y no tan niños... estamos seguros que las no tan niñas, han disfrutado como niños. No hay más que ver lo aplicadas que estaban todas.",
+  "galeria": [
+    {
+      "imagen": "/media/imagenes/dji202611211948100033d.jpg",
+      "pie": "Todos los gnomos que se hicieron"
+    }
+  ],
+  "video_url": "https://youtu.be/YOppculWOzA",
+  "album_facebook": [
+    "https://www.facebook.com/AVAE.Venialbo/posts/pfbid025UbLVYd4mjhkJC6ZyeDMj9TrDhXQpkpdFUK6cFSaQUjs8v5SdKCzz3bUnRpVB4fGl"
+  ],
+  "album_drive": "https://drive.google.com/drive/folders/1N3sPVV7Ad5uj11vo-M4bCchbscZuyS_t?usp=sharing"
 }
