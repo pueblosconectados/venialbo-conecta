@@ -1,14 +1,15 @@
 {
-  "titulo": "Fotos del Teatro: Melocotón en almíbar. ",
+  "titulo": "Fotos y video de la obra: \"Melocotón en almíbar\" en Venialbo",
   "fecha": "2026-11-06",
   "hora": "20:30",
   "categoria": "cultura",
   "organiza": "web-static/content/servicios/asociacion-venialbense-para-las-artes-escenicas-avae.json",
-  "destacada": true,
+  "destacada": false,
   "activa": true,
-  "novedad_hasta": "2026-11-16",
+  "novedad_hasta": "2026-11-24",
   "imagen_url": "/media/imagenes/cartel-melocoton-en-almibar.jpg",
   "contenido": "Estreno de la obra: Melocotón en almíbar con el debut de Vicente, Miguel y Jesús y despedida de Alba y Cristina que dejan definitivamente la escena. Otra noche de teatro en la que no faltaron risas y buen hacer por parte de los componentes del grupo de teatro Talanda.",
+  "video_url": "https://youtu.be/k7pZCF--FCQ",
   "album_facebook": [
     "https://www.facebook.com/AVAE.Venialbo/posts/pfbid0vYi9xhf7HiXNp6KunC3w4xR1opLtQXjWWnxcq6BsesRq89HeNWJafFD2ALFRFcAEl"
   ],
