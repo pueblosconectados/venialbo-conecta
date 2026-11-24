@@ -13,7 +13,8 @@
 // activa después, y corregir una errata no debe volver a avisar.
 //
 // Se lanza al terminar cada publicación de la web. De 22:00 a 9:00 (hora de Madrid) no se
-// manda nada: lo publicado de noche se queda pendiente y sale en la pasada de las 9:00.
+// manda nada: lo publicado de noche se queda pendiente y sale en la pasada de las 9:00, que
+// lanza el Worker de avisos (el cron de GitHub llegaba por la tarde; avisos.yml).
 // Si en una publicación entran varias cosas, van juntas en un solo aviso.
 //
 // Además, al grupo de los admin le llega el texto listo para difundir cada novedad por

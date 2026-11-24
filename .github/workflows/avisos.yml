@@ -5,8 +5,11 @@ name: Avisos push
 # web. Si es de noche (22:00-9:00 en Madrid) el script no manda nada y lo deja para la
 # pasada de las 9:00.
 #
-# El cron va en UTC: la pasada de las 9:00 se lanza a las dos horas UTC que pueden serlo
-# (verano e invierno); en la que no toca simplemente no hay nada pendiente.
+# La pasada de las 9:00 la lanza el Worker de avisos (workflow_dispatch, desde su cron),
+# porque el cron de GitHub en este repo llega con 5 a 10 horas de retraso y a veces se
+# salta una de las dos. El de aquí se queda de respaldo por si el Worker falla o su token
+# caduca: va en UTC, a las dos horas que pueden ser las 9:00 (verano e invierno), y si
+# llega cuando ya se ha avisado simplemente no hay nada pendiente.
 #
 # Lo ya avisado se apunta en avisos/notificados.json, que se commitea aquí mismo.
 # Necesita los secretos AVISOS_TOKEN y VAPID_PRIVADA.
@@ -15,7 +18,7 @@ on:
     workflows: ["Publicar web-static en GitHub Pages"]
     types: [completed]
   schedule:
-    - cron: "2 7,8 * * *" # 9:00 en Madrid: lo que se publicó de noche
+    - cron: "2 7,8 * * *" # 9:00 en Madrid, de respaldo: la pasada buena la lanza el Worker
   workflow_dispatch:
     inputs:
       ya:

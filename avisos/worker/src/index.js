@@ -55,7 +55,8 @@
 // tokens (renovaciones.js), y la limpieza de lo medido de los avisos (entregas.js); los
 // viernes, además, «Esta semana en Venialbo» (semana.js), y el primer lunes de cada mes
 // el repaso de las fichas viejas y cojas (repaso.js). Los lunes a las 9:00, el resumen
-// semanal de visitas.
+// semanal de visitas. Cada día a las 9:00, la pasada de los avisos push de lo publicado
+// de noche (avisos.yml): el cron de GitHub llegaba con 5 a 10 horas de retraso.
 //
 // Cada suscripción se guarda en KV con el hash de su dirección como clave y la propia
 // suscripción como metadato. Así la lista entera sale de una sola llamada a list(), sin
@@ -83,6 +84,7 @@ import { mandarDifusion } from "./difusion.js";
 import { enviarSemana, mensajeSemana } from "./semana.js";
 import { contarAviso } from "./avisar.js";
 import { contarDeshecho } from "./deshacer.js";
+import { lanzarWorkflow } from "./github.js";
 
 // Los servicios de push conocidos. Lo demás se rechaza, para que nadie llene el KV con
 // direcciones inventadas.
@@ -378,6 +380,11 @@ export default {
     const esLunes = new Intl.DateTimeFormat("en-US", { timeZone: "Europe/Madrid", weekday: "short" }).format(momento) === "Mon";
     const enPunto = momento.getUTCMinutes() === 0;
     if (esLunes && horaMadrid(momento) === 9 && enPunto) ctx.waitUntil(enviarResumen(env));
+    // Los avisos push de lo publicado de noche. El cron de avisos.yml se queda de respaldo
+    // (si el token caduca, publicaciones.js no lo ve, pero /renovaciones sí): pasar dos
+    // veces no avisa dos veces, porque la segunda ya lo encuentra en notificados.json
+    if (horaMadrid(momento) === 9 && enPunto)
+      ctx.waitUntil(lanzarWorkflow(env, "avisos.yml").then((ok) => ok || console.warn("avisos.yml: GitHub no lo ha aceptado"), (e) => console.warn(`avisos.yml: ${e.message}`)));
     // La sede, a y media de 7:30 a 22:30 (Madrid va en horas enteras respecto a UTC)
     if (momento.getUTCMinutes() === 30 && horaMadrid(momento) >= 7 && horaMadrid(momento) <= 22)
       ctx.waitUntil(vigilarSede(env));
