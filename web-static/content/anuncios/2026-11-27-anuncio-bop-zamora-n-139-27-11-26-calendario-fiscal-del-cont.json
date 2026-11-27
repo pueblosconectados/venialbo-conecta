@@ -2,6 +2,7 @@
   "titulo": "ANUNCIO BOP ZAMORA Nº 139 (27/11/26) Calendario fiscal del contribuyente para el ejercicio 2027",
   "tipo": "informacion",
   "descripcion": "Publicado por el Ayuntamiento en su [sede electrónica](https://venialbo.sedelectronica.es/board). El documento, aquí abajo.",
+  "imagen_url": "/media/imagenes/screenshot20261127114103chrome.jpg",
   "documentos": [
     {
       "archivo": "/media/documentos/anuncio-bop-zamora-n-139-27-11-26-calendario-fiscal-del-cont-8005a5d2.pdf",
@@ -9,6 +10,6 @@
     }
   ],
   "fecha_publicacion": "2026-11-27T11:39",
-  "fecha_caducidad": "",
-  "activo": false
+  "fecha_caducidad": "2027-11-25",
+  "activo": true
 }
